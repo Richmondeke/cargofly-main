@@ -174,7 +174,7 @@ export default function ServicesPage() {
                         <span className="inline-block py-1 px-3 rounded-full bg-gold-500/10 text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-6 font-body">
                             Compare Plans
                         </span>
-                        <h2 className="font-display text-3xl md:text-4xl text-white">
+                        <h2 className="font-display text-3xl md:text-4xl text-navy-900 dark:text-white">
                             Choose Your Service
                         </h2>
                     </div>
@@ -183,18 +183,18 @@ export default function ServicesPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[600px]">
                                 <thead>
-                                    <tr className="border-b border-white/10">
-                                        <th className="text-left py-6 px-6 font-body font-medium text-white/40 uppercase tracking-wider text-sm">
+                                    <tr className="border-b border-navy-900/10 dark:border-white/10">
+                                        <th className="text-left py-6 px-6 font-body font-medium text-navy-900/40 dark:text-white/40 uppercase tracking-wider text-sm">
                                             Features
                                         </th>
-                                        <th className="py-6 px-6 font-body font-medium text-gold-400 uppercase tracking-wider text-sm">
+                                        <th className="py-6 px-6 font-body font-medium text-gold-500 dark:text-gold-400 uppercase tracking-wider text-sm">
                                             Express
                                             <Star className="inline w-4 h-4 ml-1" />
                                         </th>
-                                        <th className="py-6 px-6 font-body font-medium text-white/60 uppercase tracking-wider text-sm">
+                                        <th className="py-6 px-6 font-body font-medium text-navy-900/60 dark:text-white/60 uppercase tracking-wider text-sm">
                                             Standard
                                         </th>
-                                        <th className="py-6 px-6 font-body font-medium text-white/40 uppercase tracking-wider text-sm">
+                                        <th className="py-6 px-6 font-body font-medium text-navy-900/40 dark:text-white/40 uppercase tracking-wider text-sm">
                                             Economy
                                         </th>
                                     </tr>
@@ -209,30 +209,30 @@ export default function ServicesPage() {
                                         <motion.tr
                                             key={index}
                                             variants={fadeInUp}
-                                            className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                                            className="border-b border-navy-900/5 dark:border-white/5 hover:bg-navy-900/5 dark:hover:bg-white/5 transition-colors"
                                         >
-                                            <td className="py-4 px-6 font-body text-white">
+                                            <td className="py-4 px-6 font-body text-navy-900 dark:text-white">
                                                 {row.feature}
                                             </td>
                                             <td className="py-4 px-6 text-center">
                                                 {row.express ? (
-                                                    <Check className="w-5 h-5 text-gold-400 mx-auto" />
+                                                    <Check className="w-5 h-5 text-gold-500 dark:text-gold-400 mx-auto" />
                                                 ) : (
-                                                    <span className="text-white/20">—</span>
+                                                    <span className="text-navy-900/20 dark:text-white/20">—</span>
                                                 )}
                                             </td>
                                             <td className="py-4 px-6 text-center">
                                                 {row.standard ? (
-                                                    <Check className="w-5 h-5 text-white/60 mx-auto" />
+                                                    <Check className="w-5 h-5 text-navy-900/60 dark:text-white/60 mx-auto" />
                                                 ) : (
-                                                    <span className="text-white/20">—</span>
+                                                    <span className="text-navy-900/20 dark:text-white/20">—</span>
                                                 )}
                                             </td>
                                             <td className="py-4 px-6 text-center">
                                                 {row.economy ? (
-                                                    <Check className="w-5 h-5 text-white/40 mx-auto" />
+                                                    <Check className="w-5 h-5 text-navy-900/40 dark:text-white/40 mx-auto" />
                                                 ) : (
-                                                    <span className="text-white/20">—</span>
+                                                    <span className="text-navy-900/20 dark:text-white/20">—</span>
                                                 )}
                                             </td>
                                         </motion.tr>
@@ -256,11 +256,11 @@ export default function ServicesPage() {
                             <span className="inline-block py-1 px-3 rounded-full bg-gold-500/10 text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-6 font-body">
                                 Enterprise Solutions
                             </span>
-                            <h2 className="font-display text-3xl md:text-4xl text-white mb-6">
+                            <h2 className="font-display text-3xl md:text-4xl text-navy-900 dark:text-white mb-6">
                                 Scale Your
-                                <span className="block italic text-white/80">Business</span>
+                                <span className="block italic text-navy-900/80 dark:text-white/80">Business</span>
                             </h2>
-                            <p className="text-white/60 font-body leading-relaxed mb-8">
+                            <p className="text-navy-900/60 dark:text-white/60 font-body leading-relaxed mb-8">
                                 Partner with Cargofly for enterprise-grade logistics solutions.
                                 Dedicated account management, custom integrations, and volume
                                 pricing for businesses of all sizes.
@@ -275,9 +275,9 @@ export default function ServicesPage() {
                                 ].map((item, i) => (
                                     <li key={i} className="flex items-center gap-3">
                                         <div className="w-6 h-6 rounded-full bg-gold-500/20 flex items-center justify-center">
-                                            <Check className="w-3 h-3 text-gold-400" />
+                                            <Check className="w-3 h-3 text-gold-500 dark:text-gold-400" />
                                         </div>
-                                        <span className="text-white/80 font-body">{item}</span>
+                                        <span className="text-navy-900/80 dark:text-white/80 font-body">{item}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -285,7 +285,7 @@ export default function ServicesPage() {
                                 <motion.button
                                     whileHover={{ y: -2 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 rounded-xl font-bold uppercase tracking-wider hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all"
+                                    className="inline-flex items-center gap-2 px-8 py-4 bg-gold-500 text-navy-900 rounded-xl font-bold uppercase tracking-wider hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all"
                                 >
                                     Contact Sales
                                     <ArrowRight className="w-5 h-5" />
@@ -301,11 +301,11 @@ export default function ServicesPage() {
                                     { value: "24/7", label: "Support Available" },
                                     { value: "200+", label: "API Integrations" },
                                 ].map((stat, i) => (
-                                    <div key={i} className="text-center p-6 rounded-xl bg-white/5">
-                                        <p className="font-display text-3xl text-white mb-2">
+                                    <div key={i} className="text-center p-6 rounded-xl bg-navy-900/5 dark:bg-white/5">
+                                        <p className="font-display text-3xl text-navy-900 dark:text-white mb-2">
                                             {stat.value}
                                         </p>
-                                        <p className="text-white/40 text-sm font-body uppercase tracking-wider">
+                                        <p className="text-navy-900/40 dark:text-white/40 text-sm font-body uppercase tracking-wider">
                                             {stat.label}
                                         </p>
                                     </div>
@@ -323,18 +323,18 @@ export default function ServicesPage() {
                     variants={fadeInUp}
                     className="text-center"
                 >
-                    <div className="glass-panel rounded-3xl p-12 bg-gradient-to-br from-gold-500/10 to-transparent">
-                        <h2 className="font-display text-3xl md:text-4xl text-white mb-4">
+                    <div className="glass-panel rounded-3xl p-12 bg-gold-500/10 dark:bg-gold-500/5">
+                        <h2 className="font-display text-3xl md:text-4xl text-navy-900 dark:text-white mb-4">
                             Ready to Ship?
                         </h2>
-                        <p className="text-white/60 font-body max-w-xl mx-auto mb-8">
+                        <p className="text-navy-900/60 dark:text-white/60 font-body max-w-xl mx-auto mb-8">
                             Get started with a free quote and experience premium logistics.
                         </p>
                         <Link href="/ship">
                             <motion.button
                                 whileHover={{ y: -3 }}
                                 whileTap={{ scale: 0.98 }}
-                                className="inline-flex items-center gap-2 px-10 py-5 bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 rounded-xl font-bold uppercase tracking-wider hover:shadow-[0_0_40px_rgba(202,138,4,0.4)] transition-all"
+                                className="inline-flex items-center gap-2 px-10 py-5 bg-gold-500 text-navy-900 rounded-xl font-bold uppercase tracking-wider hover:shadow-[0_0_40px_rgba(202,138,4,0.4)] transition-all"
                             >
                                 Get a Quote
                                 <ArrowRight className="w-5 h-5" />

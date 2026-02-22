@@ -20,6 +20,10 @@ import { cn } from "@/lib/utils";
 import { createShipment, ShipmentAddress, ShipmentPackage } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { Timestamp } from "firebase/firestore";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Textarea } from "@/components/ui/Textarea";
+import { Checkbox } from "@/components/ui/Checkbox";
 
 type ViewMode = "quote" | "book";
 type PaymentMethod = "card";
@@ -39,9 +43,43 @@ export default function ShipPage() {
     const [isBooking, setIsBooking] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
 
+    // Form State
+    const [packageDetails, setPackageDetails] = useState({
+        weight: "",
+        length: "",
+        width: "",
+        height: "",
+        description: "",
+        isFragile: false,
+        requiresSignature: false,
+        insurance: false,
+    });
+
+    const [sender, setSender] = useState({
+        name: "",
+        phone: "",
+        address: "",
+        city: "",
+        country: "",
+    });
+
+    const [recipient, setRecipient] = useState({
+        name: "",
+        phone: "",
+        address: "",
+        city: "",
+        country: "",
+    });
+
     const handleBookShipment = async () => {
         if (!user) {
             router.push("/login?redirect=/ship");
+            return;
+        }
+
+        // Basic validation
+        if (!packageDetails.weight || !sender.name || !recipient.name) {
+            alert("Please fill in all required fields.");
             return;
         }
 
@@ -51,46 +89,60 @@ export default function ShipPage() {
             const estimatedDelivery = new Date();
             estimatedDelivery.setDate(now.getDate() + 3);
 
+            // Mock price calculation for now
+            const weightNum = parseFloat(packageDetails.weight) || 1;
+            const basePrice = 40 * weightNum;
+            const insurancePrice = packageDetails.insurance ? 20 : 0;
+            const totalPrice = basePrice + insurancePrice + 25; // + fuel
+
             const trackingNumber = await createShipment({
                 userId: user.uid,
                 service: "express",
                 sender: {
-                    name: "John Sender",
-                    street: "123 Sender St",
-                    city: "Lagos",
-                    state: "LA",
-                    postalCode: "100001",
-                    country: "Nigeria",
-                    phone: "+234 800 000 0000"
+                    name: sender.name,
+                    street: sender.address,
+                    city: sender.city,
+                    state: "", // Optional in UI for now
+                    postalCode: "00000", // Default
+                    country: sender.country,
+                    phone: sender.phone
                 },
                 recipient: {
-                    name: "Jane Recipient",
-                    street: "456 Recipient Rd",
-                    city: "London",
+                    name: recipient.name,
+                    street: recipient.address,
+                    city: recipient.city,
                     state: "",
-                    postalCode: "SW1A 1AA",
-                    country: "United Kingdom",
-                    phone: "+44 7000 000000"
+                    postalCode: "00000",
+                    country: recipient.country,
+                    phone: recipient.phone
                 },
                 package: {
-                    weight: 5,
-                    dimensions: { length: 30, width: 20, height: 15 },
-                    description: "Electronics",
-                    isFragile: true,
-                    requiresSignature: true
+                    weight: parseFloat(packageDetails.weight),
+                    dimensions: {
+                        length: parseFloat(packageDetails.length) || 0,
+                        width: parseFloat(packageDetails.width) || 0,
+                        height: parseFloat(packageDetails.height) || 0
+                    },
+                    description: packageDetails.description,
+                    isFragile: packageDetails.isFragile,
+                    requiresSignature: packageDetails.requiresSignature
                 },
                 price: {
-                    base: 200,
+                    base: basePrice,
                     fuel: 25,
-                    insurance: 20,
-                    total: 245,
+                    insurance: insurancePrice,
+                    total: totalPrice,
                     currency: "USD"
                 },
                 estimatedDelivery: Timestamp.fromDate(estimatedDelivery),
                 paymentStatus: "paid"
             });
 
-            router.push(`/track?id=${trackingNumber}`);
+            if (user) {
+                router.push(`/dashboard/track/${trackingNumber}`);
+            } else {
+                router.push(`/track?id=${trackingNumber}`);
+            }
         } catch (error) {
             console.error("Booking failed:", error);
             alert("Failed to book shipment. Please try again.");
@@ -138,8 +190,8 @@ export default function ShipPage() {
                             className={cn(
                                 "px-6 py-3 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all font-body",
                                 viewMode === "quote"
-                                    ? "bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900"
-                                    : "text-white/60 hover:text-white"
+                                    ? "bg-gold-500 text-navy-900"
+                                    : "text-navy-900/60 dark:text-white/60 hover:text-navy-900 dark:hover:text-white"
                             )}
                         >
                             Get a Quote
@@ -149,8 +201,8 @@ export default function ShipPage() {
                             className={cn(
                                 "px-6 py-3 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all font-body",
                                 viewMode === "book"
-                                    ? "bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900"
-                                    : "text-white/60 hover:text-white"
+                                    ? "bg-gold-500 text-navy-900"
+                                    : "text-navy-900/60 dark:text-white/60 hover:text-navy-900 dark:hover:text-white"
                             )}
                         >
                             Book Shipment
@@ -179,9 +231,9 @@ export default function ShipPage() {
                         >
                             {/* Progress Steps */}
                             <div className="flex justify-between items-center mb-12 relative px-4">
-                                <div className="absolute left-0 top-1/2 w-full h-0.5 bg-white/10 -z-10" />
+                                <div className="absolute left-0 top-1/2 w-full h-0.5 bg-navy-900/10 dark:bg-white/10 -z-10" />
                                 <div
-                                    className="absolute left-0 top-1/2 h-0.5 bg-gradient-to-r from-gold-500 to-amber-400 -z-10 transition-all duration-500"
+                                    className="absolute left-0 top-1/2 h-0.5 bg-gold-500 -z-10 transition-all duration-500"
                                     style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
                                 />
                                 {steps.map((step) => (
@@ -189,20 +241,20 @@ export default function ShipPage() {
                                         key={step.id}
                                         className={cn(
                                             "relative flex flex-col items-center gap-2",
-                                            currentStep >= step.id ? "text-gold-400" : "text-white/30"
+                                            currentStep >= step.id ? "text-gold-500 dark:text-gold-400" : "text-navy-900/30 dark:text-white/30"
                                         )}
                                     >
                                         <div
                                             className={cn(
-                                                "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 bg-navy-900",
+                                                "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 bg-white dark:bg-navy-900",
                                                 currentStep >= step.id
                                                     ? "border-gold-500 text-gold-500 shadow-[0_0_20px_rgba(202,138,4,0.3)]"
-                                                    : "border-white/10 bg-navy-900"
+                                                    : "border-navy-900/10 dark:border-white/10"
                                             )}
                                         >
                                             <step.icon className="w-5 h-5" />
                                         </div>
-                                        <span className="text-xs font-bold uppercase tracking-wider font-body bg-navy-900 px-2">
+                                        <span className="text-xs font-bold uppercase tracking-wider font-body bg-white dark:bg-navy-900 px-2">
                                             {step.title}
                                         </span>
                                     </div>
@@ -210,7 +262,7 @@ export default function ShipPage() {
                             </div>
 
                             {/* Form Steps */}
-                            <div className="glass-panel p-8 rounded-3xl min-h-[500px] flex flex-col justify-between">
+                            <div className="glass-panel p-8 rounded-3xl min-h-[500px] flex flex-col justify-between border border-navy-900/10 dark:border-white/10 shadow-xl bg-white/50 dark:bg-navy-900/50 backdrop-blur-md">
                                 <AnimatePresence mode="wait">
                                     {currentStep === 1 && (
                                         <motion.div
@@ -220,67 +272,68 @@ export default function ShipPage() {
                                             exit={{ opacity: 0, x: -20 }}
                                             className="space-y-6"
                                         >
-                                            <h2 className="font-display text-2xl text-white mb-6">
+                                            <h2 className="font-display text-2xl text-navy-900 dark:text-white mb-6">
                                                 Package Details
                                             </h2>
                                             <div className="grid grid-cols-3 gap-4">
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        Weight (kg)
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="weight">Weight (kg)</Label>
+                                                    <Input
+                                                        id="weight"
                                                         type="number"
+                                                        value={packageDetails.weight}
+                                                        onChange={(e) => setPackageDetails({ ...packageDetails, weight: e.target.value })}
                                                         placeholder="0.0"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        Dimensions (LxWxH cm)
-                                                    </label>
+                                                    <Label>Dimensions (LxWxH cm)</Label>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <input
+                                                        <Input
                                                             type="text"
+                                                            value={packageDetails.length}
+                                                            onChange={(e) => setPackageDetails({ ...packageDetails, length: e.target.value })}
                                                             placeholder="L"
-                                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                         />
-                                                        <input
+                                                        <Input
                                                             type="text"
+                                                            value={packageDetails.width}
+                                                            onChange={(e) => setPackageDetails({ ...packageDetails, width: e.target.value })}
                                                             placeholder="W"
-                                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                         />
-                                                        <input
+                                                        <Input
                                                             type="text"
+                                                            value={packageDetails.height}
+                                                            onChange={(e) => setPackageDetails({ ...packageDetails, height: e.target.value })}
                                                             placeholder="H"
-                                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                         />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                    Contents Description
-                                                </label>
-                                                <textarea
+                                                <Label htmlFor="description">Contents Description</Label>
+                                                <Textarea
+                                                    id="description"
                                                     rows={3}
+                                                    value={packageDetails.description}
+                                                    onChange={(e) => setPackageDetails({ ...packageDetails, description: e.target.value })}
                                                     placeholder="Describe the items..."
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body resize-none"
                                                 />
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
-                                                <label className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="w-5 h-5 rounded border-white/20 bg-transparent text-gold-500 focus:ring-gold-500"
+                                                <label className="flex items-center gap-3 p-4 rounded-xl bg-navy-900/5 dark:bg-white/5 border border-navy-900/10 dark:border-white/10 cursor-pointer hover:bg-navy-900/10 dark:hover:bg-white/10 transition-colors">
+                                                    <Checkbox
+                                                        checked={packageDetails.isFragile}
+                                                        onChange={(e) => setPackageDetails({ ...packageDetails, isFragile: e.target.checked })}
                                                     />
-                                                    <span className="text-white font-body">Fragile Item</span>
+                                                    <span className="text-navy-900 dark:text-white font-body">Fragile Item</span>
                                                 </label>
-                                                <label className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="w-5 h-5 rounded border-white/20 bg-transparent text-gold-500 focus:ring-gold-500"
+                                                <label className="flex items-center gap-3 p-4 rounded-xl bg-navy-900/5 dark:bg-white/5 border border-navy-900/10 dark:border-white/10 cursor-pointer hover:bg-navy-900/10 dark:hover:bg-white/10 transition-colors">
+                                                    <Checkbox
+                                                        checked={packageDetails.insurance}
+                                                        onChange={(e) => setPackageDetails({ ...packageDetails, insurance: e.target.checked })}
                                                     />
-                                                    <span className="text-white font-body">Insurance (+ $20)</span>
+                                                    <span className="text-navy-900 dark:text-white font-body">Insurance (+ $20)</span>
                                                 </label>
                                             </div>
                                         </motion.div>
@@ -294,60 +347,60 @@ export default function ShipPage() {
                                             exit={{ opacity: 0, x: -20 }}
                                             className="space-y-6"
                                         >
-                                            <h2 className="font-display text-2xl text-white mb-6">
+                                            <h2 className="font-display text-2xl text-navy-900 dark:text-white mb-6">
                                                 Sender Information
                                             </h2>
                                             <div className="grid md:grid-cols-2 gap-6">
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        Full Name
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="senderName">Full Name</Label>
+                                                    <Input
+                                                        id="senderName"
                                                         type="text"
+                                                        value={sender.name}
+                                                        onChange={(e) => setSender({ ...sender, name: e.target.value })}
                                                         placeholder="John Doe"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        Phone Number
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="senderPhone">Phone Number</Label>
+                                                    <Input
+                                                        id="senderPhone"
                                                         type="tel"
+                                                        value={sender.phone}
+                                                        onChange={(e) => setSender({ ...sender, phone: e.target.value })}
                                                         placeholder="+1 (555) 000-0000"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                    Pickup Address
-                                                </label>
-                                                <textarea
+                                                <Label htmlFor="senderAddress">Pickup Address</Label>
+                                                <Textarea
+                                                    id="senderAddress"
                                                     rows={2}
+                                                    value={sender.address}
+                                                    onChange={(e) => setSender({ ...sender, address: e.target.value })}
                                                     placeholder="Enter full pickup address..."
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body resize-none"
                                                 />
                                             </div>
                                             <div className="grid md:grid-cols-2 gap-6">
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        City
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="senderCity">City</Label>
+                                                    <Input
+                                                        id="senderCity"
                                                         type="text"
+                                                        value={sender.city}
+                                                        onChange={(e) => setSender({ ...sender, city: e.target.value })}
                                                         placeholder="Lagos"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        Country
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="senderCountry">Country</Label>
+                                                    <Input
+                                                        id="senderCountry"
                                                         type="text"
+                                                        value={sender.country}
+                                                        onChange={(e) => setSender({ ...sender, country: e.target.value })}
                                                         placeholder="Nigeria"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                             </div>
@@ -362,60 +415,60 @@ export default function ShipPage() {
                                             exit={{ opacity: 0, x: -20 }}
                                             className="space-y-6"
                                         >
-                                            <h2 className="font-display text-2xl text-white mb-6">
+                                            <h2 className="font-display text-2xl text-navy-900 dark:text-white mb-6">
                                                 Recipient Information
                                             </h2>
                                             <div className="grid md:grid-cols-2 gap-6">
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        Full Name
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="recipientName">Full Name</Label>
+                                                    <Input
+                                                        id="recipientName"
                                                         type="text"
+                                                        value={recipient.name}
+                                                        onChange={(e) => setRecipient({ ...recipient, name: e.target.value })}
                                                         placeholder="Jane Smith"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        Phone Number
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="recipientPhone">Phone Number</Label>
+                                                    <Input
+                                                        id="recipientPhone"
                                                         type="tel"
+                                                        value={recipient.phone}
+                                                        onChange={(e) => setRecipient({ ...recipient, phone: e.target.value })}
                                                         placeholder="+44 20 1234 5678"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                    Delivery Address
-                                                </label>
-                                                <textarea
+                                                <Label htmlFor="recipientAddress">Delivery Address</Label>
+                                                <Textarea
+                                                    id="recipientAddress"
                                                     rows={2}
+                                                    value={recipient.address}
+                                                    onChange={(e) => setRecipient({ ...recipient, address: e.target.value })}
                                                     placeholder="Enter full delivery address..."
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body resize-none"
                                                 />
                                             </div>
                                             <div className="grid md:grid-cols-2 gap-6">
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        City
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="recipientCity">City</Label>
+                                                    <Input
+                                                        id="recipientCity"
                                                         type="text"
+                                                        value={recipient.city}
+                                                        onChange={(e) => setRecipient({ ...recipient, city: e.target.value })}
                                                         placeholder="London"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                        Country
-                                                    </label>
-                                                    <input
+                                                    <Label htmlFor="recipientCountry">Country</Label>
+                                                    <Input
+                                                        id="recipientCountry"
                                                         type="text"
+                                                        value={recipient.country}
+                                                        onChange={(e) => setRecipient({ ...recipient, country: e.target.value })}
                                                         placeholder="United Kingdom"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                     />
                                                 </div>
                                             </div>
@@ -430,32 +483,32 @@ export default function ShipPage() {
                                             exit={{ opacity: 0, x: -20 }}
                                             className="space-y-6"
                                         >
-                                            <h2 className="font-display text-2xl text-white mb-6">
+                                            <h2 className="font-display text-2xl text-navy-900 dark:text-white mb-6">
                                                 Review & Payment
                                             </h2>
-                                            <div className="p-6 rounded-xl bg-gradient-to-br from-gold-500/10 to-amber-400/5 border border-gold-500/20">
+                                            <div className="p-6 rounded-xl bg-gold-500/10 border border-gold-500/20">
                                                 <div className="flex items-center justify-between mb-4">
-                                                    <span className="text-white/60 font-body">
+                                                    <span className="text-navy-900/60 dark:text-white/60 font-body">
                                                         Estimated Total
                                                     </span>
-                                                    <span className="font-display text-3xl text-white">
-                                                        $245.00
+                                                    <span className="font-display text-3xl text-navy-900 dark:text-white">
+                                                        ${(40 * (parseFloat(packageDetails.weight) || 1) + (packageDetails.insurance ? 20 : 0) + 25).toFixed(2)}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-white/40 font-body">
+                                                <p className="text-xs text-navy-900/40 dark:text-white/40 font-body">
                                                     Includes insurance, customs clearance, and tracking
                                                 </p>
                                             </div>
                                             <div>
-                                                <label className="block text-sm text-white/40 mb-4 font-body uppercase tracking-wider">
+                                                <Label className="mb-4">
                                                     Payment Method
-                                                </label>
+                                                </Label>
                                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                                     <button
                                                         onClick={() => setPaymentMethod("card")}
                                                         className={cn(
                                                             "p-4 rounded-xl border flex items-center justify-center gap-2 transition-all",
-                                                            "bg-gold-500/10 border-gold-500/50 text-gold-400"
+                                                            "bg-gold-500/10 border-gold-500/50 text-gold-500 dark:text-gold-400"
                                                         )}
                                                     >
                                                         <CreditCard className="w-5 h-5" />
@@ -465,34 +518,25 @@ export default function ShipPage() {
 
                                                 <div className="space-y-6">
                                                     <div>
-                                                        <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                            Card Number
-                                                        </label>
-                                                        <input
+                                                        <Label>Card Number</Label>
+                                                        <Input
                                                             type="text"
                                                             placeholder="1234 5678 9012 3456"
-                                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                         />
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-6">
                                                         <div>
-                                                            <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                                Expiry Date
-                                                            </label>
-                                                            <input
+                                                            <Label>Expiry Date</Label>
+                                                            <Input
                                                                 type="text"
                                                                 placeholder="MM/YY"
-                                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                             />
                                                         </div>
                                                         <div>
-                                                            <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
-                                                                CVV
-                                                            </label>
-                                                            <input
+                                                            <Label>CVV</Label>
+                                                            <Input
                                                                 type="text"
                                                                 placeholder="123"
-                                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
                                                             />
                                                         </div>
                                                     </div>
@@ -500,21 +544,20 @@ export default function ShipPage() {
 
                                             </div>
                                             <div className="flex items-start gap-3">
-                                                <input
-                                                    type="checkbox"
+                                                <Checkbox
                                                     id="terms"
-                                                    className="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 text-gold-500 focus:ring-gold-500"
+                                                    className="mt-1"
                                                 />
                                                 <label
                                                     htmlFor="terms"
-                                                    className="text-sm text-white/60 font-body"
+                                                    className="text-sm text-navy-900/60 dark:text-white/60 font-body"
                                                 >
                                                     I agree to the{" "}
-                                                    <a href="/terms" className="text-gold-400 hover:text-gold-300">
+                                                    <a href="/terms" className="text-gold-600 dark:text-gold-400 hover:text-gold-500 dark:hover:text-gold-300">
                                                         Terms of Service
                                                     </a>{" "}
                                                     and{" "}
-                                                    <a href="/privacy" className="text-gold-400 hover:text-gold-300">
+                                                    <a href="/privacy" className="text-gold-600 dark:text-gold-400 hover:text-gold-500 dark:hover:text-gold-300">
                                                         Privacy Policy
                                                     </a>
                                                 </label>
@@ -524,15 +567,15 @@ export default function ShipPage() {
                                 </AnimatePresence>
 
                                 {/* Navigation */}
-                                <div className="flex justify-between mt-8 pt-8 border-t border-white/10">
+                                <div className="flex justify-between mt-8 pt-8 border-t border-navy-900/10 dark:border-white/10">
                                     <button
                                         onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
                                         disabled={currentStep === 1}
                                         className={cn(
                                             "flex items-center gap-2 px-6 py-3 rounded-xl transition-all font-body",
                                             currentStep === 1
-                                                ? "text-white/30 cursor-not-allowed"
-                                                : "text-white/60 hover:text-white hover:bg-white/5"
+                                                ? "text-navy-900/30 dark:text-white/30 cursor-not-allowed"
+                                                : "text-navy-900/60 dark:text-white/60 hover:text-navy-900 dark:hover:text-white hover:bg-navy-900/5 dark:hover:bg-white/5"
                                         )}
                                     >
                                         <ArrowLeft className="w-4 h-4" />
@@ -547,7 +590,7 @@ export default function ShipPage() {
                                                 : handleBookShipment()
                                         }
                                         disabled={isBooking}
-                                        className="flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 font-bold uppercase tracking-wider hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all"
+                                        className="flex items-center gap-2 px-8 py-4 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all"
                                     >
                                         {isBooking ? (
                                             <div className="w-5 h-5 border-2 border-navy-900/30 border-t-navy-900 rounded-full animate-spin" />

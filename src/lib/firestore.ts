@@ -130,7 +130,7 @@ export async function createShipment(
 }
 
 // Helper to get random item
-const getRandomItem = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+export const getRandomItem = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 const MOCK_LOCATIONS = [
     { city: "Lagos", country: "Nigeria" },

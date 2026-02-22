@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
     Mail,
@@ -11,12 +12,14 @@ import {
     User,
     Building2,
     ArrowRight,
-    Package,
     Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fadeInUp } from "@/lib/animations";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
 import { useAuth } from "@/contexts/AuthContext";
+import AuthLayout from "@/components/auth/AuthLayout";
 
 export default function RegisterPage() {
     const { signUp } = useAuth();
@@ -36,7 +39,7 @@ export default function RegisterPage() {
         try {
             await signUp(email, password, name);
             // Redirect will be handled by auth state change or router push if needed
-            window.location.href = "/ship";
+            window.location.href = "/dashboard";
         } catch (err: any) {
             console.error("Registration error:", err);
             setError(err.message || "Failed to create account. Please try again.");
@@ -46,218 +49,170 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center py-24 px-6 bg-white dark:bg-navy-900 transition-colors duration-500">
-            {/* Background */}
-            <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 via-white to-gray-50 dark:from-navy-800 dark:via-navy-900 dark:to-black" />
-            <div className="fixed inset-0 z-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] dark:invert" />
-
-            <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={fadeInUp}
-                className="relative z-10 w-full max-w-lg"
-            >
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <Link href="/" className="inline-flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gold-500 to-amber-400 flex items-center justify-center">
-                            <Package className="w-6 h-6 text-navy-900" />
-                        </div>
-                        <div className="text-left">
-                            <span className="font-display text-xl font-semibold text-navy-900 dark:text-white block">
-                                Cargo<span className="text-gold-500 dark:text-gold-400">fly</span>
-                            </span>
-                            <span className="text-[10px] uppercase tracking-[0.2em] text-navy-900/40 dark:text-white/40 font-body">
-                                Caverton Cargo
-                            </span>
-                        </div>
-                    </Link>
-                </div>
-
-                {/* Form Card */}
-                <div className="glass-panel rounded-3xl p-8">
-                    <div className="text-center mb-8">
-                        <h1 className="font-display text-2xl text-white mb-2">
-                            Create Account
-                        </h1>
-                        <p className="text-white/40 font-body text-sm">
-                            Join thousands of businesses shipping smarter
-                        </p>
+        <AuthLayout
+            title="Start shipping with Cargofly"
+            subtitle="Join thousands of businesses managing their logistics efficiently."
+            imageSrc="/images/cargofly-truck.jpg" // Cargofly truck
+        >
+            <div className="text-center mb-8">
+                <Link href="/" className="inline-flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
+                        <Image
+                            src="/images/iconmark-blue.png"
+                            alt="Cargofly Logo"
+                            width={24}
+                            height={24}
+                            className="w-6 h-auto brightness-0 invert"
+                        />
                     </div>
+                </Link>
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                    Create an account
+                </h1>
+                <p className="text-slate-500 text-sm">
+                    Enter your details to get started
+                </p>
+            </div>
 
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-body"
-                            role="alert"
-                        >
-                            {error}
-                        </motion.div>
+            {error && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-4 rounded-xl bg-red-50 text-red-600 border border-red-100 text-sm"
+                    role="alert"
+                >
+                    {error}
+                </motion.div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3 p-1 bg-slate-100 rounded-xl mb-6">
+                <button
+                    onClick={() => setAccountType("personal")}
+                    className={cn(
+                        "flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all",
+                        accountType === "personal"
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                     )}
+                >
+                    <User className="w-4 h-4" />
+                    Personal
+                </button>
+                <button
+                    onClick={() => setAccountType("business")}
+                    className={cn(
+                        "flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all",
+                        accountType === "business"
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                    )}
+                >
+                    <Building2 className="w-4 h-4" />
+                    Business
+                </button>
+            </div>
 
-                    {/* Account Type Toggle */}
-                    <div className="grid grid-cols-2 gap-2 p-1 bg-white/5 rounded-xl border border-white/10 mb-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="John Doe"
+                        required
+                        className="h-11"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="name@company.com"
+                        required
+                        autoComplete="email"
+                        className="h-11"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                        <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            required
+                            minLength={6}
+                            autoComplete="new-password"
+                            className="h-11 pr-12"
+                        />
                         <button
-                            onClick={() => setAccountType("personal")}
-                            className={cn(
-                                "flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all font-body",
-                                accountType === "personal"
-                                    ? "bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 shadow-lg shadow-gold-500/10"
-                                    : "text-white/60 hover:text-white"
-                            )}
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                         >
-                            <User className="w-4 h-4" />
-                            Personal
-                        </button>
-                        <button
-                            onClick={() => setAccountType("business")}
-                            className={cn(
-                                "flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all font-body",
-                                accountType === "business"
-                                    ? "bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 shadow-lg shadow-gold-500/10"
-                                    : "text-white/60 hover:text-white"
+                            {showPassword ? (
+                                <EyeOff className="w-5 h-5" />
+                            ) : (
+                                <Eye className="w-5 h-5" />
                             )}
-                        >
-                            <Building2 className="w-4 h-4" />
-                            Business
                         </button>
                     </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label
-                                htmlFor="name"
-                                className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider"
-                            >
-                                Full Name
-                            </label>
-                            <div className="relative">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                                <input
-                                    id="name"
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="John Doe"
-                                    required
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="email"
-                                className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider"
-                            >
-                                Email Address
-                            </label>
-                            <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                                <input
-                                    id="email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="you@example.com"
-                                    required
-                                    autoComplete="email"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="password"
-                                className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider"
-                            >
-                                Password
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                                <input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    required
-                                    minLength={6}
-                                    autoComplete="new-password"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-12 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
-                                    aria-label={showPassword ? "Hide password" : "Show password"}
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="w-5 h-5" />
-                                    ) : (
-                                        <Eye className="w-5 h-5" />
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-start gap-3">
-                                <div className="flex items-center h-5">
-                                    <div className="w-5 h-5 rounded border border-white/20 bg-white/5 flex items-center justify-center text-gold-500">
-                                        <Check className="w-3 h-3" />
-                                    </div>
-                                </div>
-                                <div className="text-sm text-white/60 font-body">
-                                    I agree to the{" "}
-                                    <Link href="/terms" className="text-gold-400 hover:text-gold-300">
-                                        Terms of Service
-                                    </Link>{" "}
-                                    and{" "}
-                                    <Link href="/privacy" className="text-gold-400 hover:text-gold-300">
-                                        Privacy Policy
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-
-                        <motion.button
-                            type="submit"
-                            disabled={isLoading}
-                            whileHover={{ y: -2 }}
-                            whileTap={{ scale: 0.98 }}
-                            className={cn(
-                                "w-full py-4 rounded-xl bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2",
-                                isLoading
-                                    ? "opacity-70 cursor-not-allowed"
-                                    : "hover:shadow-[0_0_30px_rgba(202,138,4,0.3)]"
-                            )}
-                        >
-                            {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-navy-900/30 border-t-navy-900 rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    Create Account
-                                    <ArrowRight className="w-5 h-5" />
-                                </>
-                            )}
-                        </motion.button>
-                    </form>
-
-                    {/* Login Link */}
-                    <p className="text-center mt-8 text-white/40 font-body">
-                        Already have an account?{" "}
-                        <Link
-                            href="/login"
-                            className="text-gold-400 hover:text-gold-300 transition-colors"
-                        >
-                            Sign in
-                        </Link>
-                    </p>
                 </div>
-            </motion.div>
-        </div>
+
+                <div className="pt-2">
+                    <div className="flex items-start gap-3">
+                        <div className="flex items-center h-5">
+                            <div className="w-5 h-5 rounded border border-slate-300 bg-white flex items-center justify-center text-blue-600">
+                                <Check className="w-3 h-3" />
+                            </div>
+                        </div>
+                        <div className="text-sm text-slate-500">
+                            I agree to the{" "}
+                            <Link href="/terms" className="text-blue-600 hover:text-blue-700 font-medium">
+                                Terms
+                            </Link>{" "}
+                            and{" "}
+                            <Link href="/privacy" className="text-blue-600 hover:text-blue-700 font-medium">
+                                Privacy Policy
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={cn(
+                        "w-full h-12 mt-2 rounded-xl bg-blue-600 text-white font-bold transition-all hover:bg-blue-700 active:scale-[0.98]",
+                        isLoading ? "opacity-70 cursor-not-allowed" : "shadow-lg shadow-blue-600/20"
+                    )}
+                >
+                    {isLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+                    ) : (
+                        "Create Account"
+                    )}
+                </button>
+            </form>
+
+            <p className="text-center mt-8 text-slate-500 text-sm">
+                Already have an account?{" "}
+                <Link
+                    href="/login"
+                    className="text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                    Sign in
+                </Link>
+            </p>
+        </AuthLayout>
     );
 }

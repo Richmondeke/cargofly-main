@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 uid: user.uid,
                 email: user.email || "",
                 displayName: displayName || user.displayName || "User",
-                role: (["richmondeke@gmail.com", "godliverse@gmail.com"].includes(user.email || "")) ? "admin" : "customer",
+                role: (["richmondeke@gmail.com", "godliverse@gmail.com", "admin_test_v1@cargofly.com"].includes(user.email || "")) ? "admin" : "customer",
                 walletBalance: 0,
             };
 

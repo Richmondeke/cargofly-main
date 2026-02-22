@@ -1,15 +1,9 @@
+import type { Metadata } from 'next';
 import localFont from "next/font/local";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import LayoutWrapper from "@/components/LayoutWrapper";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-
-const kabel = localFont({
-  src: "./fonts/kabel.ttf",
-  variable: "--font-kabel",
-  display: "swap",
-});
 
 const humanist = localFont({
   src: "./fonts/Humanist521BT.ttf",
@@ -96,24 +90,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${kabel.variable} ${humanist.variable}`}>
+    <html lang="en" className={`${humanist.variable}`}>
       <head>
         {/* Security Headers */}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta httpEquiv="X-Frame-Options" content="DENY" />
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
-        <meta
-          httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.cloudfunctions.net wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com"
-        />
+
         <meta name="referrer" content="strict-origin-when-cross-origin" />
+        {/* Material Symbols for dashboard icons */}
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        {/* Inter font for dashboard */}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body className="bg-white dark:bg-navy-900 text-navy-900 dark:text-white transition-colors duration-300 font-body antialiased">
         <AuthProvider>
           <ThemeProvider>
-            <Navbar />
-            <main>{children}</main>
-            <Footer />
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
           </ThemeProvider>
         </AuthProvider>
       </body>

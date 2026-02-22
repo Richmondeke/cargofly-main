@@ -1,18 +1,9 @@
-"use client";
-
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { createQuote } from "@/lib/dashboard-service";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-    MapPin,
-    Package,
-    Scale,
-    Ruler,
-    Zap,
-    Truck,
-    Plane,
-    Loader2,
-    ArrowRight,
-} from "lucide-react";
+import { Package, MapPin, Scale, Zap, Loader2, ArrowRight, Truck, Plane } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QuoteResult {
@@ -20,15 +11,19 @@ interface QuoteResult {
     currency: string;
     estimatedDays: string;
     service: string;
+    serviceId: string;
 }
 
 export default function PricingCalculator() {
+    const { user } = useAuth();
+    const router = useRouter();
     const [origin, setOrigin] = useState("");
     const [destination, setDestination] = useState("");
     const [weight, setWeight] = useState("");
     const [dimensions, setDimensions] = useState({ length: "", width: "", height: "" });
     const [service, setService] = useState<"express" | "standard" | "economy">("standard");
     const [isCalculating, setIsCalculating] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [quote, setQuote] = useState<QuoteResult | null>(null);
 
     const services = [
@@ -55,16 +50,50 @@ export default function PricingCalculator() {
             currency: "USD",
             estimatedDays: services.find((s) => s.id === service)?.days || "3-5 days",
             service: services.find((s) => s.id === service)?.name || "Standard",
+            serviceId: service,
         });
 
         setIsCalculating(false);
+    };
+
+    const handleSaveQuote = async () => {
+        if (!user || !quote) {
+            router.push("/login?redirect=/ship");
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await createQuote(user.uid, {
+                origin,
+                destination,
+                serviceType: quote.serviceId as any,
+                weight: parseFloat(weight),
+                dimensions: {
+                    length: parseFloat(dimensions.length) || 0,
+                    width: parseFloat(dimensions.width) || 0,
+                    height: parseFloat(dimensions.height) || 0,
+                },
+                price: quote.price,
+            });
+
+            // Show feedback and close
+            setQuote(null);
+            // Optionally could show a toast here
+            router.push("/dashboard/quotes");
+        } catch (error) {
+            console.error("Failed to save quote:", error);
+            alert("Failed to save quote. Please try again.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
         <div className="glass-panel rounded-3xl overflow-hidden">
             <div className="p-8 md:p-10">
                 <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gold-500 to-amber-400 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-gold-500 flex items-center justify-center">
                         <Package className="w-6 h-6 text-navy-900" />
                     </div>
                     <div>
@@ -196,7 +225,7 @@ export default function PricingCalculator() {
                         disabled={isCalculating || !origin || !destination || !weight}
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full py-4 rounded-xl bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all flex items-center justify-center gap-2"
                     >
                         {isCalculating ? (
                             <>
@@ -241,7 +270,7 @@ export default function PricingCalculator() {
                                 </button>
 
                                 {/* Success Icon */}
-                                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-gold-500 to-amber-400 flex items-center justify-center">
+                                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gold-500 flex items-center justify-center">
                                     <Package className="w-8 h-8 text-navy-900" />
                                 </div>
 
@@ -252,7 +281,7 @@ export default function PricingCalculator() {
                                     {origin} → {destination}
                                 </p>
 
-                                <div className="bg-gradient-to-br from-gold-500/10 to-amber-400/5 rounded-2xl p-6 border border-gold-500/20 mb-6">
+                                <div className="bg-gold-500/10 rounded-2xl p-6 border border-gold-500/20 mb-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <span className="text-white/60 font-body">
                                             Estimated Price
@@ -275,15 +304,16 @@ export default function PricingCalculator() {
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
-                                        onClick={() => setQuote(null)}
+                                        onClick={handleSaveQuote}
+                                        disabled={isSaving}
                                         className="py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 font-medium hover:bg-white/10 hover:text-white transition-colors"
                                     >
-                                        Close
+                                        {isSaving ? "Saving..." : "Save Quote"}
                                     </button>
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="py-3 rounded-xl bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 font-bold uppercase tracking-wider"
+                                        className="py-3 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider"
                                     >
                                         Book Now
                                     </motion.button>

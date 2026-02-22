@@ -104,7 +104,7 @@ export default function Testimonials() {
             variants={fadeInUp}
             className="relative"
         >
-            <div className="glass-panel rounded-3xl p-8 md:p-12 overflow-hidden">
+            <div className="bg-slate-50 dark:bg-white/5 backdrop-blur-md rounded-3xl p-8 md:p-12 overflow-hidden border border-slate-200 dark:border-white/10">
                 {/* Quote Icon */}
                 <div className="absolute top-8 right-8 opacity-10">
                     <Quote className="w-24 h-24 text-gold-500" />
@@ -130,14 +130,14 @@ export default function Testimonials() {
                                         "w-5 h-5",
                                         i < current.rating
                                             ? "fill-gold-400 text-gold-400"
-                                            : "text-white/20"
+                                            : "text-slate-300 dark:text-white/20"
                                     )}
                                 />
                             ))}
                         </div>
 
                         {/* Content */}
-                        <blockquote className="font-body text-xl md:text-2xl text-white/90 leading-relaxed mb-8 max-w-3xl">
+                        <blockquote className="font-body text-xl md:text-2xl text-navy-900 dark:text-white/90 leading-relaxed mb-8 max-w-3xl">
                             &ldquo;{current.content}&rdquo;
                         </blockquote>
 
@@ -152,8 +152,8 @@ export default function Testimonials() {
                                 />
                             </div>
                             <div>
-                                <p className="font-display text-lg text-white">{current.name}</p>
-                                <p className="text-sm text-white/40 font-body">
+                                <p className="font-display text-lg text-navy-900 dark:text-white">{current.name}</p>
+                                <p className="text-sm text-navy-900/60 dark:text-white/40 font-body">
                                     {current.role}, {current.company}
                                 </p>
                             </div>
@@ -162,7 +162,7 @@ export default function Testimonials() {
                 </AnimatePresence>
 
                 {/* Navigation */}
-                <div className="flex items-center justify-between mt-10 pt-8 border-t border-white/10">
+                <div className="flex items-center justify-between mt-10 pt-8 border-t border-navy-900/10 dark:border-white/10">
                     {/* Dots */}
                     <div className="flex gap-2">
                         {testimonials.map((_, i) => (
@@ -176,7 +176,7 @@ export default function Testimonials() {
                                     "w-2 h-2 rounded-full transition-all",
                                     i === currentIndex
                                         ? "w-8 bg-gold-500"
-                                        : "bg-white/20 hover:bg-white/40"
+                                        : "bg-navy-900/20 dark:bg-white/20 hover:bg-navy-900/40 dark:hover:bg-white/40"
                                 )}
                                 aria-label={`Go to testimonial ${i + 1}`}
                             />
@@ -189,7 +189,7 @@ export default function Testimonials() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => paginate(-1)}
-                            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-gold-400 hover:border-gold-500/50 transition-colors"
+                            className="w-10 h-10 rounded-full bg-navy-900/5 dark:bg-white/5 border border-navy-900/10 dark:border-white/10 flex items-center justify-center text-navy-900/60 dark:text-white/60 hover:text-gold-500 dark:hover:text-gold-400 hover:border-gold-500/50 transition-colors"
                             aria-label="Previous testimonial"
                         >
                             <ChevronLeft className="w-5 h-5" />
@@ -198,7 +198,7 @@ export default function Testimonials() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => paginate(1)}
-                            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-gold-400 hover:border-gold-500/50 transition-colors"
+                            className="w-10 h-10 rounded-full bg-navy-900/5 dark:bg-white/5 border border-navy-900/10 dark:border-white/10 flex items-center justify-center text-navy-900/60 dark:text-white/60 hover:text-gold-500 dark:hover:text-gold-400 hover:border-gold-500/50 transition-colors"
                             aria-label="Next testimonial"
                         >
                             <ChevronRight className="w-5 h-5" />

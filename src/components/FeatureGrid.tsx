@@ -30,31 +30,29 @@ export default function FeatureGrid({ features }: FeatureGridProps) {
                     variants={fadeInUp}
                     whileHover={{ y: -4 }}
                     className={cn(
-                        "bg-white/50 backdrop-blur-md border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors",
-                        "dark:bg-blue-sky/10 dark:border-blue-sky/20", // Tertiary Blue in Dark Mode
-                        "hover:dark:bg-blue-sky/20",
+                        "bg-white dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl p-8 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors",
                         feature.span === "wide" && "md:col-span-2",
                         feature.span === "tall" && "md:row-span-2"
                     )}
                 >
                     {/* Icon */}
                     <div className="w-14 h-14 rounded-xl bg-gold-500/10 flex items-center justify-center mb-6 group-hover:bg-gold-500/20 transition-colors">
-                        <div className="text-gold-400">{feature.icon}</div>
+                        <div className="text-gold-500 dark:text-gold-400">{feature.icon}</div>
                     </div>
 
                     {/* Content */}
-                    <h3 className="font-display text-xl text-white mb-3">
+                    <h3 className="font-display text-xl text-navy-900 dark:text-white mb-3">
                         {feature.title}
                     </h3>
-                    <p className="text-white/60 text-sm font-body leading-relaxed">
+                    <p className="text-navy-900/60 dark:text-white/60 text-sm font-body leading-relaxed">
                         {feature.description}
                     </p>
 
                     {/* Hover Glow */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-gold-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="absolute inset-0 bg-transparent" />
 
                     {/* Corner Accent */}
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-gold-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-transparent" />
                 </motion.div>
             ))}
         </motion.div>

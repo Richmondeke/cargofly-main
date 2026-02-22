@@ -93,7 +93,7 @@ export default function TrackingTimeline({
     return (
         <div className="relative">
             {/* Timeline Line */}
-            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-white/10" />
+            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700" />
 
             {/* Events */}
             <div className="space-y-0">
@@ -114,12 +114,12 @@ export default function TrackingTimeline({
                             <div className="relative z-10">
                                 <div
                                     className={cn(
-                                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
+                                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-white dark:bg-slate-800 shadow-sm",
                                         event.isCompleted
-                                            ? "bg-gradient-to-br from-gold-500 to-amber-400 shadow-lg shadow-gold-500/20"
+                                            ? "bg-gold-500 shadow-lg shadow-gold-500/20"
                                             : isCurrent
-                                                ? "bg-navy-800 border-2 border-gold-500 animate-pulse"
-                                                : "bg-navy-800 border border-white/10"
+                                                ? "border-2 border-gold-500 animate-pulse"
+                                                : "border border-slate-200 dark:border-slate-700"
                                     )}
                                 >
                                     <Icon
@@ -128,8 +128,8 @@ export default function TrackingTimeline({
                                             event.isCompleted
                                                 ? "text-navy-900"
                                                 : isCurrent
-                                                    ? "text-gold-400"
-                                                    : "text-white/40"
+                                                    ? "text-gold-500"
+                                                    : "text-slate-400 dark:text-slate-500"
                                         )}
                                     />
                                 </div>
@@ -146,23 +146,23 @@ export default function TrackingTimeline({
                                         className={cn(
                                             "font-display text-lg",
                                             event.isCompleted || isCurrent
-                                                ? "text-white"
-                                                : "text-white/40"
+                                                ? "text-slate-900 dark:text-white"
+                                                : "text-slate-400 dark:text-slate-500"
                                         )}
                                     >
                                         {event.status}
                                     </h4>
                                     {isCurrent && (
-                                        <span className="px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-400 text-xs font-bold uppercase tracking-wider">
+                                        <span className="px-2 py-0.5 rounded-full bg-gold-500/10 text-gold-600 dark:text-gold-400 text-xs font-bold uppercase tracking-wider">
                                             Current
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-white/40 mb-2 font-body">
+                                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2 font-body">
                                     <MapPin className="w-3.5 h-3.5" />
                                     <span>{event.location}</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-white/40 mb-2 font-body">
+                                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2 font-body">
                                     <Clock className="w-3.5 h-3.5" />
                                     <span>{event.timestamp}</span>
                                 </div>
@@ -170,8 +170,8 @@ export default function TrackingTimeline({
                                     className={cn(
                                         "text-sm font-body",
                                         event.isCompleted || isCurrent
-                                            ? "text-white/60"
-                                            : "text-white/30"
+                                            ? "text-slate-600 dark:text-slate-300"
+                                            : "text-slate-400 dark:text-slate-500"
                                     )}
                                 >
                                     {event.description}

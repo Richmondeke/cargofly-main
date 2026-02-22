@@ -16,6 +16,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fadeInUp, fadeInLeft, fadeInRight } from "@/lib/animations";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Textarea } from "@/components/ui/Textarea";
+import { Select } from "@/components/ui/Select";
 
 const locations = [
     {
@@ -127,10 +131,11 @@ export default function ContactPage() {
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
+                                        <Label htmlFor="name" className="text-white/40">
                                             Your Name
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
+                                            id="name"
                                             type="text"
                                             required
                                             value={formData.name}
@@ -138,14 +143,15 @@ export default function ContactPage() {
                                                 setFormData({ ...formData, name: e.target.value })
                                             }
                                             placeholder="John Doe"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
+                                            className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-gold-500/50 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
+                                        <Label htmlFor="email" className="text-white/40">
                                             Email Address
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
+                                            id="email"
                                             type="email"
                                             required
                                             value={formData.email}
@@ -153,34 +159,36 @@ export default function ContactPage() {
                                                 setFormData({ ...formData, email: e.target.value })
                                             }
                                             placeholder="john@example.com"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body"
+                                            className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-gold-500/50 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
+                                    <Label htmlFor="subject" className="text-white/40">
                                         Subject
-                                    </label>
-                                    <select
+                                    </Label>
+                                    <Select
+                                        id="subject"
                                         value={formData.subject}
                                         onChange={(e) =>
                                             setFormData({ ...formData, subject: e.target.value })
                                         }
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:outline-none focus:border-gold-500/50 transition-all font-body appearance-none cursor-pointer"
+                                        className="bg-white/5 border-white/10 text-white focus:border-gold-500/50 dark:bg-white/5 dark:border-white/10 dark:text-white"
                                     >
-                                        <option value="general">General Inquiry</option>
-                                        <option value="quote">Request a Quote</option>
-                                        <option value="support">Shipment Support</option>
-                                        <option value="careers">Careers</option>
-                                    </select>
+                                        <option value="general" className="bg-navy-900 text-white">General Inquiry</option>
+                                        <option value="quote" className="bg-navy-900 text-white">Request a Quote</option>
+                                        <option value="support" className="bg-navy-900 text-white">Shipment Support</option>
+                                        <option value="careers" className="bg-navy-900 text-white">Careers</option>
+                                    </Select>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm text-white/40 mb-2 font-body uppercase tracking-wider">
+                                    <Label htmlFor="message" className="text-white/40">
                                         Message
-                                    </label>
-                                    <textarea
+                                    </Label>
+                                    <Textarea
+                                        id="message"
                                         required
                                         rows={5}
                                         value={formData.message}
@@ -188,7 +196,7 @@ export default function ContactPage() {
                                             setFormData({ ...formData, message: e.target.value })
                                         }
                                         placeholder="How can we help you today?"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body resize-none"
+                                        className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-gold-500/50 dark:bg-white/5 dark:border-white/10 dark:text-white resize-none"
                                     />
                                 </div>
 
@@ -198,7 +206,7 @@ export default function ContactPage() {
                                     whileHover={{ y: -2 }}
                                     whileTap={{ scale: 0.98 }}
                                     className={cn(
-                                        "w-full py-4 rounded-xl bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2",
+                                        "w-full py-4 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2",
                                         isSubmitting
                                             ? "opacity-70 cursor-not-allowed"
                                             : "hover:shadow-[0_0_30px_rgba(202,138,4,0.3)]"

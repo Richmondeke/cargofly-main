@@ -240,7 +240,7 @@ function TrackPageContent() {
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${getProgress(shipment.status)}%` }}
                                                 transition={{ duration: 1, ease: "easeOut" }}
-                                                className="h-full bg-gradient-to-r from-gold-500 to-amber-400"
+                                                className="h-full bg-gold-500"
                                             />
                                         </div>
                                         <div
@@ -320,7 +320,7 @@ function TrackPageContent() {
                             </div>
 
                             {/* Support Card */}
-                            <div className="p-6 rounded-3xl bg-gradient-to-br from-gold-500/10 to-amber-400/5 border border-gold-500/20">
+                            <div className="p-6 rounded-3xl bg-gold-500/10 border border-gold-500/20">
                                 <h3 className="font-display text-lg text-white mb-2">
                                     Need Help?
                                 </h3>

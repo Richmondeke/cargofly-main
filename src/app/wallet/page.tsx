@@ -92,7 +92,7 @@ export default function WalletPage() {
     if (authLoading) {
         return (
             <div className="min-h-screen pt-24 flex items-center justify-center bg-gray-50 dark:bg-slate-900">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-gold-500" />
             </div>
         );
     }
@@ -116,7 +116,7 @@ export default function WalletPage() {
                     >
                         <button
                             onClick={() => setIsFundModalOpen(true)}
-                            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-xl transition-all active:scale-95"
+                            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gold-500 text-navy-900 font-medium shadow-lg shadow-gold-500/20 hover:bg-gold-600 hover:shadow-xl transition-all active:scale-95"
                         >
                             <Plus className="w-5 h-5 mr-2" />
                             Add Funds
@@ -131,9 +131,9 @@ export default function WalletPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="lg:col-span-1"
                     >
-                        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl p-8 h-full">
+                        <div className="relative overflow-hidden rounded-2xl bg-slate-900 text-white shadow-2xl p-8 h-full">
                             {/* Background Glows */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
                             <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none" />
 
                             <div className="relative z-10 flex flex-col justify-between h-full min-h-[220px]">
@@ -239,7 +239,7 @@ export default function WalletPage() {
                         {/* Pagination placeholder if needed */}
                         {transactions.length > 5 && (
                             <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-center">
-                                <button className="text-sm text-blue-600 font-medium hover:text-blue-700 hover:underline">
+                                <button className="text-sm text-gold-500 font-medium hover:text-gold-600 hover:underline">
                                     View All Transactions
                                 </button>
                             </div>
@@ -266,7 +266,7 @@ export default function WalletPage() {
                             className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8"
                         >
                             <div className="mb-6">
-                                <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400">
+                                <div className="w-12 h-12 rounded-full bg-gold-50 dark:bg-gold-900/20 flex items-center justify-center mb-4 text-gold-600 dark:text-gold-400">
                                     <CreditCard className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Fund Wallet</h3>
@@ -295,7 +295,7 @@ export default function WalletPage() {
                                             placeholder="0.00"
                                             value={fundAmount}
                                             onChange={(e) => setFundAmount(e.target.value)}
-                                            className="block w-full pl-8 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-lg"
+                                            className="block w-full pl-8 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 transition-all font-medium text-lg"
                                             disabled={processingPayment}
                                         />
                                     </div>
@@ -313,7 +313,7 @@ export default function WalletPage() {
                                     <button
                                         type="submit"
                                         disabled={processingPayment}
-                                        className="flex-1 px-4 py-2.5 rounded-lg bg-blue-600 text-white font-medium shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-xl transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        className="flex-1 px-4 py-2.5 rounded-lg bg-gold-500 text-navy-900 font-medium shadow-lg shadow-gold-500/20 hover:bg-gold-600 hover:shadow-xl transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     >
                                         {processingPayment ? (
                                             <>

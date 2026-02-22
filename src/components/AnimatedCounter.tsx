@@ -61,13 +61,13 @@ export default function AnimatedCounter({
             transition={{ duration: 0.5 }}
             className={cn("text-center", className)}
         >
-            <div className={cn("font-display text-5xl md:text-6xl text-white mb-2", !label && "mb-0")}>
+            <div className={cn("font-display text-5xl md:text-6xl text-navy-900 dark:text-white mb-2", !label && "mb-0")}>
                 {prefix}
                 <span className="tabular-nums">{count.toLocaleString()}</span>
-                <span className="text-gold-400">{suffix}</span>
+                <span className="text-gold-500 dark:text-gold-400">{suffix}</span>
             </div>
             {label && (
-                <p className="text-white/40 text-sm uppercase tracking-wider font-body">
+                <p className="text-navy-900/40 dark:text-white/40 text-sm uppercase tracking-wider font-body">
                     {label}
                 </p>
             )}

@@ -120,7 +120,7 @@ export default function AboutPage() {
                                 fill
                                 className="object-cover"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-transparent to-transparent" />
+                            <div className="absolute inset-0 bg-transparent" />
                         </motion.div>
 
                         <motion.div
@@ -339,7 +339,7 @@ export default function AboutPage() {
                     variants={fadeInUp}
                     className="text-center"
                 >
-                    <div className="glass-panel rounded-3xl p-12 bg-gradient-to-br from-gold-500/10 to-transparent">
+                    <div className="glass-panel rounded-3xl p-12 bg-gold-500/10">
                         <h2 className="font-display text-3xl md:text-4xl text-white mb-6">
                             Join Our Team
                         </h2>

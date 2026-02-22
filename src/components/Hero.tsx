@@ -1,250 +1,136 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Search, Package, MapPin, ArrowRight, Plane, Globe, Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-    staggerContainer,
-    fadeInUp,
-    textReveal,
-    scaleIn,
-    glowPulse
-} from "@/lib/animations";
+import { Plane } from "lucide-react";
+import HeroWidget from "./HeroWidget";
+
+// Custom Bezier for smooth "slide in"
+const smoothEase: [number, number, number, number] = [0.16, 1, 0.3, 1]; // Custom cubic-bezier for premium feel
+
+const slideUp = {
+    hidden: { y: 100, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+        transition: {
+            duration: 0.8,
+            ease: smoothEase
+        }
+    }
+};
+
+const slideRight = {
+    hidden: { x: -100, opacity: 0 },
+    visible: {
+        x: 0,
+        opacity: 1,
+        transition: {
+            duration: 0.8,
+            ease: smoothEase
+        }
+    }
+};
+
+const slideLeft = {
+    hidden: { x: 100, opacity: 0 },
+    visible: {
+        x: 0,
+        opacity: 1,
+        transition: {
+            duration: 0.8,
+            ease: smoothEase,
+            delay: 0.2
+        }
+    }
+};
 
 export default function Hero() {
-    const [trackingNumber, setTrackingNumber] = useState("");
-
-    const handleTrack = () => {
-        if (trackingNumber.trim()) {
-            window.location.href = `/track?id=${encodeURIComponent(trackingNumber)}`;
-        }
-    };
-
     return (
-        <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20">
-            {/* Background */}
-            {/* Background */}
-            <div className="absolute inset-0 z-0 bg-white dark:bg-navy-900 transition-colors duration-500" />
-            <div className="absolute inset-0 z-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] filter contrast-150 brightness-100" />
+        <section className="relative w-full flex justify-center items-center py-spacing-11 bg-[#003399]">
 
-            {/* Floating Orbs */}
-            <motion.div
-                animate={{ y: [0, -20, 0], opacity: [0.5, 0.8, 0.5] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
-            />
-            <motion.div
-                animate={{ y: [0, 30, 0], opacity: [0.5, 0.8, 0.5] }}
-                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-gold-500/5 rounded-full blur-3xl"
-            />
+            {/* Main Content Frame */}
+            <div className="w-full max-w-[1200px] min-h-[700px] flex flex-col justify-center items-center gap-spacing-12 px-spacing-06 relative z-10">
 
-            {/* Background Image */}
-            <div className="absolute inset-0 z-0">
-                <Image
-                    src="/images/hero-aircraft.png"
-                    alt="Caverton cargo aircraft at sunset"
-                    fill
-                    className="object-cover opacity-10 dark:opacity-20 transition-opacity duration-500"
-                    priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/70 to-white dark:from-navy-900/80 dark:via-navy-900/60 dark:to-navy-900 transition-colors duration-500" />
-            </div>
+                {/* Top Section: Text & Image Row */}
+                <div className="w-full grid lg:grid-cols-2 gap-spacing-07 lg:gap-spacing-10 items-center">
+                    {/* Left Content - Text */}
+                    <div className="space-y-8">
+                        <motion.h1
+                            variants={slideRight}
+                            initial="hidden"
+                            animate="visible"
+                            className="font-display text-4xl md:text-[72px] font-medium text-white leading-[1.1]"
+                        >
+                            Global Air
+                            <br />
+                            Freight, Made
+                            <br />
+                            Simple
+                        </motion.h1>
 
-            <div className="container mx-auto px-6 relative z-10 grid lg:grid-cols-12 gap-12 items-center">
-                {/* Text Content */}
+                        <motion.p
+                            variants={slideRight}
+                            initial="hidden"
+                            animate="visible"
+                            transition={{ delay: 0.1 }}
+                            className="text-white/80 text-[16px] font-body max-w-xl leading-relaxed"
+                        >
+                            Track, Book, and Move Cargo Worldwide —
+                            <br />
+                            Faster Than Ever.
+                        </motion.p>
+                    </div>
+
+                    {/* Right Content - Image */}
+                    <div className="relative w-full flex items-center justify-end">
+                        <motion.div
+                            variants={slideLeft}
+                            initial="hidden"
+                            animate="visible"
+                            className="relative w-full max-w-[500px] aspect-[4/3] rounded-[40px] overflow-hidden shadow-2xl border-4 border-white/10"
+                        >
+                            <Image
+                                src="/images/cargofly-truck.jpg"
+                                alt="Cargofly Truck"
+                                fill
+                                className="object-cover"
+                                priority
+                            />
+
+                            {/* Notification Badge */}
+                            <div className="absolute top-6 right-6 bg-white rounded-2xl p-4 shadow-xl flex items-center gap-4 max-w-[240px] animate-fade-slide-up">
+                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                    <Plane className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <div className="text-left">
+                                    <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-1">New</p>
+                                    <p className="text-[12px] font-medium text-slate-900 leading-tight">At Cargo, we move it fast! Get premium shipment.</p>
+                                </div>
+                                <div className="absolute -top-1 -left-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center">
+                                    <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                                </div>
+                            </div>
+
+                            {/* Logo Overlay on Truck */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                                <Image src="/logo-light.png" alt="" width={200} height={60} className="object-contain" />
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+
+                {/* Bottom Widget */}
                 <motion.div
-                    className="lg:col-span-7 space-y-8"
+                    variants={slideUp}
                     initial="hidden"
                     animate="visible"
-                    variants={staggerContainer}
+                    transition={{ delay: 0.4 }}
+                    className="w-full"
                 >
-                    <motion.div variants={fadeInUp}>
-                        <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-6 backdrop-blur-md font-body">
-                            Premium Aviation Logistics
-                        </span>
-                        <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-medium leading-[0.95] text-navy-900 dark:text-white overflow-hidden pb-4">
-                            <motion.span className="block" variants={textReveal}>Ship Beyond</motion.span>
-                            <motion.span className="block italic text-navy-900/90 dark:text-white/90" variants={textReveal}>
-                                Boundaries
-                            </motion.span>
-
-                        </h1>
-                        <p className="mt-8 text-lg text-navy-900 dark:text-white/80 max-w-xl leading-relaxed font-body font-medium">
-                            The pinnacle of West African cargo services. Where luxury meets
-                            logistics, and every shipment is crafted for the discerning.
-                        </p>
-                    </motion.div>
-
-                    {/* Stats */}
-                    <motion.div
-                        variants={staggerContainer}
-                        className="flex flex-wrap gap-8 pt-4"
-                    >
-                        {[
-                            { icon: Globe, value: "200+", label: "Countries" },
-                            { icon: Package, value: "1M+", label: "Shipments" },
-                            { icon: Clock, value: "99%", label: "On Time" },
-                        ].map((stat, i) => (
-                            <motion.div key={i} variants={fadeInUp} className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-xl bg-navy-900/5 dark:bg-white/5 border border-navy-900/10 dark:border-white/10 flex items-center justify-center">
-                                    <stat.icon className="w-5 h-5 text-gold-500 dark:text-gold-400" />
-                                </div>
-                                <div>
-                                    <p className="font-display text-2xl text-navy-900 dark:text-white">{stat.value}</p>
-                                    <p className="text-xs uppercase tracking-wider text-navy-900/50 dark:text-white/40 font-body">
-                                        {stat.label}
-                                    </p>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-
-                    {/* CTA Buttons - Stack on Mobile, Row on Desktop */}
-                    <motion.div
-                        variants={fadeInUp}
-                        className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto"
-                    >
-                        <Link href="/ship" className="w-full sm:w-auto">
-                            <motion.button
-                                whileHover={{ y: -3 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="w-full sm:w-auto group relative px-8 py-4 bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 rounded-xl font-bold uppercase tracking-wider overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(202,138,4,0.4)]"
-                            >
-                                <span className="relative z-10 flex items-center justify-center gap-2">
-                                    Ship Now
-                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                </span>
-                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                            </motion.button>
-                        </Link>
-                        <Link href="/services" className="w-full sm:w-auto">
-                            <motion.button
-                                whileHover={{ y: -2 }}
-                                className="w-full sm:w-auto group relative px-8 py-4 bg-transparent border border-navy-900/20 dark:border-white/20 text-navy-900 dark:text-white rounded-xl font-medium uppercase tracking-wider overflow-hidden transition-all hover:border-gold-500/50"
-                            >
-                                <span className="relative z-10 group-hover:text-gold-500 dark:group-hover:text-gold-400 transition-colors flex justify-center">
-                                    Explore Services
-                                </span>
-                                <div className="absolute inset-0 bg-navy-900/5 dark:bg-white/5 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
-                            </motion.button>
-                        </Link>
-                    </motion.div>
+                    <HeroWidget />
                 </motion.div>
-
-                {/* Tracking Widget */}
-                <div className="lg:col-span-5 relative mt-10 lg:mt-0">
-                    <motion.div
-                        initial="hidden"
-                        animate="visible"
-                        variants={scaleIn}
-                        className="bg-navy-900/40 backdrop-blur-xl border border-white/10 shadow-xl p-1 rounded-3xl"
-                    >
-                        <div className="bg-white/50 dark:bg-navy-900/40 backdrop-blur-xl rounded-[20px] p-8 border border-white/20 dark:border-white/5 shadow-xl dark:shadow-none">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-gold-500/10 dark:bg-gold-500/20 flex items-center justify-center">
-                                    <Search className="w-5 h-5 text-gold-500 dark:text-gold-400" />
-                                </div>
-                                <div>
-                                    <h3 className="font-display text-lg text-navy-900 dark:text-white">Track Shipment</h3>
-                                    <p className="text-xs text-navy-900/50 dark:text-white/40 font-body">
-                                        Enter your tracking number
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="relative">
-                                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gold-500/70" />
-                                    <input
-                                        type="text"
-                                        value={trackingNumber}
-                                        onChange={(e) => setTrackingNumber(e.target.value)}
-                                        onKeyDown={(e) => e.key === "Enter" && handleTrack()}
-                                        placeholder="e.g., CF-2025-8473629"
-                                        className="w-full bg-white dark:bg-white/5 border border-navy-900/10 dark:border-white/10 rounded-xl py-4 pl-12 pr-4 text-navy-900 dark:text-white placeholder:text-navy-900/30 dark:placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body font-mono shadow-sm dark:shadow-none"
-                                        maxLength={20}
-                                    />
-                                </div>
-
-                                <motion.button
-                                    whileHover={{ y: -2 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={handleTrack}
-                                    className="w-full py-4 rounded-xl bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 font-bold uppercase tracking-widest shadow-lg shadow-gold-500/20 hover:shadow-gold-500/40 transition-all flex items-center justify-center gap-2"
-                                >
-                                    <Search className="w-5 h-5" />
-                                    <span>Track Package</span>
-                                </motion.button>
-
-                                <p className="text-center text-xs text-navy-900/40 dark:text-white/40 font-body">
-                                    Real-time tracking powered by GPS technology
-                                </p>
-                            </div>
-
-                            {/* Quick Links */}
-                            <div className="mt-8 pt-6 border-t border-navy-900/10 dark:border-white/10">
-                                <p className="text-xs uppercase tracking-wider text-navy-900/40 dark:text-white/40 mb-4 font-body">
-                                    Quick Actions
-                                </p>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Link
-                                        href="/ship"
-                                        className="flex items-center gap-2 p-3 rounded-lg bg-navy-900/5 dark:bg-white/5 hover:bg-navy-900/10 dark:hover:bg-white/10 transition-colors group"
-                                    >
-                                        <Package className="w-4 h-4 text-gold-500 dark:text-gold-400" />
-                                        <span className="text-sm text-navy-900/80 dark:text-white/80 group-hover:text-navy-900 dark:group-hover:text-white font-body">
-                                            Ship Package
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/services#rates"
-                                        className="flex items-center gap-2 p-3 rounded-lg bg-navy-900/5 dark:bg-white/5 hover:bg-navy-900/10 dark:hover:bg-white/10 transition-colors group"
-                                    >
-                                        <MapPin className="w-4 h-4 text-gold-500 dark:text-gold-400" />
-                                        <span className="text-sm text-navy-900/80 dark:text-white/80 group-hover:text-navy-900 dark:group-hover:text-white font-body">
-                                            Get Quote
-                                        </span>
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Floating Plane Animation */}
-                    <motion.div
-                        className="absolute -top-10 -right-10 hidden lg:block"
-                        animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gold-500/20 to-amber-400/10 backdrop-blur-sm border border-gold-500/20 flex items-center justify-center">
-                            <Plane className="w-10 h-10 text-gold-400" />
-                        </div>
-                    </motion.div>
-                </div>
             </div>
-
-            {/* Scroll Indicator */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.5 }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-            >
-                <span className="text-xs uppercase tracking-widest text-white/40 font-body">
-                    Scroll
-                </span>
-                <div className="w-6 h-10 rounded-full border border-white/20 flex items-start justify-center p-2">
-                    <motion.div
-                        animate={{ y: [0, 12, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="w-1.5 h-1.5 rounded-full bg-gold-400"
-                    />
-                </div>
-            </motion.div>
-        </section >
+        </section>
     );
 }

@@ -96,7 +96,7 @@ export default function TrackingWidget({
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={cn(
-                            "px-8 py-4 rounded-xl bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed hover:shadow-[0_0_30px_rgba(202,138,4,0.3)]",
+                            "px-8 py-4 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed hover:shadow-[0_0_30px_rgba(202,138,4,0.3)]",
                             variant === "page" && "sm:w-auto w-full"
                         )}
                     >

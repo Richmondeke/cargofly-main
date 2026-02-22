@@ -3,14 +3,33 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
+  /* Cargofly Official Brand Colors */
   --color-navy: #003399;
-  --color-navy-800: #002060;
+  --color-navy-700: #002060;
+  --color-navy-800: #0044CE;
   --color-navy-900: #003399;
-  /* Main Background */
-  --color-blue-sky: #4196FF;
+  --color-sky: #4196FF;
+  --color-sky-400: #81B7FF;
+  --color-sky-500: #4196FF;
+  --color-sky-600: #016FFF;
+  --color-gold-50: #FFFBEB;
+  --color-gold-100: #FFF3C4;
   --color-gold-400: #FFD541;
   --color-gold-500: #FFCA00;
-  --color-amber-400: #F59E0B;
+  --color-gold-600: #BA9100;
+  --color-gray-dark: #666666;
+  --color-gray-light: #CCCCCC;
+
+  /* Surface & Background tokens */
+  --color-surface-dark: #002060;
+  --color-background-dark: #001A4D;
+  --color-surface-light: #FFFFFF;
+  --color-background-light: #F8FAFC;
+
+  /* Primary token */
+  --color-primary: #003399;
+  --color-primary-dark: #002060;
+  --color-primary-light: #0044CE;
 
   --font-display: var(--font-kabel);
   --font-body: var(--font-humanist);
@@ -126,6 +145,24 @@
   h6 {
     font-family: var(--font-display);
   }
+
+  /* Force visible text on autofill */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: black !important;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: 0 0 0 30px white inset !important;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
+      -webkit-text-fill-color: white !important;
+      box-shadow: 0 0 0 30px #001A4D inset !important;
+  }
 }
 
 @layer components {
@@ -134,6 +171,11 @@
   */
 
   .btn-gold {
-    @apply bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 font-bold uppercase tracking-wider hover:shadow-lg transition-all;
+    @apply bg-gold-500 text-navy-900 font-bold uppercase tracking-wider hover:shadow-lg transition-all;
   }
+}
+.bg-motif {
+  background-image: url('/Cargofly motif_transparent.png');
+  background-repeat: repeat;
+  background-size: 400px;
 }

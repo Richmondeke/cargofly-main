@@ -1,0 +1,43 @@
+"use client";
+
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/dashboard/Sidebar';
+import MobileHeader from '@/components/dashboard/MobileHeader';
+import LoadingAnimation from '@/components/LoadingAnimation';
+import { useAuth } from '@/contexts/AuthContext';
+
+
+export default function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const { user, loading } = useAuth();
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/login');
+        }
+    }, [user, loading, router]);
+
+    if (loading) {
+        return <LoadingAnimation />;
+    }
+
+    if (!user) {
+        return null; // Will redirect via useEffect
+    }
+
+    return (
+        <div className="flex h-screen w-full flex-row overflow-hidden bg-background-light dark:bg-background-dark" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+            <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+                <MobileHeader onOpenConfig={() => setIsSidebarOpen(true)} />
+                {children}
+            </main>
+        </div>
+    );
+}

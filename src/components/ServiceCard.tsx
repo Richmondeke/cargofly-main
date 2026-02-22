@@ -29,13 +29,13 @@ export default function ServiceCard({
             className={cn(
                 "group relative rounded-2xl overflow-hidden transition-all duration-500",
                 featured
-                    ? "bg-gradient-to-br from-gold-500/20 to-amber-400/10 border border-gold-500/30 dark:bg-blue-sky/10 dark:border-blue-sky/30"
+                    ? "bg-gold-500/20 border border-gold-500/30 dark:bg-blue-sky/10 dark:border-blue-sky/30"
                     : "bg-white/5 border border-white/10 hover:border-gold-500/30 dark:bg-blue-sky/5 dark:border-blue-sky/20 dark:hover:border-gold-500/50"
             )}
         >
             {/* Featured Badge */}
             {featured && (
-                <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-gradient-to-r from-gold-500 to-amber-400 text-navy-900 text-xs font-bold uppercase tracking-wider">
+                <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-gold-500 text-navy-900 text-xs font-bold uppercase tracking-wider">
                     Popular
                 </div>
             )}
@@ -46,7 +46,7 @@ export default function ServiceCard({
                     className={cn(
                         "w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-all duration-300",
                         featured
-                            ? "bg-gradient-to-br from-gold-500 to-amber-400 text-navy-900"
+                            ? "bg-gold-500 text-navy-900"
                             : "bg-white/5 text-gold-400 group-hover:bg-gold-500/20"
                     )}
                 >
@@ -99,7 +99,7 @@ export default function ServiceCard({
             <div
                 className={cn(
                     "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none",
-                    "bg-gradient-to-t from-gold-500/5 to-transparent"
+                    "bg-transparent"
                 )}
             />
         </motion.div>
