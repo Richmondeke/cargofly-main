@@ -126,7 +126,7 @@ export default function Hero() {
                     initial="hidden"
                     animate="visible"
                     transition={{ delay: 0.4 }}
-                    className="w-full"
+                    className="w-full mt-16 lg:mt-24"
                 >
                     <HeroWidget />
                 </motion.div>
