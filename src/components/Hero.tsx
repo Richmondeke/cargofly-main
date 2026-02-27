@@ -61,13 +61,33 @@ export default function Hero() {
                             variants={slideUpText}
                             initial="hidden"
                             animate="visible"
-                            className="font-display text-4xl md:text-[72px] font-medium text-white leading-[1.1]"
+                            className="font-display text-5xl md:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6"
                         >
-                            Global Air
+                            {"Global Air Freight, Made ".split("").map((char, index) => (
+                                <motion.span
+                                    key={index}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{
+                                        duration: 0.05,
+                                        delay: index * 0.05 + 0.5,
+                                    }}
+                                >
+                                    {char}
+                                </motion.span>
+                            ))}
                             <br />
-                            Freight, Made
-                            <br />
-                            Simple
+                            <motion.span
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{
+                                    duration: 0.5,
+                                    delay: "Global Air Freight, Made ".length * 0.05 + 0.6,
+                                }}
+                                className="bg-gold-500 text-navy-900 px-4 py-1 rounded-xl inline-block mt-2"
+                            >
+                                Simple
+                            </motion.span>
                         </motion.h1>
 
                         <motion.p
@@ -75,7 +95,7 @@ export default function Hero() {
                             initial="hidden"
                             animate="visible"
                             transition={{ delay: 0.1 }}
-                            className="text-white/80 text-[16px] font-body max-w-xl leading-relaxed"
+                            className="text-white/80 text-base md:text-xl font-body max-w-xl leading-relaxed"
                         >
                             Track, Book, and Move Cargo Worldwide —
                             <br />

@@ -42,7 +42,7 @@ export default function Footer({ isLanding }: { isLanding?: boolean }) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className={cn("relative border-t border-white/5", isLanding ? "bg-transparent" : "bg-navy-900")}
+            className={cn("relative border-t border-white/5 py-40", isLanding ? "bg-transparent" : "bg-navy-900")}
         >
             {/* Background Effects */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-navy-800/50 via-transparent to-transparent pointer-events-none" />
@@ -50,81 +50,98 @@ export default function Footer({ isLanding }: { isLanding?: boolean }) {
             <div className="container mx-auto px-spacing-06 relative z-10">
                 <div className="py-spacing-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-spacing-09 border-b border-navy-800/50">
                     {/* Brand Column */}
-                    <div className="lg:col-span-2">
-                        <h4 className="font-display text-xs uppercase tracking-widest text-[#003399]/60 mb-spacing-06">Company</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.company.map((link) => (
-                                <li key={link.name}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-[#003399] hover:text-blue-500 transition-colors text-sm font-body"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Resources */}
-                    <div className="lg:col-span-2">
-                        <h4 className="font-display text-xs uppercase tracking-widest text-[#003399]/60 mb-spacing-06">Resources</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.resources.map((link) => (
-                                <li key={link.name}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-[#003399] hover:text-blue-500 transition-colors text-sm font-body"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Legal */}
-                    <div className="lg:col-span-2">
-                        <h4 className="font-display text-xs uppercase tracking-widest text-[#003399]/60 mb-spacing-06">Legal</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.legal.map((link) => (
-                                <li key={link.name}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-[#003399] hover:text-blue-500 transition-colors text-sm font-body"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Newsletter Section */}
-                    <div className="lg:col-span-6 lg:pl-12">
-                        <div className="bg-white/5 rounded-3xl p-8 border border-white/10 backdrop-blur-sm">
-                            <h3 className="font-display text-2xl text-white mb-2">
-                                Stay Updated
-                            </h3>
-                            <p className="text-white/60 font-body text-sm mb-6">
-                                Subscribe for exclusive updates and premium shipping offers.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <input
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-gold-500/50 transition-all font-body text-sm"
-                                />
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="shrink-0 bg-gold-500 text-navy-900 px-6 py-3 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-gold-400 transition-colors"
-                                >
-                                    Subscribe
-                                    <ArrowRight className="w-4 h-4" />
-                                </motion.button>
-                            </div>
+                    <div className="lg:col-span-4">
+                        <div className="mb-6">
+                            <Image
+                                src="/logo-dark.png"
+                                alt="Cargofly"
+                                width={160}
+                                height={40}
+                                className="object-contain"
+                            />
                         </div>
+                        <p className="text-[#003399]/70 dark:text-white/60 text-sm font-body mb-8 max-w-sm">
+                            The pinnacle of West African aviation logistics. Premium cargo services, real-time tracking, and white-glove delivery.
+                        </p>
+                        <div className="flex gap-4">
+                            {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
+                                <Link key={i} href="#" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all">
+                                    <Icon className="w-4 h-4" />
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Quick Links Group */}
+                    <div className="lg:col-span-5 grid grid-cols-2 md:grid-cols-3 gap-8">
+                        <div>
+                            <h4 className="font-display text-xs uppercase tracking-widest text-[#003399]/60 mb-spacing-06">Company</h4>
+                            <ul className="space-y-3">
+                                {footerLinks.company.map((link) => (
+                                    <li key={link.name}>
+                                        <Link
+                                            href={link.href}
+                                            className="text-[#003399] dark:text-white/80 hover:text-blue-500 transition-colors text-sm font-body"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 className="font-display text-xs uppercase tracking-widest text-[#003399]/60 mb-spacing-06">Resources</h4>
+                            <ul className="space-y-3">
+                                {footerLinks.resources.map((link) => (
+                                    <li key={link.name}>
+                                        <Link
+                                            href={link.href}
+                                            className="text-[#003399] dark:text-white/80 hover:text-blue-500 transition-colors text-sm font-body"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="hidden md:block">
+                            <h4 className="font-display text-xs uppercase tracking-widest text-[#003399]/60 mb-spacing-06">Legal</h4>
+                            <ul className="space-y-3">
+                                {footerLinks.legal.map((link) => (
+                                    <li key={link.name}>
+                                        <Link
+                                            href={link.href}
+                                            className="text-[#003399] dark:text-white/80 hover:text-blue-500 transition-colors text-sm font-body"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Contact Column */}
+                    <div className="lg:col-span-3">
+                        <h4 className="font-display text-xs uppercase tracking-widest text-[#003399]/60 mb-spacing-06">Contact Us</h4>
+                        <ul className="space-y-4">
+                            <li className="flex items-start gap-3">
+                                <MapPin className="w-4 h-4 text-gold-500 mt-1 flex-shrink-0" />
+                                <span className="text-[#003399] dark:text-white/80 text-sm font-body">
+                                    Aviation Estate, Murtala Muhammed International Airport, Lagos, Nigeria
+                                </span>
+                            </li>
+                            <li className="flex items-center gap-3">
+                                <Phone className="w-4 h-4 text-gold-500 flex-shrink-0" />
+                                <span className="text-[#003399] dark:text-white/80 text-sm font-body">+234 800 CARGOFLY</span>
+                            </li>
+                            <li className="flex items-center gap-3">
+                                <Mail className="w-4 h-4 text-gold-500 flex-shrink-0" />
+                                <span className="text-[#003399] dark:text-white/80 text-sm font-body">info@cargofly.caverton.com</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 

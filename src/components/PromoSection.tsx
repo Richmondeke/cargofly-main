@@ -25,10 +25,10 @@ export default function PromoSection() {
                     </div>
 
                     <div className="flex flex-col items-center max-w-2xl mx-auto">
-                        <h2 className="font-display text-4xl md:text-5xl text-[#003399] mb-4">
+                        <h2 className="font-display text-4xl md:text-5xl font-bold text-[#003399] mb-6 tracking-tight">
                             Ready to move <span className="text-blue-600 font-bold underline decoration-blue-600/30">cargo</span> faster?
                         </h2>
-                        <p className="text-slate-600 mb-8 font-body text-sm md:text-base leading-relaxed">
+                        <p className="text-slate-600 mb-8 font-body text-base md:text-lg leading-relaxed">
                             Cargofly helps businesses and individuals book and manage air cargo shipments with ease.
                             Get transparent rates, instant tracking, and shipment updates — all from your dashboard.
                         </p>

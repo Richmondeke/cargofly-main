@@ -15,7 +15,7 @@ export default function TrustSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                        className="font-display text-3xl md:text-4xl text-white mb-spacing-05"
+                        className="font-display text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight"
                     >
                         Trusted by freight forwarders, exporters,
                         <br />
@@ -26,7 +26,7 @@ export default function TrustSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-                        className="text-white/60 text-lg font-body"
+                        className="text-white/70 text-base md:text-lg leading-relaxed font-body"
                     >
                         Your shipments deserve full visibility, faster processing, and a system you can rely on.
                     </motion.p>

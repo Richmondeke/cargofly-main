@@ -5,6 +5,7 @@ import PromoSection from "@/components/PromoSection";
 import TagMarquee from "@/components/TagMarquee";
 import TrustSection from "@/components/TrustSection";
 import BlogSection from "@/components/BlogSection";
+import NewsletterSection from "@/components/NewsletterSection";
 
 export default function Home() {
   return (
@@ -20,6 +21,9 @@ export default function Home() {
       <TrustSection />
 
       <BlogSection />
+
+      {/* Independent Newsletter Section */}
+      <NewsletterSection />
 
       {/* Footer will be auto-attached by layout, but we need to ensure it blends.
           Since the footer has its own bg-navy-900, it might contrast slightly with #003399.

@@ -17,106 +17,105 @@ export default function HeroWidget() {
     };
 
     return (
-        <div className="relative z-20 w-[567px] h-[249px] mx-auto">
-            {/* Tabs Container */}
-            <div className="flex justify-center mb-[-1px] relative z-20">
-                <div className="flex bg-[#001f5c]/40 backdrop-blur-md rounded-t-2xl p-1 gap-1 relative overflow-hidden">
+        <div className="relative z-20 w-full max-w-3xl mx-auto px-4 sm:px-0">
+            {/* Tabs Container - Floats above the main box */}
+            <div className="flex bg-navy-900/30 backdrop-blur-md rounded-2xl p-1 relative overflow-hidden w-fit mx-auto shadow-2xl border border-white/10 mb-4">
+                <button
+                    onClick={() => setActiveTab('track')}
+                    className={cn(
+                        "relative px-8 py-2 text-sm font-bold tracking-wide transition-all duration-300 z-10 min-w-[140px] rounded-xl",
+                        activeTab === 'track'
+                            ? "text-[#003399] bg-white shadow-lg"
+                            : "text-white/80 hover:text-white hover:bg-white/5"
+                    )}
+                >
+                    Track
+                </button>
+                <button
+                    onClick={() => setActiveTab('book')}
+                    className={cn(
+                        "relative px-8 py-2 text-sm font-bold tracking-wide transition-all duration-300 z-10 min-w-[140px] rounded-xl",
+                        activeTab === 'book'
+                            ? "text-[#003399] bg-white shadow-lg"
+                            : "text-white/80 hover:text-white hover:bg-white/5"
+                    )}
+                >
+                    Book
+                </button>
+            </div >
 
-                    {/* Book Shipment Tab */}
-                    <button
-                        onClick={() => setActiveTab('book')}
-                        className={cn(
-                            "relative px-6 py-3 text-sm font-semibold transition-all duration-300 z-10 min-w-[140px] rounded-t-xl",
-                            activeTab === 'book' ? "text-[#003399] bg-white shadow-sm" : "text-white/80 hover:text-white hover:bg-white/10"
-                        )}
-                    >
-                        <span className="relative z-20">Book Shipment</span>
-                    </button>
+            {/* Main Widget Body - Glow Wrapper */}
+            <div className="relative rounded-[26px] p-[2px] overflow-hidden group w-full">
+                {/* Animated light effect */}
+                <div className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,transparent_60%,#ffffff_80%,#4196FF_100%)] opacity-80" />
 
-                    {/* Track Shipment Tab */}
-                    <button
-                        onClick={() => setActiveTab('track')}
-                        className={cn(
-                            "relative px-6 py-3 text-sm font-semibold transition-all duration-300 z-10 min-w-[140px] rounded-t-xl",
-                            activeTab === 'track' ? "text-[#003399] bg-white shadow-sm" : "text-white/80 hover:text-white hover:bg-white/10"
-                        )}
-                    >
-                        <span className="relative z-20">Track Shipment</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* Main Widget Body */}
-            <motion.div
-                layout
-                className="bg-white rounded-3xl shadow-2xl relative h-full flex items-center justify-center overflow-hidden border border-white/20"
-            >
-                <div className="w-full px-spacing-07 py-spacing-06">
-                    <AnimatePresence mode="wait">
-                        {activeTab === 'track' ? (
-                            <motion.div
-                                key="track"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.3 }}
-                                className="flex flex-col items-center w-full"
-                            >
-                                <div className="w-full max-w-lg mb-spacing-06">
-                                    <label className="block text-sm font-bold text-slate-700 mb-spacing-03 px-1">
-                                        Enter Tracking ID
-                                    </label>
-                                    <div className="bg-slate-50 rounded-2xl p-spacing-02">
-                                        <input
-                                            type="text"
-                                            value={trackingNumber}
-                                            onChange={(e) => setTrackingNumber(e.target.value)}
-                                            placeholder="CF-10222345555"
-                                            className="w-full bg-transparent border-none px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:ring-0 font-mono text-base"
-                                        />
+                {/* Main Widget Body - Glass Box */}
+                <motion.div
+                    layout
+                    className="bg-navy-900/40 backdrop-blur-3xl rounded-[24px] shadow-2xl relative overflow-hidden border border-white/10 p-2 lg:p-2 z-10 w-full"
+                >
+                    <div className="w-full">
+                        <AnimatePresence mode="wait">
+                            {activeTab === 'track' ? (
+                                <motion.div
+                                    key="track"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="flex items-center w-full"
+                                >
+                                    <div className="flex-1 flex items-center w-full">
+                                        {/* Main input container */}
+                                        <div className="relative z-10 flex items-center w-full bg-white rounded-[20px] shadow-inner pl-6 md:pl-8 pr-2 py-2">
+                                            <input
+                                                type="text"
+                                                value={trackingNumber}
+                                                onChange={(e) => setTrackingNumber(e.target.value)}
+                                                placeholder="Enter Tracking ID (e.g. CF-12345)"
+                                                className="w-full bg-transparent border-none px-0 py-3 md:py-4 text-slate-800 placeholder:text-slate-400 focus:ring-0 font-mono text-base md:text-lg focus:outline-none"
+                                            />
+                                            <button
+                                                onClick={handleTrack}
+                                                className="bg-[#FFCA00] text-black px-8 py-3 md:py-4 rounded-[14px] font-extrabold text-sm tracking-wide flex items-center gap-2 hover:bg-[#FFCA00]/90 transition-all shadow-md active:scale-95 flex-shrink-0"
+                                            >
+                                                <span className="hidden sm:inline">Track</span>
+                                                <ArrowRight className="w-5 h-5" />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="book"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="flex items-center justify-between w-full bg-white rounded-[20px] overflow-hidden shadow-inner pl-6 md:pl-8 pr-2 py-2"
+                                >
+                                    <div className="flex-1">
+                                        <p className="text-slate-700 font-semibold text-sm md:text-base hidden sm:block">
+                                            Ready to move your cargo globally?
+                                        </p>
+                                        <p className="text-slate-700 font-semibold text-sm sm:hidden">
+                                            Ship with Cargofly
+                                        </p>
+                                    </div>
 
-                                {/* Floating Action Button */}
-                                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2">
-                                    <button
-                                        onClick={handleTrack}
-                                        className="bg-[#003399] text-white px-12 py-3.5 rounded-2xl font-semibold text-base flex items-center gap-3 hover:bg-[#00287a] hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl"
-                                    >
-                                        Proceed
-                                        <ArrowRight className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="book"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.3 }}
-                                className="flex flex-col items-center w-full text-center"
-                            >
-                                <h3 className="text-2xl font-bold text-[#003399] mb-2">Ready to ship?</h3>
-                                <p className="text-slate-500 mb-8 max-w-sm mx-auto text-sm">
-                                    Get instant quotes, schedule pickups, and manage your shipments seamlessly.
-                                </p>
-
-                                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-4">
-                                    <Link href="/ship">
-                                        <button className="bg-[#003399] text-white px-12 py-3.5 rounded-2xl font-semibold text-base flex items-center gap-3 hover:bg-[#00287a] hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-xl">
-                                            Start Booking
+                                    <Link href="/ship" className="flex-shrink-0">
+                                        <button className="bg-[#FFCA00] text-black px-8 py-3 md:py-4 rounded-[14px] font-extrabold text-sm tracking-wide flex items-center gap-2 hover:bg-[#FFCA00]/90 transition-all shadow-md active:scale-95">
+                                            <span className="hidden sm:inline">Get Quote</span>
+                                            <span className="sm:hidden">Start</span>
                                             <ArrowRight className="w-5 h-5" />
                                         </button>
                                     </Link>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                {/* Need Help Bubble - Removed per user request */}
-            </motion.div>
-        </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </motion.div>
+            </div>
+        </div >
     );
 }
