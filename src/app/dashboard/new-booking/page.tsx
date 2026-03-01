@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { createBooking, logActivity } from '@/lib/dashboard-service';
+import { createBooking } from '@/lib/dashboard-service';
 import LottieAnimation from '@/components/ui/LottieAnimation';
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -15,22 +15,23 @@ type Step = 1 | 2 | 3 | 4;
 
 export default function NewBookingPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { user, userProfile } = useAuth();
     const [currentStep, setCurrentStep] = useState<Step>(1);
     const [loading, setLoading] = useState(false);
     const [trackingNumber, setTrackingNumber] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
-        origin: '',
-        destination: '',
-        serviceType: 'express',
+        origin: searchParams.get('origin') || '',
+        destination: searchParams.get('destination') || '',
+        serviceType: searchParams.get('cargoType')?.toLowerCase() || 'express',
         // Package details
         weight: '',
         length: '',
         width: '',
         height: '',
         description: '',
-        isFragile: false,
+        isFragile: searchParams.get('cargoType')?.toLowerCase() === 'fragile',
         // Sender
         senderName: '',
         senderPhone: '',
@@ -45,6 +46,23 @@ export default function NewBookingPage() {
         expiry: '',
         cvv: '',
     });
+
+    // Update form if search params change
+    useEffect(() => {
+        const origin = searchParams.get('origin');
+        const destination = searchParams.get('destination');
+        const cargoType = searchParams.get('cargoType')?.toLowerCase();
+
+        if (origin || destination || cargoType) {
+            setFormData(prev => ({
+                ...prev,
+                origin: origin || prev.origin,
+                destination: destination || prev.destination,
+                serviceType: cargoType || prev.serviceType,
+                isFragile: cargoType === 'fragile' || prev.isFragile
+            }));
+        }
+    }, [searchParams]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;

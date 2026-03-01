@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import TransitionLink from "@/components/TransitionLink";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
@@ -65,9 +65,9 @@ export default function Footer({ isLanding }: { isLanding?: boolean }) {
                         </p>
                         <div className="flex gap-4">
                             {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
-                                <Link key={i} href="#" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all">
+                                <TransitionLink key={i} href="#" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-gold-500 hover:text-navy-900 transition-all">
                                     <Icon className="w-4 h-4" />
-                                </Link>
+                                </TransitionLink>
                             ))}
                         </div>
                     </div>
@@ -79,12 +79,12 @@ export default function Footer({ isLanding }: { isLanding?: boolean }) {
                             <ul className="space-y-3">
                                 {footerLinks.company.map((link) => (
                                     <li key={link.name}>
-                                        <Link
+                                        <TransitionLink
                                             href={link.href}
                                             className="text-[#003399] dark:text-white/80 hover:text-blue-500 transition-colors text-sm font-body"
                                         >
                                             {link.name}
-                                        </Link>
+                                        </TransitionLink>
                                     </li>
                                 ))}
                             </ul>
@@ -95,12 +95,12 @@ export default function Footer({ isLanding }: { isLanding?: boolean }) {
                             <ul className="space-y-3">
                                 {footerLinks.resources.map((link) => (
                                     <li key={link.name}>
-                                        <Link
+                                        <TransitionLink
                                             href={link.href}
                                             className="text-[#003399] dark:text-white/80 hover:text-blue-500 transition-colors text-sm font-body"
                                         >
                                             {link.name}
-                                        </Link>
+                                        </TransitionLink>
                                     </li>
                                 ))}
                             </ul>
@@ -111,12 +111,12 @@ export default function Footer({ isLanding }: { isLanding?: boolean }) {
                             <ul className="space-y-3">
                                 {footerLinks.legal.map((link) => (
                                     <li key={link.name}>
-                                        <Link
+                                        <TransitionLink
                                             href={link.href}
                                             className="text-[#003399] dark:text-white/80 hover:text-blue-500 transition-colors text-sm font-body"
                                         >
                                             {link.name}
-                                        </Link>
+                                        </TransitionLink>
                                     </li>
                                 ))}
                             </ul>

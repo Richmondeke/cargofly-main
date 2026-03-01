@@ -2,12 +2,8 @@
 
 import { motion } from "framer-motion";
 import {
-    Package,
-    Truck,
     Plane,
     CheckCircle2,
-    MapPin,
-    Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,15 +21,6 @@ interface TrackingTimelineProps {
     currentStatus: string;
 }
 
-const statusIcons: Record<string, React.ElementType> = {
-    "Order Placed": Package,
-    "Picked Up": Package,
-    "In Transit": Truck,
-    "Departed": Plane,
-    "Arrived": MapPin,
-    "Out for Delivery": Truck,
-    "Delivered": CheckCircle2,
-};
 
 export const sampleTrackingEvents: TrackingEvent[] = [
     {
@@ -93,14 +80,12 @@ export default function TrackingTimeline({
     return (
         <div className="relative">
             {/* Timeline Line */}
-            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700" />
+            <div className="absolute left-[33px] top-6 bottom-0 w-[2px] bg-gray-100 dark:bg-navy-700" />
 
             {/* Events */}
             <div className="space-y-0">
                 {events.map((event, index) => {
-                    const Icon = statusIcons[event.status] || Package;
                     const isCurrent = event.status === currentStatus;
-                    const isLast = index === events.length - 1;
 
                     return (
                         <motion.div
@@ -108,74 +93,49 @@ export default function TrackingTimeline({
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="relative flex gap-6 pb-8 last:pb-0"
+                            className="relative flex gap-6 pb-12 last:pb-0 group"
                         >
-                            {/* Icon */}
-                            <div className="relative z-10">
+                            {/* Icon Pillar */}
+                            <div className="relative flex flex-col items-center">
                                 <div
                                     className={cn(
-                                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-white dark:bg-slate-800 shadow-sm",
+                                        "w-[18px] h-[18px] rounded-full flex items-center justify-center transition-all z-10",
                                         event.isCompleted
-                                            ? "bg-gold-500 shadow-lg shadow-gold-500/20"
+                                            ? "bg-navy-900 dark:bg-navy-700"
                                             : isCurrent
-                                                ? "border-2 border-gold-500 animate-pulse"
-                                                : "border border-slate-200 dark:border-slate-700"
+                                                ? "bg-gold-500 scale-125 shadow-[0_0_15px_rgba(202,138,4,0.5)]"
+                                                : "bg-gray-200 dark:bg-navy-800"
                                     )}
                                 >
-                                    <Icon
-                                        className={cn(
-                                            "w-5 h-5",
-                                            event.isCompleted
-                                                ? "text-navy-900"
-                                                : isCurrent
-                                                    ? "text-gold-500"
-                                                    : "text-slate-400 dark:text-slate-500"
-                                        )}
-                                    />
+                                    {event.isCompleted && (
+                                        <CheckCircle2 className="w-3 h-3 text-white" />
+                                    )}
+                                    {isCurrent && (
+                                        <Plane className="w-2.5 h-2.5 text-navy-900" />
+                                    )}
                                 </div>
-                                {/* Connector dot for completed */}
-                                {event.isCompleted && !isLast && (
-                                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-gold-500" />
-                                )}
                             </div>
 
                             {/* Content */}
-                            <div className="flex-1 pt-1">
-                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <div className="flex-1 -mt-1">
+                                <div className="flex flex-col mb-1">
                                     <h4
                                         className={cn(
-                                            "font-display text-lg",
-                                            event.isCompleted || isCurrent
-                                                ? "text-slate-900 dark:text-white"
-                                                : "text-slate-400 dark:text-slate-500"
+                                            "font-display text-sm font-bold uppercase tracking-widest",
+                                            isCurrent ? "text-navy-900 dark:text-white" : "text-gray-400"
                                         )}
                                     >
                                         {event.status}
                                     </h4>
-                                    {isCurrent && (
-                                        <span className="px-2 py-0.5 rounded-full bg-gold-500/10 text-gold-600 dark:text-gold-400 text-xs font-bold uppercase tracking-wider">
-                                            Current
-                                        </span>
-                                    )}
+                                    <p className="text-[11px] text-gray-400 font-medium font-body mt-0.5">
+                                        {event.timestamp} — {event.location}
+                                    </p>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2 font-body">
-                                    <MapPin className="w-3.5 h-3.5" />
-                                    <span>{event.location}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2 font-body">
-                                    <Clock className="w-3.5 h-3.5" />
-                                    <span>{event.timestamp}</span>
-                                </div>
-                                <p
-                                    className={cn(
-                                        "text-sm font-body",
-                                        event.isCompleted || isCurrent
-                                            ? "text-slate-600 dark:text-slate-300"
-                                            : "text-slate-400 dark:text-slate-500"
-                                    )}
-                                >
-                                    {event.description}
-                                </p>
+                                {isCurrent && (
+                                    <div className="mt-2 text-[10px] font-bold py-1 px-2 bg-gray-100 dark:bg-navy-700 rounded-lg inline-block text-navy-900 dark:text-white uppercase tracking-tighter">
+                                        Current Status
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     );

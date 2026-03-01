@@ -283,7 +283,7 @@ export async function getActiveShipments(userId?: string, role?: string, statusF
             eta,
             price: data.price,
             package: data.package,
-            category: data.serviceType || "General",
+            category: data.service || "General",
             weight: data.package?.weight ? `${data.package.weight}kg` : "N/A",
             createdAt: data.createdAt,
             estimatedDelivery: data.estimatedDelivery

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import TransitionLink from "@/components/TransitionLink";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -53,7 +53,7 @@ export default function Navbar() {
             <div className="container mx-auto px-spacing-06 flex items-center justify-between">
                 {/* Logo */}
                 {/* Logo */}
-                <Link href="/" className="relative z-50 flex items-center gap-2 group">
+                <TransitionLink href="/" className="relative z-50 flex items-center gap-2 group">
                     <div className="relative w-32 md:w-40 h-10 md:h-12">
                         {/* Dark Mode Logo (White) - Visible when dark OR when transparent navbar on dark hero (default) */}
                         <Image
@@ -81,7 +81,7 @@ export default function Navbar() {
                             priority
                         />
                     </div>
-                </Link>
+                </TransitionLink>
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-8">
@@ -91,7 +91,7 @@ export default function Navbar() {
                                 pathname === link.href ||
                                 (link.href !== "/" && pathname.startsWith(link.href));
                             return (
-                                <Link
+                                <TransitionLink
                                     key={link.name}
                                     href={link.href}
                                     className={cn(
@@ -110,7 +110,7 @@ export default function Navbar() {
                                             className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gold-500 shadow-[0_0_10px_rgba(202,138,4,0.5)]"
                                         />
                                     )}
-                                </Link>
+                                </TransitionLink>
                             );
                         })}
                     </div>
@@ -130,7 +130,7 @@ export default function Navbar() {
                             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                         </button>
 
-                        <Link
+                        <TransitionLink
                             href="/login"
                             className={cn(
                                 "text-sm font-body transition-colors border border-white/30 px-6 py-2 rounded-lg hover:bg-white/10",
@@ -140,10 +140,10 @@ export default function Navbar() {
                             )}
                         >
                             Log in
-                        </Link>
+                        </TransitionLink>
                     </div>
 
-                    <Link href="/ship">
+                    <TransitionLink href="/ship">
                         <motion.button
                             whileHover={{ y: -2 }}
                             whileTap={{ scale: 0.98 }}
@@ -152,7 +152,7 @@ export default function Navbar() {
                             <span className="relative z-10">Ship Now</span>
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                         </motion.button>
-                    </Link>
+                    </TransitionLink>
                 </div>
 
                 {/* Mobile Menu Button - Moved right */}
@@ -188,13 +188,13 @@ export default function Navbar() {
                             animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                             transition={{ delay: i * 0.1 }}
                         >
-                            <Link
+                            <TransitionLink
                                 href={link.href}
                                 onClick={() => setIsOpen(false)}
                                 className="font-display text-4xl text-navy-900 dark:text-white hover:text-gold-500 dark:hover:text-gold-400 transition-colors"
                             >
                                 {link.name}
-                            </Link>
+                            </TransitionLink>
                         </motion.div>
                     ))}
                     <motion.div
@@ -203,28 +203,28 @@ export default function Navbar() {
                         transition={{ delay: 0.5 }}
                         className="flex flex-col items-center gap-6 mt-4"
                     >
-                        <Link
+                        <TransitionLink
                             href="/login"
                             onClick={() => setIsOpen(false)}
                             className="font-display text-2xl text-navy-900/80 dark:text-white/80 hover:text-navy-900 dark:hover:text-white transition-colors"
                         >
                             Sign In
-                        </Link>
-                        <Link
+                        </TransitionLink>
+                        <TransitionLink
                             href="/register"
                             onClick={() => setIsOpen(false)}
                             className="font-display text-2xl text-navy-900/80 dark:text-white/80 hover:text-navy-900 dark:hover:text-white transition-colors"
                         >
                             Create Account
-                        </Link>
+                        </TransitionLink>
 
-                        <Link
+                        <TransitionLink
                             href="/ship"
                             onClick={() => setIsOpen(false)}
                             className="mt-4 bg-gold-500 text-navy-900 px-8 py-4 rounded-full font-bold uppercase tracking-wider hover:shadow-lg transition-all"
                         >
                             Ship Now
-                        </Link>
+                        </TransitionLink>
                     </motion.div>
                 </motion.div>
             </div>

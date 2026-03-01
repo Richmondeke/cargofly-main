@@ -5,22 +5,18 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
     Package,
-    MapPin,
-    Clock,
-    CheckCircle2,
-    Copy,
-    Check,
     Plane,
     Info,
+    Share2,
+    Printer,
+    Search,
 } from "lucide-react";
-import TrackingWidget from "@/components/TrackingWidget";
 import TrackingTimeline, { TrackingEvent as UITrackingEvent } from "@/components/TrackingTimeline";
-import { cn } from "@/lib/utils";
+import FlightPath from "@/components/FlightPath";
 import {
     getShipmentByTracking,
     getTrackingEvents,
     Shipment,
-    TrackingEvent as DBTrackingEvent,
     getStatusDisplay,
     formatTimestamp
 } from "@/lib/firestore";
@@ -32,7 +28,6 @@ function TrackPageContent() {
     const [events, setEvents] = useState<UITrackingEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const id = searchParams.get("id");
@@ -60,7 +55,7 @@ function TrackPageContent() {
                     // Convert Firestore events to UI events
                     // Firestore returns Descending (Newest First). 
                     // We reverse to show Chronological (Oldest First) to match Timeline flow.
-                    const flowEvents = eventsData.reverse().map((e: any) => ({
+                    const flowEvents = eventsData.reverse().map((e: unknown) => ({
                         id: e.id,
                         status: getStatusDisplay(e.status) || e.status,
                         location: e.location,
@@ -110,7 +105,7 @@ function TrackPageContent() {
         }
     };
 
-    const formatDate = (timestamp: any) => {
+    const formatDate = (timestamp: unknown) => {
         if (!timestamp) return "Pending";
         // Handle Firestore Timestamp or Date
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -134,32 +129,52 @@ function TrackPageContent() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-12"
+                    className="mb-8"
                 >
-                    <span className="inline-block py-1 px-3 rounded-full bg-gold-500/10 text-gold-400 text-xs font-bold tracking-[0.2em] uppercase mb-6 font-body">
-                        Track Shipment
-                    </span>
-                    <h1 className="font-display text-4xl md:text-5xl text-navy-900 dark:text-white mb-4">
-                        Track Your
-                        <span className="block italic text-navy-900/80 dark:text-white/80">Package</span>
-                    </h1>
-                    <p className="text-navy-900/60 dark:text-white/60 max-w-xl mx-auto font-body">
-                        Enter your tracking number to get real-time updates on your shipment&apos;s
-                        location and status.
-                    </p>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="flex-1 max-w-2xl">
+                            <div className="relative group">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-gold-500 transition-colors" />
+                                <input
+                                    type="text"
+                                    placeholder="Track another Shipment ID (e.g. CF-8829341029)"
+                                    className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white dark:bg-navy-800/50 border border-gray-200 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 transition-all text-navy-900 dark:text-white font-body"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            const val = (e.target as HTMLInputElement).value;
+                                            if (val) setTrackingId(val);
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-navy-800 border border-gray-200 dark:border-navy-700 text-navy-900 dark:text-white hover:bg-gray-200 dark:hover:bg-navy-700 transition-colors text-sm font-bold font-body">
+                                <Share2 className="w-4 h-4" />
+                                Share
+                            </button>
+                            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-navy-900 dark:bg-gold-500 text-white dark:text-navy-900 hover:bg-navy-800 dark:hover:bg-gold-400 transition-colors text-sm font-bold font-body">
+                                <Printer className="w-4 h-4" />
+                                Print
+                            </button>
+                        </div>
+                    </div>
                 </motion.div>
 
-                {/* Tracking Widget */}
+                {/* Shipment Info Summary */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="max-w-2xl mx-auto mb-16"
+                    className="mb-12"
                 >
-                    <TrackingWidget
-                        variant="page"
-                        onTrack={(id) => setTrackingId(id)}
-                    />
+                    <h1 className="font-display text-4xl text-navy-900 dark:text-white mb-2">
+                        Shipment Tracking
+                    </h1>
+                    <div className="flex items-center gap-2 text-navy-900/60 dark:text-white/60 font-body">
+                        <span>Tracking ID:</span>
+                        <span className="text-navy-900 dark:text-white font-bold">{trackingId || "---"}</span>
+                    </div>
                 </motion.div>
 
                 {/* Loading State */}
@@ -184,155 +199,95 @@ function TrackPageContent() {
 
                 {/* Results */}
                 {shipment && !loading && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="grid lg:grid-cols-3 gap-8"
-                    >
-                        {/* Main Status Card */}
-                        <div className="lg:col-span-2 space-y-8">
-                            <div className="glass-panel p-8 rounded-3xl relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 duration-500 group-hover:bg-gold-500/20" />
-
-                                <div className="relative z-10">
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <h2 className="font-display text-3xl text-white">
-                                                    {shipment.status.replace(/_/g, " ").toUpperCase()}
-                                                </h2>
-                                                <div className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold uppercase tracking-wider">
-                                                    Active
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-white/40 font-body">
-                                                <span>Tracking ID:</span>
-                                                <span className="text-white font-mono tracking-wider">
-                                                    {shipment.trackingNumber}
-                                                </span>
-                                                <button
-                                                    onClick={handleCopy}
-                                                    className="p-1 hover:text-gold-400 transition-colors"
-                                                >
-                                                    {copied ? (
-                                                        <Check className="w-4 h-4 text-green-400" />
-                                                    ) : (
-                                                        <Copy className="w-4 h-4" />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm text-white/40 font-body mb-1">
-                                                Estimated Delivery
-                                            </p>
-                                            <p className="font-display text-xl text-gold-400">
-                                                {formatDate(shipment.estimatedDelivery)}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Progress Bar */}
-                                    <div className="mb-8 relative">
-                                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${getProgress(shipment.status)}%` }}
-                                                transition={{ duration: 1, ease: "easeOut" }}
-                                                className="h-full bg-gold-500"
-                                            />
-                                        </div>
-                                        <div
-                                            className="absolute top-1/2 -translate-y-1/2 -ml-3"
-                                            style={{ left: `${getProgress(shipment.status)}%` }}
-                                        >
-                                            <div className="w-6 h-6 rounded-full bg-gold-500 border-4 border-navy-900 shadow-[0_0_20px_rgba(202,138,4,0.5)] flex items-center justify-center">
-                                                <Plane className="w-3 h-3 text-navy-900" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Route Info */}
-                                    <div className="grid grid-cols-2 gap-8 py-8 border-t border-white/5">
-                                        <div>
-                                            <p className="text-sm text-white/40 font-body mb-2 flex items-center gap-2">
-                                                <CheckCircle2 className="w-4 h-4 text-gold-500" />
-                                                From
-                                            </p>
-                                            <p className="text-xl text-white font-display mb-1">
-                                                {shipment.sender.city}, {shipment.sender.country}
-                                            </p>
-                                            <p className="text-sm text-white/40 font-body">
-                                                {formatDate(shipment.createdAt)}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm text-white/40 font-body mb-2 flex items-center justify-end gap-2">
-                                                <MapPin className="w-4 h-4 text-gold-500" />
-                                                Destination
-                                            </p>
-                                            <p className="text-xl text-white font-display mb-1">
-                                                {shipment.recipient.city}, {shipment.recipient.country}
-                                            </p>
-                                            <p className="text-sm text-white/40 font-body">
-                                                {formatDate(shipment.estimatedDelivery)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div className="grid lg:grid-cols-12 gap-8 items-start">
+                        {/* Left Column: Timeline */}
+                        <div className="lg:col-span-4 lg:sticky lg:top-32">
+                            <div className="bg-white dark:bg-navy-800/50 rounded-3xl p-8 border border-gray-100 dark:border-navy-700">
+                                <h3 className="font-display text-xl text-navy-900 dark:text-white mb-8">
+                                    Status Timeline
+                                </h3>
+                                <TrackingTimeline
+                                    events={events}
+                                    currentStatus={getStatusDisplay(shipment.status as unknown) || shipment.status}
+                                />
                             </div>
-
-                            {/* Timeline */}
-                            <TrackingTimeline
-                                events={events}
-                                currentStatus={getStatusDisplay(shipment.status as any) || shipment.status}
-                            />
                         </div>
 
-                        {/* Shipment Details Sidebar */}
-                        <div className="space-y-6">
-                            <div className="glass-panel p-6 rounded-3xl">
-                                <h3 className="font-display text-lg text-white mb-6 flex items-center gap-2">
+                        {/* Right Column: Details & Map */}
+                        <div className="lg:col-span-8 space-y-8">
+                            {/* Cargo Info Card */}
+                            <div className="bg-navy-900 rounded-3xl overflow-hidden text-white shadow-2xl">
+                                <div className="bg-navy-800/50 px-8 py-4 border-b border-white/5 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase mb-1">Cargo Information</p>
+                                        <h3 className="font-display text-xl">Shipment Details</h3>
+                                    </div>
                                     <Package className="w-5 h-5 text-gold-500" />
-                                    Shipment Details
-                                </h3>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center py-3 border-b border-white/5">
-                                        <span className="text-white/40 text-sm font-body">Service</span>
-                                        <span className="text-white font-body capitalize">{shipment.service.replace(/_/g, " ")}</span>
+                                </div>
+                                <div className="p-8">
+                                    <div className="grid md:grid-cols-2 gap-y-10 gap-x-12 mb-10">
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Origin</p>
+                                            <p className="text-lg font-display">{shipment.sender.city}, {shipment.sender.country}</p>
+                                        </div>
+                                        <div className="space-y-1 md:text-right">
+                                            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Destination</p>
+                                            <p className="text-lg font-display">{shipment.recipient.city}, {shipment.recipient.country}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Est. Delivery</p>
+                                            <p className="text-lg font-display text-gold-400">{formatDate(shipment.estimatedDelivery)}</p>
+                                        </div>
+                                        <div className="space-y-1 md:text-right">
+                                            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Weight</p>
+                                            <p className="text-lg font-display">{shipment.package.weight} kg</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Cargo Type</p>
+                                            <p className="text-lg font-display">{shipment.package.description}</p>
+                                        </div>
+                                        <div className="space-y-1 md:text-right">
+                                            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Service Level</p>
+                                            <div className="flex items-center md:justify-end gap-1 text-gold-400">
+                                                <span className="text-lg font-display">+ PRIORITY</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center py-3 border-b border-white/5">
-                                        <span className="text-white/40 text-sm font-body">Weight</span>
-                                        <span className="text-white font-body">{shipment.package.weight} kg</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-3 border-b border-white/5">
-                                        <span className="text-white/40 text-sm font-body">Dimensions</span>
-                                        <span className="text-white font-body">
-                                            {shipment.package.dimensions.length}x{shipment.package.dimensions.width}x{shipment.package.dimensions.height} cm
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-3 border-b border-white/5">
-                                        <span className="text-white/40 text-sm font-body">Contents</span>
-                                        <span className="text-white font-body">{shipment.package.description}</span>
+
+                                    <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                        <p className="text-gray-400 font-mono text-sm tracking-wider">
+                                            Invoice #INV-2023-8829
+                                        </p>
+                                        <button className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition-colors text-sm font-bold font-body">
+                                            View Invoice
+                                        </button>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Support Card */}
-                            <div className="p-6 rounded-3xl bg-gold-500/10 border border-gold-500/20">
-                                <h3 className="font-display text-lg text-white mb-2">
-                                    Need Help?
-                                </h3>
-                                <p className="text-sm text-white/60 font-body mb-4">
-                                    Our support team is available 24/7 to assist you with your shipment.
-                                </p>
-                                <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors font-body text-sm font-bold uppercase tracking-wider">
-                                    Contact Support
-                                </button>
+                            {/* Flight Path / Map Visual */}
+                            <div className="bg-white dark:bg-navy-800/50 rounded-3xl p-8 border border-gray-100 dark:border-navy-700">
+                                <div className="flex items-center justify-between mb-8">
+                                    <h3 className="font-display text-xl text-navy-900 dark:text-white flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600">
+                                            <Plane className="w-4 h-4" />
+                                        </div>
+                                        Real-time Flight Path
+                                    </h3>
+                                    <div className="px-3 py-1 rounded-full bg-orange-500/10 text-orange-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                                        Live Tracking
+                                    </div>
+                                </div>
+                                <div className="aspect-[2/1] bg-sky-100 dark:bg-navy-900 rounded-2xl overflow-hidden relative">
+                                    <FlightPath
+                                        origin={shipment.sender.city}
+                                        destination={shipment.recipient.city}
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 )}
             </div>
         </div>

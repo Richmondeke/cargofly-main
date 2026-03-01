@@ -19,7 +19,7 @@ const staggerContainer: Variants = {
   }
 };
 
-export default function Home() {
+export default function LandingPageVariantC() {
   const router = useRouter();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'track' | 'book'>('track');

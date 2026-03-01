@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -14,6 +15,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import AuthLayout from "@/components/auth/AuthLayout";
 
 export default function LoginPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const { signIn, signInWithGoogle } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -22,6 +25,15 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const handleRedirect = () => {
+        const redirect = searchParams.get("redirect");
+        if (redirect) {
+            router.push(redirect);
+        } else {
+            router.push("/dashboard");
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -29,9 +41,8 @@ export default function LoginPage() {
 
         try {
             await signIn(email, password);
-            // Redirect handled by auth state
-            window.location.href = "/dashboard";
-        } catch (err: any) {
+            handleRedirect();
+        } catch (err) {
             console.error("Login error:", err);
             setError("Invalid email or password. Please try again.");
         } finally {
@@ -131,7 +142,7 @@ export default function LoginPage() {
                     <Checkbox
                         id="remember"
                         checked={rememberMe}
-                        onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                        onChange={(e) => setRememberMe(e.target.checked)}
                     />
                     <label htmlFor="remember" className="ml-2 text-sm text-slate-600 cursor-pointer">
                         Remember me for 30 days
@@ -171,7 +182,7 @@ export default function LoginPage() {
                     try {
                         setIsLoading(true);
                         await signInWithGoogle();
-                        window.location.href = "/dashboard";
+                        handleRedirect();
                     } catch (error) {
                         console.error("Google Auth Error:", error);
                         setError("Failed to sign in with Google.");

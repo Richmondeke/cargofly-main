@@ -15,11 +15,13 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         return <>{children}</>;
     }
 
+    const isLanding = pathname === '/' || pathname === '/b' || pathname === '/c';
+
     return (
-        <div className={cn((pathname === '/' || pathname === '/b') && "bg-[#003399] bg-motif min-h-screen")}>
+        <div className={cn(isLanding && "bg-[#003399] bg-motif min-h-screen")}>
             <Navbar />
             <main>{children}</main>
-            <Footer isLanding={pathname === '/' || pathname === '/b'} />
+            <Footer isLanding={isLanding} />
             <AskCargoflyWidget />
         </div>
     );
