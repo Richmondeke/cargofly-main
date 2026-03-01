@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+
 import localFont from "next/font/local";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -12,7 +12,7 @@ const humanist = localFont({
   display: "swap",
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Cargofly | Caverton Cargo Division - Premium Aviation Logistics",
   description:
     "The pinnacle of West African aviation logistics. Premium cargo services, real-time tracking, and white-glove delivery for discerning clients worldwide.",

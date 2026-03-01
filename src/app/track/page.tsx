@@ -28,6 +28,7 @@ function TrackPageContent() {
     const [events, setEvents] = useState<UITrackingEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const id = searchParams.get("id");
@@ -55,7 +56,7 @@ function TrackPageContent() {
                     // Convert Firestore events to UI events
                     // Firestore returns Descending (Newest First). 
                     // We reverse to show Chronological (Oldest First) to match Timeline flow.
-                    const flowEvents = eventsData.reverse().map((e: TrackingEvent) => ({
+                    const flowEvents = eventsData.reverse().map((e: any) => ({
                         id: e.id,
                         status: getStatusDisplay(e.status) || e.status,
                         location: e.location,
