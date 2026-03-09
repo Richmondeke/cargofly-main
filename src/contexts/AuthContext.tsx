@@ -90,8 +90,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (user) {
                 const profile = await createUserProfile(user);
                 setUserProfile(profile);
+
+                // Synchronize Firebase auth state with server-side session cookie
+                try {
+                    const idToken = await user.getIdToken();
+                    await fetch('/api/auth/session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idToken })
+                    });
+                } catch (error) {
+                    console.error("Failed to sync session cookie:", error);
+                }
             } else {
                 setUserProfile(null);
+
+                // Clear session cookie
+                try {
+                    await fetch('/api/auth/session', { method: 'DELETE' });
+                } catch (error) {
+                    console.error("Failed to clear session cookie:", error);
+                }
             }
 
             setLoading(false);
