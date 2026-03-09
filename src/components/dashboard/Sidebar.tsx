@@ -96,7 +96,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                             <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Management</span>
                         </div>
                         <SidebarLink to="/dashboard/admin" icon="admin_panel_settings" label="Operations" active={pathname === '/dashboard/admin'} onClick={onClose} />
-                        <SidebarLink to="/dashboard/admin/users" icon="group" label="Users" active={pathname === '/dashboard/admin/users'} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/support" icon="confirmation_number" label="Tickets" active={pathname?.startsWith('/dashboard/admin/support')} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/rates" icon="currency_exchange" label="Shipping Rates" active={pathname === '/dashboard/admin/rates'} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/blog" icon="article" label="Blog Posts" active={pathname?.startsWith('/dashboard/admin/blog')} onClick={onClose} />
