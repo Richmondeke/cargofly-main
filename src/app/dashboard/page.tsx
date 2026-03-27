@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
-import EmptyState from '@/components/common/EmptyState';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -13,87 +12,43 @@ import {
     DashboardShipment,
     formatTimestamp,
 } from '@/lib/dashboard-service';
-import RiveAnimation from '@/components/ui/RiveAnimation';
-import { useNotifications } from '@/contexts/NotificationContext';
 import { ShipmentDetailsDrawer } from '@/components/dashboard/ShipmentDetailsDrawer';
 import { Eye } from 'lucide-react';
 
+// Modals
+import QuoteModal from '@/components/dashboard/QuoteModal';
+import TrackModal from '@/components/dashboard/TrackModal';
+import ReportModal from '@/components/dashboard/ReportModal';
 
-// --- Components ---
-
-function TrackOrderModal({ onClose }: { onClose: () => void }) {
-    const [trackingId, setTrackingId] = useState('');
-    const [error, setError] = useState('');
-    const router = useRouter();
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!trackingId.trim()) {
-            setError('Please enter a tracking ID');
-            return;
-        }
-        router.push(`/dashboard/track/${trackingId.trim()}`);
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-navy-900 rounded-2xl w-full max-w-sm p-6 shadow-xl border border-slate-200 dark:border-navy-700 animate-in fade-in zoom-in duration-200">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Track Order</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Enter your tracking ID to see shipment details.</p>
-
-                {error && (
-                    <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm rounded-lg">
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tracking ID</label>
-                        <input
-                            type="text"
-                            autoFocus
-                            value={trackingId}
-                            onChange={(e) => setTrackingId(e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none uppercase placeholder:normal-case"
-                            placeholder="e.g., CF-12345"
-                        />
-                    </div>
-
-                    <div className="flex gap-3 mt-6">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 py-2 rounded-lg border border-slate-300 dark:border-navy-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-800 font-medium transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="flex-1 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 font-medium transition-colors shadow-sm"
-                        >
-                            Track
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
+// Status icon helper
+function getStatusIcon(status: string) {
+    const s = status?.toLowerCase() || '';
+    if (s.includes('transit')) return { icon: 'flight', bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-600' };
+    if (s.includes('processing') || s.includes('pending')) return { icon: 'box_edit', bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600' };
+    if (s.includes('delivered') || s.includes('arrived')) return { icon: 'warehouse', bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600' };
+    if (s.includes('customs') || s.includes('hold')) return { icon: 'security', bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600' };
+    return { icon: 'local_shipping', bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-600' };
 }
 
 export default function DashboardPage() {
     const { user, userProfile, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
     const [stats, setStats] = useState({ totalShipments: 0, inTransit: 0, delivered: 0, totalRevenue: 0, pending: 0 });
     const [shipments, setShipments] = useState<DashboardShipment[]>([]);
-    const [showTrackModal, setShowTrackModal] = useState(false);
-    const { toggleSidebar, unreadCount } = useNotifications();
 
     // Drawer State
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedShipment, setSelectedShipment] = useState<DashboardShipment | null>(null);
 
+    // Quick Action Modal States
+    const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+    const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
     useEffect(() => {
+        setMounted(true);
         if (authLoading || !user) return;
 
         async function loadDashboardData() {
@@ -114,180 +69,291 @@ export default function DashboardPage() {
         loadDashboardData();
     }, [authLoading, user]);
 
+    const activeShipments = shipments.filter(s => {
+        const st = s.status?.toLowerCase() || '';
+        return st.includes('transit') || st.includes('processing') || st.includes('customs');
+    });
+
+    const recentBookings = shipments.slice(0, 4);
+
     return (
         <div className="flex-1 overflow-y-auto bg-[#F8FAFC] dark:bg-background-dark min-h-full">
-            {showTrackModal && <TrackOrderModal onClose={() => setShowTrackModal(false)} />}
+            <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
 
-            <div className="p-4 sm:p-8">
-                {/* Header - Spacing: 32px bottom */}
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Dashboard</h1>
-                        <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">
-                            Welcome back {userProfile?.displayName ? userProfile.displayName.split(' ')[0] : 'Richmond'}
+                {/* Announcement Banner */}
+                <section className="relative overflow-hidden rounded-xl bg-slate-900 p-6 sm:p-8 flex items-center justify-between group">
+                    <div className="z-10 relative space-y-3">
+                        <span className="inline-block px-3 py-1 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded">
+                            Route Expansion
+                        </span>
+                        <h2 className="text-white text-2xl sm:text-3xl font-bold leading-tight">
+                            New Route to Singapore <br className="hidden sm:block" />
+                            Starting Next Month
+                        </h2>
+                        <p className="text-slate-300 max-w-md text-sm">
+                            Book your cargo space early to take advantage of introductory low rates for our new daily service.
                         </p>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={toggleSidebar}
-                            className="relative p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-                        >
-                            <span className="material-symbols-outlined text-[24px]">notifications</span>
-                            {unreadCount > 0 && (
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[#F8FAFC]"></span>
-                            )}
-                        </button>
-                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
-                            {(userProfile?.displayName?.[0] || 'BO').toUpperCase()}
+                        <div className="flex gap-3 pt-1 flex-wrap">
+                            <Link href="/dashboard/new-booking">
+                                <button className="bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:brightness-110 transition-all shadow-lg shadow-primary/20">
+                                    Book This Route
+                                </button>
+                            </Link>
+                            <button className="bg-white/10 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-white/20 transition-all">
+                                Learn More
+                            </button>
                         </div>
                     </div>
-                </div>
+                    <div
+                        className="absolute right-0 top-0 h-full w-1/3 sm:w-2/5 opacity-20 pointer-events-none transition-transform group-hover:scale-105 duration-700"
+                        style={{
+                            backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCj32WxKMQJJjPpeGLU41bKxnpgDqvVvH4DxU94dpj2u-QSOXOb9gIIpMEB7z0msS40fh5EnRzayghD3ChwBJe9nf4XDp7EVafYqL_aqT8k3TcP5batWJQvKvh9S8P9ExMPhbcv48N6ErQ2vyR_8dz8CwgI6BzbjwLOjnq8RdpPCzhlDqDUteub66JOuj0mmXCNrM_zWbbj7JLEC2TgGH63pKmvYjgL4HVwHMP1EQryzNajyDK1YxojNTBGclCFA9V6Wt2L1FmjTUmj')",
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                        }}
+                    />
+                </section>
 
-                {/* Banner - Height 220px */}
-                <div className="flex flex-col lg:flex-row h-auto lg:h-[220px] rounded-[24px] overflow-hidden shadow-lg mb-8">
-                    {/* Left Side - Dark Blue */}
-                    <div className="flex-1 bg-[#003399] p-6 sm:p-10 flex flex-col justify-center relative">
-                        <h2 className="text-2xl sm:text-[32px] font-bold text-white mb-2">In-Transit</h2>
-                        <p className="text-[14px] text-blue-100 mb-6 max-w-sm">
-                            Active shipments currently moving across our network.
-                        </p>
+                {/* Quick Action Bar */}
+                <section className="flex flex-wrap gap-3 items-center justify-between">
+                    <div className="flex gap-3 flex-wrap">
                         <Link href="/dashboard/new-booking">
-                            <button className="bg-[#FFD700] hover:bg-[#FFC000] text-navy-900 px-6 py-3 rounded-xl font-bold text-[14px] transition-colors w-fit">
-                                Create Order
+                            <button className="flex items-center gap-2 bg-primary text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all text-sm">
+                                <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                                New Shipment
                             </button>
                         </Link>
+                        <button 
+                            onClick={() => setIsQuoteModalOpen(true)}
+                            className="flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-5 py-3 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">request_quote</span>
+                            Request Quote
+                        </button>
                     </div>
-
-                    {/* Right Side - Image */}
-                    <div className="w-full lg:w-[45%] bg-blue-50 relative h-[220px] lg:h-full">
-                        <div
-                            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                            style={{ backgroundImage: 'url(/images/illustrations/aircraft_hangar.jpg)' }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#003399]/10 to-transparent"></div>
+                    <div className="flex gap-3 flex-wrap">
+                        <button 
+                            onClick={() => setIsTrackModalOpen(true)}
+                            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-semibold px-4 py-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-sm"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">track_changes</span>
+                            Track Shipment
+                        </button>
+                        <button 
+                            onClick={() => setIsReportModalOpen(true)}
+                            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-semibold px-4 py-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-sm"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">download</span>
+                            Download Report
+                        </button>
                     </div>
-                </div>
+                </section>
 
-                {/* Stats Cards - Height 118px auto on mobile, Radius 16px, Padding 24px */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                    {/* Total Shipments - Blue */}
-                    <div className="bg-[#003399] p-[24px] rounded-[16px] shadow-sm flex flex-col justify-between h-[118px]">
-                        <div className="flex justify-between items-start">
-                            <span className="text-[14px] text-blue-100 font-medium">Total Shipments</span>
-                            <span className="material-symbols-outlined text-blue-200 text-lg">info</span>
+                {/* Stats Cards */}
+                <section className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    {/* Total Shipments */}
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Shipments</p>
+                            <h3 className="text-3xl font-bold mt-1 text-slate-900 dark:text-white">
+                                {(!mounted || loading) ? <span className="animate-pulse text-slate-300">—</span> : stats.totalShipments}
+                                <span className="text-sm font-normal text-slate-400 ml-1">All time</span>
+                            </h3>
+                            <div className="mt-2 flex items-center text-emerald-500 text-xs font-bold">
+                                <span className="material-symbols-outlined text-base">trending_up</span>
+                                <span className="ml-1">Active network</span>
+                            </div>
                         </div>
-                        <p className="text-[32px] font-bold text-white">{stats.totalShipments}</p>
-                    </div>
-
-                    {/* Pending Approvals - White with specific border */}
-                    <div className="bg-white dark:bg-surface-dark p-[24px] rounded-[16px] border border-[#EFEFEF] dark:border-slate-700 flex flex-col justify-between h-[118px] gap-[12px]">
-                        <div className="flex justify-between items-start">
-                            <span className="text-[14px] text-slate-600 dark:text-slate-300 font-medium">Pending Approvals</span>
-                            <span className="material-symbols-outlined text-slate-400 text-lg">info</span>
+                        <div className="size-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-blue-600">
+                            <span className="material-symbols-outlined text-3xl">weight</span>
                         </div>
-                        <p className="text-[32px] font-bold text-slate-900 dark:text-white">{(stats as any).pending || 0}</p>
                     </div>
 
-                    {/* Delivered - White with specific border */}
-                    <div className="bg-white dark:bg-surface-dark p-[24px] rounded-[16px] border border-[#EFEFEF] dark:border-slate-700 flex flex-col justify-between h-[118px] gap-[12px]">
-                        <div className="flex justify-between items-start">
-                            <span className="text-[14px] text-slate-600 dark:text-slate-300 font-medium">Delivered</span>
-                            <span className="material-symbols-outlined text-slate-400 text-lg">info</span>
+                    {/* In Transit */}
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Shipments</p>
+                            <h3 className="text-3xl font-bold mt-1 text-slate-900 dark:text-white">
+                                {(!mounted || loading) ? <span className="animate-pulse text-slate-300">—</span> : stats.inTransit}
+                                <span className="text-sm font-normal text-slate-400 ml-1">In Transit</span>
+                            </h3>
+                            <div className="mt-2 flex items-center text-primary text-xs font-bold">
+                                <span className="material-symbols-outlined text-base">schedule</span>
+                                <span className="ml-1">Real-time tracking</span>
+                            </div>
                         </div>
-                        <p className="text-[32px] font-bold text-slate-900 dark:text-white">{stats.delivered}</p>
-                    </div>
-
-                    {/* In Transit - Light Blue */}
-                    <div className="bg-[#DBEAFE] dark:bg-blue-900/30 p-[24px] rounded-[16px] shadow-sm flex flex-col justify-between h-[118px]">
-                        <div className="flex justify-between items-start">
-                            <span className="text-[14px] text-slate-700 dark:text-blue-200 font-medium">In Transit</span>
-                            <span className="material-symbols-outlined text-slate-500 dark:text-blue-300 text-lg">info</span>
+                        <div className="size-14 bg-orange-50 dark:bg-orange-900/20 rounded-2xl flex items-center justify-center text-primary">
+                            <span className="material-symbols-outlined text-3xl">local_shipping</span>
                         </div>
-                        <p className="text-[32px] font-bold text-slate-900 dark:text-white">{stats.inTransit}</p>
                     </div>
-                </div>
 
-                {/* Shipping History Table */}
-                <div className="bg-white dark:bg-surface-dark rounded-[24px] p-4 sm:p-8 shadow-sm">
-                    <h3 className="text-[18px] font-bold text-slate-900 dark:text-white mb-6">Shipping History</h3>
+                    {/* Pending / Quotes */}
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending</p>
+                            <h3 className="text-3xl font-bold mt-1 text-slate-900 dark:text-white">
+                                {(!mounted || loading) ? <span className="animate-pulse text-slate-300">—</span> : ((stats as any).pending || 0)}
+                                <span className="text-sm font-normal text-slate-400 ml-1">Awaiting Action</span>
+                            </h3>
+                            <div className="mt-2 flex items-center text-slate-400 text-xs font-bold">
+                                <span className="material-symbols-outlined text-base">pending</span>
+                                <span className="ml-1">Needs attention</span>
+                            </div>
+                        </div>
+                        <div className="size-14 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-600 dark:text-slate-300">
+                            <span className="material-symbols-outlined text-3xl">request_quote</span>
+                        </div>
+                    </div>
+                </section>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="text-[12px] text-slate-500 font-medium border-b border-slate-100 dark:border-slate-700">
-                                <tr>
-                                    <th className="pb-4 pl-2 font-normal">Shipping ID</th>
-                                    <th className="pb-4 font-normal">Date</th>
-                                    <th className="pb-4 font-normal">Origin</th>
-                                    <th className="pb-4 font-normal">Destination</th>
-                                    <th className="pb-4 font-normal">ETA</th>
-                                    <th className="pb-4 font-normal">Status</th>
-                                    <th className="pb-4 font-normal">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-[14px]">
-                                {loading ? (
-                                    [1, 2, 3].map((i) => (
-                                        <tr key={i}>
-                                            <td colSpan={7} className="py-4">
-                                                <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded animate-pulse"></div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : shipments.length > 0 ? (
-                                    shipments.slice(0, 5).map((s) => (
-                                        <tr key={s.id} className="border-b border-slate-50 dark:border-slate-800 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                            <td className="py-5 pl-2 font-medium text-slate-900 dark:text-white">{s.trackingNumber || s.id}</td>
-                                            <td className="py-5 text-slate-600 dark:text-slate-300">{s.createdAt ? formatTimestamp(s.createdAt) : 'N/A'}</td>
-                                            <td className="py-5 text-slate-600 dark:text-slate-300">{s.origin}</td>
-                                            <td className="py-5 text-slate-600 dark:text-slate-300">{s.destination}</td>
-                                            <td className="py-5 text-slate-600 dark:text-slate-300">{s.eta}</td>
-                                            <td className="py-5">
-                                                <StatusBadge status={s.status} />
-                                            </td>
-                                            <td className="py-5 flex items-center gap-2">
-                                                <Link href={`/dashboard/track/${s.id}`}>
-                                                    <button
-                                                        className="p-2 rounded-xl text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                                        title="Track Shipment"
-                                                    >
-                                                        <span className="material-symbols-outlined text-[18px]">map</span>
-                                                    </button>
-                                                </Link>
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedShipment(s);
-                                                        setIsDrawerOpen(true);
-                                                    }}
-                                                    className="p-2 rounded-xl text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
+                {/* Data Tables */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                    {/* Active Shipments List */}
+                    <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Active Shipments</h3>
+                            <Link href="/dashboard/shipments" className="text-primary text-sm font-semibold hover:underline">
+                                View All
+                            </Link>
+                        </div>
+                        <div className="flex-1 overflow-y-auto">
+                            {loading ? (
+                                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="p-5 flex items-center gap-4">
+                                            <div className="size-10 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />
+                                            <div className="flex-1 space-y-2">
+                                                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded animate-pulse w-1/2" />
+                                                <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded animate-pulse w-3/4" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : activeShipments.length > 0 ? (
+                                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {activeShipments.slice(0, 5).map(s => {
+                                        const statusStyle = getStatusIcon(s.status);
+                                        return (
+                                            <div
+                                                key={s.id}
+                                                className="p-5 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                                                onClick={() => { setSelectedShipment(s); setIsDrawerOpen(true); }}
+                                            >
+                                                <div className={`size-10 ${statusStyle.bg} ${statusStyle.text} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                                                    <span className="material-symbols-outlined text-[20px]">{statusStyle.icon}</span>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex justify-between items-start gap-2">
+                                                        <p className="text-sm font-bold truncate text-slate-900 dark:text-white">
+                                                            {s.trackingNumber || s.id}
+                                                        </p>
+                                                        <StatusBadge status={s.status} />
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
+                                                        <span className="font-semibold">{s.origin}</span>
+                                                        <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+                                                        <span className="font-semibold">{s.destination}</span>
+                                                        <span className="mx-1">•</span>
+                                                        <span>ETA: {s.eta || 'TBD'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="p-10 text-center text-slate-400 text-sm">
+                                    <span className="material-symbols-outlined text-4xl block mb-2 opacity-40">local_shipping</span>
+                                    No active shipments at the moment.
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Recent Bookings Table */}
+                    <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Recent Bookings</h3>
+                            <Link href="/dashboard/shipments">
+                                <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                                    <span className="material-symbols-outlined text-slate-500">filter_list</span>
+                                </button>
+                            </Link>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                                     <tr>
-                                        <td colSpan={7} className="py-4">
-                                            <EmptyState
-                                                title="No shipments found"
-                                                description="You haven't made any bookings yet."
-                                            />
-                                        </td>
+                                        <th className="px-6 py-4">Booking ID</th>
+                                        <th className="px-6 py-4">Route</th>
+                                        <th className="px-6 py-4">Weight</th>
+                                        <th className="px-6 py-4">Status</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div >
-            </div >
+                                </thead>
+                                <tbody className="text-sm divide-y divide-slate-100 dark:divide-slate-800">
+                                    {loading ? (
+                                        [1, 2, 3, 4].map(i => (
+                                            <tr key={i}>
+                                                <td colSpan={4} className="px-6 py-4">
+                                                    <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : recentBookings.length > 0 ? (
+                                        recentBookings.map(s => (
+                                            <tr
+                                                key={s.id}
+                                                className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
+                                                onClick={() => { setSelectedShipment(s); setIsDrawerOpen(true); }}
+                                            >
+                                                <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
+                                                    {s.trackingNumber ? s.trackingNumber.slice(0, 12) : s.id.slice(0, 8)}
+                                                </td>
+                                                <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                                                    {s.origin} → {s.destination}
+                                                </td>
+                                                <td className="px-6 py-4 text-slate-500">
+                                                    {s.weight || '—'}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <StatusBadge status={s.status} />
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={4} className="px-6 py-10 text-center text-slate-400 text-sm">
+                                                No bookings yet.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+            </div>
 
             <ShipmentDetailsDrawer
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
                 shipment={selectedShipment}
             />
-        </div >
+
+            {/* Quick Action Modals */}
+            <QuoteModal 
+                isOpen={isQuoteModalOpen} 
+                onClose={() => setIsQuoteModalOpen(false)} 
+            />
+            <TrackModal 
+                isOpen={isTrackModalOpen} 
+                onClose={() => setIsTrackModalOpen(false)} 
+            />
+            <ReportModal 
+                isOpen={isReportModalOpen} 
+                onClose={() => setIsReportModalOpen(false)} 
+            />
+        </div>
+        </div>
     );
 }

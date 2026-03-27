@@ -102,7 +102,7 @@ const NetworkMap = ({ locations, routes }: NetworkMapProps) => {
                         <Polyline
                             key={route.id}
                             positions={[getCoordinates(originLoc), getCoordinates(destLoc)]}
-                            pathOptions={{ color: '#3b82f6', weight: 2, opacity: 0.6, dashArray: '5, 10' }}
+                            pathOptions={{ color: '#4196FF', weight: 2, opacity: 0.8, dashArray: '8, 12' }}
                         />
                     );
                 }

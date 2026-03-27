@@ -17,6 +17,7 @@ import {
     LineChart,
     Line,
 } from 'recharts';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function AnalyticsPage() {
     const { user } = useAuth();
@@ -56,10 +57,10 @@ export default function AnalyticsPage() {
 
     return (
         <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
-            <div className="mb-8">
-                <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Analytics Dashboard</h1>
-                <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">Insights into your shipping performance and spend</p>
-            </div>
+            <DashboardHeader
+                title="Analytics Dashboard"
+                subtitle="Insights into your shipping performance and spend"
+            />
 
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

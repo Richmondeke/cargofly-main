@@ -42,7 +42,7 @@ export interface Message {
     id: string;
     senderId: string;
     senderName: string;
-    senderRole: 'customer' | 'admin';
+    senderRole: 'customer' | 'admin' | 'staff';
     content: string;
     createdAt: Date;
     attachments?: string[];

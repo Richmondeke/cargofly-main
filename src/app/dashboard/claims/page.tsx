@@ -6,6 +6,7 @@ import { getClaims, createClaim, Claim, getActiveShipments, DashboardShipment } 
 import EmptyState from '@/components/common/EmptyState';
 import { StatusPill } from '@/components/dashboard/StatusPill';
 import { motion, AnimatePresence } from 'framer-motion';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function ClaimsPage() {
     const { user } = useAuth();
@@ -81,11 +82,10 @@ export default function ClaimsPage() {
 
     return (
         <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Claims Center</h1>
-                    <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">File and track insurance claims for your shipments</p>
-                </div>
+            <DashboardHeader
+                title="Claims Center"
+                subtitle="File and track insurance claims for your shipments"
+            >
                 <button
                     onClick={() => setShowFileForm(!showFileForm)}
                     className="px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors flex items-center gap-2"
@@ -93,7 +93,7 @@ export default function ClaimsPage() {
                     <span className="material-symbols-outlined">{showFileForm ? 'close' : 'report_problem'}</span>
                     {showFileForm ? 'Cancel' : 'File a Claim'}
                 </button>
-            </div>
+            </DashboardHeader>
 
             <AnimatePresence>
                 {showFileForm && (

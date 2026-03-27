@@ -40,8 +40,8 @@ const NotificationItem = ({ notification }: { notification: Notification }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             className={`p-4 rounded-xl border mb-3 transition-all ${notification.isRead
-                ? 'bg-white/5 border-white/5 opacity-60'
-                : 'bg-white/10 border-white/10 shadow-lg'
+                ? 'bg-navy-800/20 border-white/5 opacity-60'
+                : 'bg-navy-800 border-white/10'
                 }`}
             onClick={() => !notification.isRead && markAsRead(notification.id)}
         >
@@ -83,7 +83,7 @@ export default function NotificationSidebar() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={closeSidebar}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+                        className="fixed inset-0 bg-black/70 z-[100]"
                     />
 
                     {/* Sidebar */}
@@ -111,7 +111,7 @@ export default function NotificationSidebar() {
                         </div>
 
                         {/* Actions */}
-                        <div className="px-6 py-4 flex items-center justify-between bg-white/5 border-b border-white/5">
+                        <div className="px-6 py-4 flex items-center justify-between bg-navy-950/20 border-b border-white/5">
                             <button
                                 onClick={markAllAsRead}
                                 className="text-xs font-bold text-gold-500 hover:text-gold-400 transition-colors uppercase tracking-wider"

@@ -21,9 +21,10 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     }, []);
 
     const isDashboard = pathname?.startsWith('/dashboard');
+    const isCustomLanding = pathname === '/' || pathname === '/lp-b' || pathname === '/ab-test-b';
 
-    if (isDashboard) {
-        // Dashboard has its own layout, don't wrap with Navbar/Footer
+    if (isDashboard || isCustomLanding) {
+        // Dashboard and custom landing tests have their own layout/nav
         return (
             <>
                 {showSplash && <LoadingAnimation isSplash />}

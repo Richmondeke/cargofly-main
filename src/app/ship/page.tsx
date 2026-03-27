@@ -12,8 +12,6 @@ import {
     ArrowRight,
     Shield,
     Clock,
-    Plane,
-    AlertTriangle,
     Plus,
     Trash2,
     Calendar,
@@ -23,7 +21,7 @@ import { useRouter } from "next/navigation";
 import dynamicImport from "next/dynamic";
 const PricingCalculator = dynamicImport(() => import("@/components/PricingCalculator"), { ssr: false });
 import { cn } from "@/lib/utils";
-import { createShipment, ShipmentAddress, ShipmentPackage } from "@/lib/firestore";
+import { createShipment } from "@/lib/firestore";
 // Removed server-only import. Route type defined locally.
 
 type Route = {
@@ -39,9 +37,11 @@ import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Select } from "@/components/ui/Select";
+import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 type ViewMode = "quote" | "book";
-type PaymentMethod = "card";
+type PaymentMethod = "card" | "wallet";
 
 const steps = [
     { id: 1, title: "Shipper", icon: User },
@@ -63,7 +63,7 @@ export default function ShipPage() {
     const [viewMode, setViewMode] = useState<ViewMode>("quote");
     const [currentStep, setCurrentStep] = useState(1);
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, userProfile } = useAuth();
     const [isBooking, setIsBooking] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
 
@@ -72,7 +72,7 @@ export default function ShipPage() {
 
     // Form State
     const [packages, setPackages] = useState<any[]>([{
-        id: Math.random().toString(36).substr(2, 9),
+        id: "package-1",
         weight: "",
         length: "",
         width: "",
@@ -216,20 +216,28 @@ export default function ShipPage() {
 
     const calculatePrices = () => {
         const totalWeight = packages.reduce((sum, p) => sum + (parseFloat(p.weight) || 0), 0);
+        const weightToUse = Math.max(totalWeight, 0); // Ensure non-negative
 
         if (!currentRoute) {
-            const base = 40 * (totalWeight || 1);
+            const base = 40 * (weightToUse || 1);
             const insuranceP = hasInsurance ? 20 : 0;
             return { base, total: base + insuranceP + 25, currency: 'USD' };
         }
 
-        const multiplier = 1.0;
-        const base = currentRoute.rate * (totalWeight || 1) * multiplier;
+        const rate = currentRoute.rate || 0;
+        const base = rate * (weightToUse || 1);
         const insuranceP = hasInsurance ? 20 : 0;
-        return { base, total: base + insuranceP + 25, currency: currentRoute.currency };
+        const total = base + insuranceP + 25;
+
+        return {
+            base,
+            total: isNaN(total) ? 0 : total,
+            currency: currentRoute.currency || 'USD'
+        };
     };
 
-    const { base: basePrice, total: totalPrice, currency } = calculatePrices();
+    const priceData = calculatePrices();
+    const { base: basePrice, total: totalPrice, currency } = priceData;
 
     const handleBookShipment = async () => {
         if (!user) {
@@ -249,17 +257,20 @@ export default function ShipPage() {
             return;
         }
 
+        if (paymentMethod === 'wallet' && (userProfile?.walletBalance || 0) < totalPrice) {
+            alert("Insufficient wallet balance. Please fund your wallet or use a card.");
+            return;
+        }
+
         setIsBooking(true);
         try {
-            // Simulate payment processing
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
             const now = new Date();
             const estimatedDelivery = new Date();
             estimatedDelivery.setDate(now.getDate() + 3);
 
             const { base: basePrice, total: totalPrice, currency } = calculatePrices();
 
+            // 1. Create Shipment (Status: pending)
             const trackingNumber = await createShipment({
                 userId: user.uid,
                 service: "express",
@@ -306,18 +317,65 @@ export default function ShipPage() {
                 poNumber: shippingInstructions.poNumber,
                 bookingComments: shippingInstructions.bookingComments,
                 isDangerousGoods: shippingInstructions.isDangerousGoods,
-                paymentStatus: "paid",
+                paymentStatus: "pending",
+                paymentMethod: paymentMethod,
                 cargoType: shippingInstructions.cargoType
             });
 
-            if (user) {
+            // 2. Process Payment
+            if (paymentMethod === 'card') {
+                const response = await fetch('/api/payments/initialize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: totalPrice,
+                        currency: currency === 'USD' ? 'USD' : 'NGN',
+                        customer: {
+                            name: user.displayName || sender.name,
+                            email: user.email
+                        },
+                        description: `Shipment #${trackingNumber}`,
+                        metadata: {
+                            trackingNumber,
+                            userId: user.uid
+                        }
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status && result.data?.checkout_url) {
+                    // Redirect to Korapay Checkout
+                    window.location.href = result.data.checkout_url;
+                    return;
+                } else {
+                    throw new Error(result.message || "Failed to initialize secure checkout");
+                }
+            } else if (paymentMethod === 'wallet') {
+                // Process Wallet Payment via Graph API
+                const res = await fetch('/api/payments/graph', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user.uid,
+                        amount: totalPrice,
+                        currency: currency,
+                        method: 'wallet_usd', // Assuming USD for now, can be dynamic
+                        description: `Payment for Shipment #${trackingNumber}`,
+                        shipmentId: trackingNumber // In this app trackingNumber is used as ID often
+                    })
+                });
+
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || "Wallet payment failed");
+
+                // Success: Update shipment payment status locally if needed (though API does it)
                 router.push(`/dashboard/track/${trackingNumber}`);
-            } else {
-                router.push(`/track?id=${trackingNumber}`);
             }
-        } catch (error) {
+
+        } catch (error: any) {
             console.error("Booking failed:", error);
-            alert("Failed to book shipment. Please try again.");
+            alert(`Failed to book shipment: ${error.message || "Unknown error"}`);
         } finally {
             setIsBooking(false);
         }
@@ -483,7 +541,7 @@ export default function ShipPage() {
 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                                 <div>
-                                                    <Label htmlFor="senderName">Shipper's Name *</Label>
+                                                    <Label htmlFor="senderName">Shipper&apos;s Name *</Label>
                                                     <Input
                                                         id="senderName"
                                                         type="text"
@@ -493,24 +551,23 @@ export default function ShipPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <Label htmlFor="senderPhone">Shipper's Phone *</Label>
-                                                    <Input
+                                                    <Label htmlFor="senderPhone">Shipper&apos;s Phone *</Label>
+                                                    <PhoneInput
                                                         id="senderPhone"
-                                                        type="tel"
+                                                        label="Phone Number"
                                                         value={sender.phone}
-                                                        onChange={(e) => setSender({ ...sender, phone: e.target.value })}
+                                                        onChange={(val) => setSender({ ...sender, phone: val })}
                                                         placeholder="Phone Number"
                                                     />
                                                 </div>
                                             </div>
                                             <div>
-                                                <Label htmlFor="senderAddress">Shipper's Contact Address *</Label>
-                                                <Textarea
+                                                <AddressAutocomplete
                                                     id="senderAddress"
-                                                    rows={3}
+                                                    label="Shipper&apos;s Contact Address *"
                                                     value={sender.address}
-                                                    onChange={(e) => setSender({ ...sender, address: e.target.value })}
-                                                    placeholder="Full Address"
+                                                    onChange={(addr) => setSender({ ...sender, address: addr })}
+                                                    placeholder="Enter full address..."
                                                 />
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -561,23 +618,21 @@ export default function ShipPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <Label htmlFor="recipientPhone">Phone Number</Label>
-                                                    <Input
+                                                    <PhoneInput
                                                         id="recipientPhone"
-                                                        type="tel"
+                                                        label="Phone Number"
                                                         value={recipient.phone}
-                                                        onChange={(e) => setRecipient({ ...recipient, phone: e.target.value })}
-                                                        placeholder="+44 20 1234 5678"
+                                                        onChange={(val) => setRecipient({ ...recipient, phone: val })}
+                                                        placeholder="Phone Number"
                                                     />
                                                 </div>
                                             </div>
                                             <div>
-                                                <Label htmlFor="recipientAddress">Delivery Address</Label>
-                                                <Textarea
+                                                <AddressAutocomplete
                                                     id="recipientAddress"
-                                                    rows={2}
+                                                    label="Delivery Address"
                                                     value={recipient.address}
-                                                    onChange={(e) => setRecipient({ ...recipient, address: e.target.value })}
+                                                    onChange={(addr) => setRecipient({ ...recipient, address: addr })}
                                                     placeholder="Enter full delivery address..."
                                                 />
                                             </div>
@@ -892,44 +947,85 @@ export default function ShipPage() {
                                                     <button
                                                         onClick={() => setPaymentMethod("card")}
                                                         className={cn(
-                                                            "p-4 rounded-xl border flex items-center justify-center gap-2 transition-all",
-                                                            "bg-gold-500/10 border-gold-500/50 text-gold-500 dark:text-gold-400"
+                                                            "p-4 rounded-xl border flex items-center justify-between gap-2 transition-all",
+                                                            paymentMethod === "card"
+                                                                ? "bg-gold-500/10 border-gold-500/50 text-gold-500 dark:text-gold-400"
+                                                                : "bg-white/5 border-navy-900/10 dark:border-white/10 text-navy-900/60 dark:text-white/60 hover:border-gold-500/30"
                                                         )}
                                                     >
-                                                        <CreditCard className="w-5 h-5" />
-                                                        <span className="font-bold uppercase tracking-wider text-sm">Debit/Credit Card</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <CreditCard className="w-5 h-5" />
+                                                            <span className="font-bold uppercase tracking-wider text-sm">Debit/Credit Card</span>
+                                                        </div>
+                                                        {paymentMethod === 'card' && <Check className="w-4 h-4" />}
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => setPaymentMethod("wallet")}
+                                                        className={cn(
+                                                            "p-4 rounded-xl border flex items-center justify-between gap-2 transition-all",
+                                                            paymentMethod === "wallet"
+                                                                ? "bg-gold-500/10 border-gold-500/50 text-gold-500 dark:text-gold-400"
+                                                                : "bg-white/5 border-navy-900/10 dark:border-white/10 text-navy-900/60 dark:text-white/60 hover:border-gold-500/30"
+                                                        )}
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-5 h-5 rounded-full bg-gold-500 flex items-center justify-center text-navy-900 text-[10px] font-bold">W</div>
+                                                            <div className="text-left">
+                                                                <span className="font-bold uppercase tracking-wider text-sm block">My Wallet</span>
+                                                                <span className="text-[10px] opacity-60">Balance: ${userProfile?.walletBalance?.toLocaleString() || '0.00'}</span>
+                                                            </div>
+                                                        </div>
+                                                        {paymentMethod === 'wallet' && <Check className="w-4 h-4" />}
                                                     </button>
                                                 </div>
 
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <Label htmlFor="cardNumber">Card Number</Label>
-                                                        <Input
-                                                            id="cardNumber"
-                                                            type="text"
-                                                            placeholder="1234 5678 9012 3456"
-                                                        />
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div>
-                                                            <Label htmlFor="expiry">Expiry Date</Label>
-                                                            <Input
-                                                                id="expiry"
-                                                                type="text"
-                                                                placeholder="MM/YY"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <Label htmlFor="cvv">CVV</Label>
-                                                            <Input
-                                                                id="cvv"
-                                                                type="password"
-                                                                placeholder="123"
-                                                                maxLength={3}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <AnimatePresence>
+                                                    {paymentMethod === "card" && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: "auto" }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                            className="space-y-4 overflow-hidden"
+                                                        >
+                                                            <div className="p-8 rounded-2xl bg-gold-500/5 border border-gold-500/20 text-center">
+                                                                <div className="w-16 h-16 rounded-full bg-gold-500/10 flex items-center justify-center mx-auto mb-4">
+                                                                    <Shield className="w-8 h-8 text-gold-500" />
+                                                                </div>
+                                                                <h3 className="font-display text-lg text-navy-900 dark:text-white mb-2">Secure Redirect</h3>
+                                                                <p className="text-sm text-navy-900/60 dark:text-white/60 font-body mb-6">
+                                                                    You will be redirected to Korapay&apos;s secure checkout page to complete your transaction safely.
+                                                                </p>
+                                                                <div className="flex items-center justify-center gap-4 text-[10px] grayscale opacity-50">
+                                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4" />
+                                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6" />
+                                                                    <span className="font-bold">PCI-DSS COMPLIANT</span>
+                                                                </div>
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+
+                                                    {paymentMethod === "wallet" && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: "auto" }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                            className="space-y-4 overflow-hidden"
+                                                        >
+                                                            <div className="p-6 rounded-2xl bg-gold-500/10 border border-gold-500/20 text-center">
+                                                                <div className="text-gold-600 dark:text-gold-400 font-display text-lg mb-2">Wallet Deduction</div>
+                                                                <div className="text-navy-900/60 dark:text-white/60 text-sm font-body">
+                                                                    A total of <span className="font-bold text-navy-900 dark:text-white">${totalPrice.toLocaleString()}</span> will be deducted from your wallet balance.
+                                                                </div>
+                                                                {(userProfile?.walletBalance || 0) < totalPrice && (
+                                                                    <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold uppercase">
+                                                                        Insufficient Balance
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
 
                                             </div>
                                             <div className="flex items-start gap-3 mt-8">

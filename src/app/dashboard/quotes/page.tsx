@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getQuotes, Quote } from '@/lib/dashboard-service';
 import EmptyState from '@/components/common/EmptyState';
 import { useRouter } from 'next/navigation';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function QuotesPage() {
     const { user } = useAuth();
@@ -29,11 +30,10 @@ export default function QuotesPage() {
 
     return (
         <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Saved Quotes</h1>
-                    <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">Manage your saved shipping estimates</p>
-                </div>
+            <DashboardHeader
+                title="Saved Quotes"
+                subtitle="Manage your saved shipping estimates"
+            >
                 <button
                     onClick={() => router.push('/ship')}
                     className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors flex items-center gap-2"
@@ -41,7 +41,7 @@ export default function QuotesPage() {
                     <span className="material-symbols-outlined">add</span>
                     New Quote
                 </button>
-            </div>
+            </DashboardHeader>
 
             {loading ? (
                 <div className="space-y-4">

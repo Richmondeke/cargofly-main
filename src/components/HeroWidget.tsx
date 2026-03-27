@@ -19,7 +19,7 @@ export default function HeroWidget() {
     return (
         <div className="relative z-20 w-full max-w-3xl mx-auto px-4 sm:px-0">
             {/* Tabs Container - Floats above the main box */}
-            <div className="flex bg-navy-900/30 backdrop-blur-md rounded-2xl p-1 relative overflow-hidden w-fit mx-auto shadow-2xl border border-white/10 mb-4">
+            <div className="flex bg-navy-900 rounded-2xl p-1 relative overflow-hidden w-fit mx-auto shadow-2xl border border-navy-700 mb-4">
                 <button
                     onClick={() => setActiveTab('track')}
                     className={cn(
@@ -47,12 +47,12 @@ export default function HeroWidget() {
             {/* Main Widget Body - Glow Wrapper */}
             <div className="relative rounded-[26px] p-[2px] overflow-hidden group w-full">
                 {/* Animated light effect */}
-                <div className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,transparent_60%,#ffffff_80%,#4196FF_100%)] opacity-80" />
+                <div className="absolute inset-0 bg-navy-900" />
 
                 {/* Main Widget Body - Glass Box */}
                 <motion.div
                     layout
-                    className="bg-navy-900/40 backdrop-blur-3xl rounded-[24px] shadow-2xl relative overflow-hidden border border-white/10 p-2 lg:p-2 z-10 w-full"
+                    className="bg-navy-900 rounded-[24px] shadow-2xl relative overflow-hidden border border-navy-700 p-2 lg:p-2 z-10 w-full"
                 >
                     <div className="w-full">
                         <AnimatePresence mode="wait">

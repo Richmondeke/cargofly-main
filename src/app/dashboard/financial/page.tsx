@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { getInvoices, getFinancialStats, Invoice } from '@/lib/dashboard-service';
 import { useAuth } from '@/contexts/AuthContext';
 import RiveAnimation from '@/components/ui/RiveAnimation';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function FinancialPage() {
     const { userProfile } = useAuth();
@@ -74,11 +75,10 @@ export default function FinancialPage() {
     return (
         <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <div>
-                    <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Financial Hub</h1>
-                    <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">Track revenue, expenses, and invoices</p>
-                </div>
+            <DashboardHeader
+                title="Financial Hub"
+                subtitle="Track revenue, expenses, and invoices"
+            >
                 <button
                     onClick={handleExport}
                     className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-all shadow-md active:scale-95"
@@ -86,7 +86,7 @@ export default function FinancialPage() {
                     <span className="material-symbols-outlined text-lg">download</span>
                     Export Report
                 </button>
-            </div>
+            </DashboardHeader>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -14,11 +14,16 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase (prevent multiple initializations)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Initialize Firebase safely (prevent multiple initializations or crashing if config is missing)
+const app = (() => {
+    if (getApps().length > 0) return getApps()[0];
+    if (firebaseConfig.apiKey) return initializeApp(firebaseConfig);
+    return undefined;
+})();
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+// Export services with fallbacks to avoid crashing build if config is missing
+export const auth = app ? getAuth(app) : (undefined as unknown as ReturnType<typeof getAuth>);
+export const db = app ? getFirestore(app) : (undefined as unknown as ReturnType<typeof getFirestore>);
+export const storage = app ? getStorage(app) : (undefined as unknown as ReturnType<typeof getStorage>);
 
 export default app;

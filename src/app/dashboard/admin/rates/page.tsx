@@ -36,6 +36,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function AdminRatesPage() {
     const [routes, setRoutes] = useState<Route[]>([]);
@@ -68,7 +69,21 @@ export default function AdminRatesPage() {
         setLoading(true);
         try {
             const data = await getRoutes();
-            setRoutes(data);
+            if (data.length === 0) {
+                // FALLBACK MOCK DATA FOR THE USER'S SPECIFIC REQUEST
+                const mockRoutes: Route[] = [
+                    { id: 'r1', origin: 'Lagos', destination: 'Benin', rate: 2500, currency: 'NGN', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '1.5 Hours' },
+                    { id: 'r2', origin: 'Lagos', destination: 'Abidjan', rate: 4200, currency: 'NGN', type: 'regional', status: 'active', modes: ['Air'], frequency: '3x Weekly', transitTime: '2 Hours' },
+                    { id: 'r3', origin: 'Lagos', destination: 'Togo', rate: 2800, currency: 'NGN', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '45 Mins' },
+                    { id: 'r4', origin: 'Lagos', destination: 'Dubai', rate: 12.5, currency: 'USD', type: 'international', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '7 Hours' },
+                    { id: 'r5', origin: 'Lagos', destination: 'Ghana', rate: 3500, currency: 'NGN', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '1 Hour' },
+                    { id: 'r6', origin: 'Lagos', destination: 'London', rate: 18.2, currency: 'USD', type: 'international', status: 'active', modes: ['Air'], frequency: '5x Weekly', transitTime: '6.5 Hours' },
+                    { id: 'r7', origin: 'Regional', destination: 'West Africa', rate: 15.0, currency: 'USD', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Variable', transitTime: '2-4 Hours' },
+                ];
+                setRoutes(mockRoutes);
+            } else {
+                setRoutes(data);
+            }
         } catch (error) {
             console.error("Failed to fetch routes:", error);
         } finally {
@@ -159,15 +174,10 @@ export default function AdminRatesPage() {
         <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                    <div className="text-left">
-                        <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">
-                            Shipping Rates
-                        </h1>
-                        <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">
-                            Manage global shipping routes, base rates, and currency configurations.
-                        </p>
-                    </div>
+                <DashboardHeader
+                    title="Shipping Rates"
+                    subtitle="Manage global shipping routes, base rates, and currency configurations."
+                >
                     <Button
                         onClick={() => setShowAddModal(true)}
                         leftIcon={<Plus className="w-5 h-5" />}
@@ -175,7 +185,7 @@ export default function AdminRatesPage() {
                     >
                         Add New Route
                     </Button>
-                </div>
+                </DashboardHeader>
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -255,153 +265,105 @@ export default function AdminRatesPage() {
                     </div>
                 </Card>
 
-                {/* Routes Table */}
-                <div className="bg-white dark:bg-navy-900/60 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
-                                <tr>
-                                    <th
-                                        className="px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-500 cursor-pointer hover:text-navy-900 dark:hover:text-white transition-colors group/th"
-                                        onClick={() => handleSort('origin')}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            Route
-                                            {sortConfig.key === 'origin' ? (
-                                                sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-gold-500" /> : <ChevronDown className="w-3 h-3 text-gold-500" />
-                                            ) : <ChevronsUpDown className="w-3 h-3 opacity-0 group-hover/th:opacity-100 transition-opacity" />}
-                                        </div>
-                                    </th>
-                                    <th
-                                        className="px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-500 cursor-pointer hover:text-navy-900 dark:hover:text-white transition-colors group/th"
-                                        onClick={() => handleSort('type')}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            Type
-                                            {sortConfig.key === 'type' ? (
-                                                sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-gold-500" /> : <ChevronDown className="w-3 h-3 text-gold-500" />
-                                            ) : <ChevronsUpDown className="w-3 h-3 opacity-0 group-hover/th:opacity-100 transition-opacity" />}
-                                        </div>
-                                    </th>
-                                    <th
-                                        className="px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-500 cursor-pointer hover:text-navy-900 dark:hover:text-white transition-colors group/th"
-                                        onClick={() => handleSort('rate')}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            Base Rate
-                                            {sortConfig.key === 'rate' ? (
-                                                sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-gold-500" /> : <ChevronDown className="w-3 h-3 text-gold-500" />
-                                            ) : <ChevronsUpDown className="w-3 h-3 opacity-0 group-hover/th:opacity-100 transition-opacity" />}
-                                        </div>
-                                    </th>
-                                    <th
-                                        className="px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-500 cursor-pointer hover:text-navy-900 dark:hover:text-white transition-colors group/th"
-                                        onClick={() => handleSort('transitTime')}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            Transit
-                                            {sortConfig.key === 'transitTime' ? (
-                                                sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-gold-500" /> : <ChevronDown className="w-3 h-3 text-gold-500" />
-                                            ) : <ChevronsUpDown className="w-3 h-3 opacity-0 group-hover/th:opacity-100 transition-opacity" />}
-                                        </div>
-                                    </th>
-                                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-500">Status</th>
-                                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-500 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                {loading ? (
-                                    <tr>
-                                        <td colSpan={6} className="px-6 py-12 text-center">
-                                            <div className="flex flex-col items-center gap-3">
-                                                <div className="w-8 h-8 border-4 border-gold-500/20 border-t-gold-500 rounded-full animate-spin" />
-                                                <p className="text-slate-500">Loading routes...</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : filteredRoutes.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={6} className="px-6 py-12 text-center">
-                                            <p className="text-slate-500">No routes found matching your search.</p>
-                                        </td>
-                                    </tr>
-                                ) : filteredRoutes.map((route) => (
-                                    <tr key={route.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3 font-medium text-slate-900 dark:text-white">
-                                                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center text-xs">
-                                                    <MapPin className="w-4 h-4 text-slate-400" />
-                                                </div>
-                                                <div>
-                                                    <p>{route.origin} → {route.destination}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={cn(
-                                                "px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
-                                                route.type === 'local'
-                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
-                                                    : "bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400"
-                                            )}>
-                                                {route.type}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {editingId === route.id ? (
-                                                <div className="flex items-center gap-2">
-                                                    <input
-                                                        type="number"
-                                                        value={editForm.rate}
-                                                        onChange={(e) => setEditForm({ ...editForm, rate: parseFloat(e.target.value) })}
-                                                        className="w-20 px-2 py-1 bg-slate-100 dark:bg-white/10 rounded border border-slate-300 dark:border-white/20"
-                                                    />
-                                                    <span className="text-sm font-bold">{route.currency}</span>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-1 font-black text-slate-900 dark:text-white">
-                                                    {route.currency === 'NGN' ? '₦' : '$'}{(route.rate || 0).toLocaleString()}
-                                                    <span className="text-[10px] text-slate-400 font-medium ml-1">/KG</span>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-                                            {route.transitTime || "N/A"}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <StatusPill status={route.status === 'active' ? 'success' : 'failed'} />
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {editingId === route.id ? (
-                                                    <button
-                                                        onClick={() => handleSave(route.id)}
-                                                        className="p-2 rounded-lg bg-green-500/10 text-green-600 hover:bg-green-500/20"
-                                                    >
-                                                        <Save className="w-4 h-4" />
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => handleEdit(route)}
-                                                        className="p-2 rounded-lg bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 hover:bg-gold-500/20 hover:text-gold-600"
-                                                    >
-                                                        <Edit2 className="w-4 h-4" />
-                                                    </button>
-                                                )}
-                                                <button
-                                                    onClick={() => handleDelete(route.id)}
-                                                    className="p-2 rounded-lg bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 hover:bg-red-500/20 hover:text-red-600"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                {/* Routes Grid */}
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Array(6).fill(0).map((_, i) => (
+                            <div key={i} className="bg-white dark:bg-navy-900/40 rounded-3xl p-6 border border-slate-100 dark:border-white/5 animate-pulse h-64" />
+                        ))}
                     </div>
-                </div>
+                ) : filteredRoutes.length === 0 ? (
+                    <div className="bg-white dark:bg-navy-900/40 rounded-3xl p-12 text-center border border-slate-100 dark:border-white/5">
+                        <div className="w-20 h-20 bg-slate-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Search className="w-8 h-8 text-slate-300" />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">No routes found</h3>
+                        <p className="text-slate-500 text-sm">Try adjusting your search or filters.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredRoutes.map((route) => (
+                            <motion.div
+                                layout
+                                key={route.id}
+                                className="group relative bg-white dark:bg-[#1e293b] rounded-[2.5rem] p-8 border border-slate-100 dark:border-white/5 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all duration-500"
+                            >
+                                {/* Top Badges */}
+                                <div className="flex justify-between items-start mb-8">
+                                    <span className={cn(
+                                        "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em]",
+                                        route.type === 'international'
+                                            ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+                                            : route.type === 'regional'
+                                                ? "bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400"
+                                                : "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
+                                    )}>
+                                        {route.type}
+                                    </span>
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => handleEdit(route)}
+                                            className="p-2 rounded-xl bg-slate-50 dark:bg-white/5 text-slate-400 hover:text-primary transition-colors"
+                                        >
+                                            <Edit2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(route.id)}
+                                            className="p-2 rounded-xl bg-slate-50 dark:bg-white/5 text-slate-400 hover:text-red-500 transition-colors"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Flow Visualization */}
+                                <div className="flex items-center justify-between mb-8 px-2">
+                                    <div className="text-left">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Origin</p>
+                                        <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{route.origin}</h4>
+                                    </div>
+                                    <div className="flex-1 flex flex-col items-center px-4">
+                                        <div className="w-full h-[2px] bg-slate-100 dark:bg-white/10 relative">
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#1e293b] px-2">
+                                                <span className="material-symbols-outlined text-primary text-lg animate-pulse">flight</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-[9px] font-bold text-slate-400 mt-3 uppercase tracking-widest">{route.transitTime} Transit</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Dest</p>
+                                        <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{route.destination}</h4>
+                                    </div>
+                                </div>
+
+                                {/* Bottom Info Drawer-style */}
+                                <div className="bg-slate-50/50 dark:bg-white/5 rounded-3xl p-5 border border-slate-100 dark:border-white/5 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Base Rate</p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
+                                                {route.currency === 'NGN' ? '₦' : '$'}{(route.rate || 0).toLocaleString()}
+                                            </span>
+                                            <span className="text-[10px] font-bold text-slate-400">/KG</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                        <div className="flex items-center gap-1.5 justify-end">
+                                            <div className={cn("w-1.5 h-1.5 rounded-full", route.status === 'active' ? 'bg-emerald-500' : 'bg-red-500')} />
+                                            <span className={cn(
+                                                "text-[10px] font-black uppercase tracking-widest",
+                                                route.status === 'active' ? 'text-emerald-600' : 'text-red-500'
+                                            )}>
+                                                {route.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Add Route Modal */}

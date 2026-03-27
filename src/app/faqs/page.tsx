@@ -45,12 +45,12 @@ const faqs = [
     {
         category: "shipping",
         question: "What are the requirements for picking up shipments?",
-        answer: "Major shipments must be picked up within 48 hours of arrival at our neighbor island facilities to avoid storage fees."
+        answer: "Major shipments must be picked up within 48 hours of arrival at our destination facilities to avoid storage fees."
     },
     {
         category: "services",
         question: "Do you partner with major retailers?",
-        answer: "Yes, we partner with major retailers like Home Depot and Lowe's for inter-island shipping. Through our retail partnerships, we also facilitate shopping from Oʻahu retailers like Costco, Sam's Club, Target, and Walmart."
+        answer: "Yes, we partner with major retail providers for inter-island shipping and facilitate logistics from major retailers. Through our retail partnerships, we ensure seamless delivery for your large purchases."
     },
     {
         category: "safety",
@@ -118,8 +118,8 @@ export default function FAQsPage() {
                     className="max-w-2xl mx-auto mb-12"
                 >
                     <div className="relative group">
-                        <div className="absolute inset-0 bg-gold-500/20 blur-xl rounded-2xl group-hover:bg-gold-500/30 transition-all opacity-0 group-focus-within:opacity-100" />
-                        <div className="relative flex items-center bg-white/40 dark:bg-white/5 backdrop-blur-md border border-navy-900/10 dark:border-white/10 rounded-2xl px-6 py-4 transition-all focus-within:border-gold-500/50">
+                        <div className="relative group-focus-within:ring-2 ring-gold-500/20 rounded-2xl transition-all" />
+                        <div className="relative flex items-center bg-white/5 border border-navy-900/10 dark:border-white/10 rounded-2xl px-6 py-4 transition-all focus-within:border-gold-500/50">
                             <Search className="w-5 h-5 text-navy-900/40 dark:text-white/40 mr-4" />
                             <input
                                 type="text"
@@ -174,8 +174,8 @@ export default function FAQsPage() {
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.05 }}
                                         className={cn(
-                                            "group p-1 rounded-2xl transition-all duration-300 bg-white/40 dark:bg-white/5 border border-navy-900/5 dark:border-white/5 hover:border-gold-500/30",
-                                            openIndex === index ? "shadow-2xl ring-1 ring-gold-500/20" : "hover:bg-white/60 dark:hover:bg-white/10"
+                                            "group p-1 rounded-2xl transition-all duration-300 bg-white/5 border border-navy-900/5 dark:border-white/5 hover:border-gold-500/30",
+                                            openIndex === index ? "bg-white/10 ring-1 ring-gold-500/20" : "hover:bg-white/10"
                                         )}
                                     >
                                         <button
@@ -244,9 +244,9 @@ export default function FAQsPage() {
                     viewport={{ once: true }}
                     className="mt-24 text-center"
                 >
-                    <div className="bg-navy-900 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 md:p-16 relative overflow-hidden group">
+                    <div className="bg-navy-900 dark:bg-white/5 border border-white/10 rounded-3xl p-12 md:p-16 relative overflow-hidden group">
                         {/* Decorative gradients */}
-                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gold-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                        <div className="absolute top-0 left-0 w-full h-full bg-gold-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                         <h2 className="font-display text-3xl md:text-4xl text-white mb-6 relative z-10">
                             Still have <span className="italic">questions?</span>

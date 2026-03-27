@@ -35,6 +35,7 @@ export interface DashboardShipment {
     packages?: { description: string; weight: number; dimensions?: { length: number; width: number; height: number } }[];
     category: string;
     weight: string;
+    customsDuty?: number;
     createdAt?: Timestamp;
     estimatedDelivery?: Timestamp;
     consignmentMedia?: {
@@ -137,7 +138,7 @@ export interface Route {
     distance?: string;
     rate: number;
     currency: string;
-    type: "local" | "regional";
+    type: "local" | "regional" | "international";
     modes: string[];
     frequency: string;
     status: "active" | "suspended";
@@ -291,7 +292,7 @@ export async function getActiveShipments(userId?: string, role?: string, statusF
         const data = doc.data() as Shipment;
         const eta = data.estimatedDelivery
             ? formatTimestamp(data.estimatedDelivery)
-            : "TBD";
+            : "Processing...";
 
         return {
             id: doc.id,

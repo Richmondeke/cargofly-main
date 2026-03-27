@@ -2,24 +2,30 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext'; // Assuming this context exists or we will use local state
 
 const SidebarLink: React.FC<{ to: string; icon: string; label: string; active?: boolean; onClick?: () => void }> = ({ to, icon, label, active, onClick }) => (
     <Link
         href={to}
         onClick={onClick}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${active
-            ? 'bg-white/10 text-white shadow-sm'
-            : 'text-white/70 hover:bg-white/5 hover:text-white'
+        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${active
+            ? 'bg-[#000066] text-white shadow-inner'
+            : 'text-blue-200/50 hover:text-white hover:bg-white/10'
             }`}
     >
-        <span className={`material-symbols-outlined text-xl ${active ? 'fill-1' : 'group-hover:text-white transition-colors'}`}>
+        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
             {icon}
         </span>
-        <span className="text-sm font-medium">{label}</span>
+        <span className="font-['Work_Sans'] font-semibold tracking-tight text-sm">{label}</span>
     </Link>
+);
+
+const SidebarSection: React.FC<{ label: string }> = ({ label }) => (
+    <div className="mt-6 mb-2 px-4">
+        <span className="font-['Work_Sans'] font-bold text-[10px] text-white/30 uppercase tracking-widest">{label}</span>
+    </div>
 );
 
 interface SidebarProps {
@@ -29,26 +35,8 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     const pathname = usePathname();
-    const { userProfile, signOut } = useAuth(); // Connect to AuthContext
+    const { userProfile, signOut } = useAuth();
     const router = useRouter();
-
-    const [darkMode, setDarkMode] = React.useState(false);
-
-    React.useEffect(() => {
-        if (document.documentElement.classList.contains('dark')) {
-            setDarkMode(true);
-        }
-    }, []);
-
-    const toggleTheme = () => {
-        const isDark = !darkMode;
-        setDarkMode(isDark);
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    };
 
     const handleSignOut = async () => {
         try {
@@ -60,20 +48,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     };
 
     const sidebarContent = (
-        <aside className={`flex h-full w-[253px] flex-col bg-[#003399] transition-transform duration-300 ease-in-out shrink-0
-            fixed md:relative z-40 md:z-0
-            ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            top-0 left-0 bottom-0
-            pt-12 pb-12 pl-8 pr-6
-        `} style={{ backgroundImage: 'url("/Cargofly motif_transparent.png")', backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-            <div className="flex items-center justify-between mb-12">
-                <div className="flex items-center gap-3">
-                    <img
-                        src="/logo-dark.png"
-                        alt="Cargofly"
-                        className="h-8 w-auto"
-                    />
-                </div>
+        <aside
+            className={`fixed left-0 top-0 h-screen w-72 bg-[#000080] flex flex-col py-8 px-4 z-50 transition-transform duration-300 ease-in-out md:translate-x-0 overflow-hidden ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        >
+            {/* Background Image Overlay */}
+            <div
+                className="absolute inset-0 z-0 opacity-[0.07] pointer-events-none bg-repeat brightness-0 invert"
+                style={{ backgroundImage: "url('/Cargofly motif_transparent.png')", backgroundSize: '200px' }}
+            />
+
+            <div className="relative z-10 mb-10 px-4 flex justify-between items-center">
+                <Link href="/dashboard" className="flex items-center gap-2">
+                    <div className="relative w-32 h-10">
+                        <Image
+                            src="/logo-light.png"
+                            alt="Cargofly"
+                            fill
+                            className="object-contain object-left brightness-0 invert"
+                            priority
+                        />
+                    </div>
+                </Link>
                 {/* Mobile Close Button */}
                 <button
                     onClick={onClose}
@@ -83,35 +78,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                 </button>
             </div>
 
-            <div className="flex flex-col gap-1 flex-1 overflow-y-auto">
-                <SidebarLink to="/dashboard" icon="dashboard" label="Dashboard" active={pathname === '/dashboard'} onClick={onClose} />
-                <SidebarLink to="/dashboard/shipments" icon="inventory_2" label="Shipments" active={pathname?.startsWith('/dashboard/shipments')} onClick={onClose} />
-                <SidebarLink to="/dashboard/new-booking" icon="add_circle" label="New Booking" active={pathname === '/dashboard/new-booking'} onClick={onClose} />
-                <SidebarLink to="/dashboard/wallet" icon="account_balance_wallet" label="Wallet" active={pathname === '/dashboard/wallet'} onClick={onClose} />
-                <SidebarLink to="/dashboard/support" icon="support_agent" label="Support" active={pathname?.startsWith('/dashboard/support') && !pathname?.includes('admin')} onClick={onClose} />
+            <nav className="relative z-10 flex-grow space-y-1 overflow-y-auto custom-scrollbar pb-10">
+                <SidebarSection label="User" />
+                <SidebarLink to="/dashboard" icon="dashboard" label="Overview" active={pathname === '/dashboard'} onClick={onClose} />
+                <SidebarLink to="/dashboard/shipments" icon="inventory_2" label="My Shipments" active={pathname?.startsWith('/dashboard/shipments')} onClick={onClose} />
+                <SidebarLink to="/dashboard/wallet" icon="account_balance_wallet" label="My Wallet" active={pathname === '/dashboard/wallet'} onClick={onClose} />
+                <SidebarLink to="/dashboard/tickets" icon="confirmation_number" label="Support Tickets" active={pathname?.startsWith('/dashboard/tickets')} onClick={onClose} />
+                <SidebarLink to="/dashboard/settings" icon="settings" label="Account Settings" active={pathname === '/dashboard/settings'} onClick={onClose} />
 
                 {userProfile?.role === 'admin' && (
                     <>
-                        <div className="mt-8 mb-2 px-4">
-                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Management</span>
-                        </div>
-                        <SidebarLink to="/dashboard/admin" icon="admin_panel_settings" label="Operations" active={pathname === '/dashboard/admin'} onClick={onClose} />
-                        <SidebarLink to="/dashboard/admin/support" icon="confirmation_number" label="Tickets" active={pathname?.startsWith('/dashboard/admin/support')} onClick={onClose} />
-                        <SidebarLink to="/dashboard/admin/rates" icon="currency_exchange" label="Shipping Rates" active={pathname === '/dashboard/admin/rates'} onClick={onClose} />
-                        <SidebarLink to="/dashboard/admin/blog" icon="article" label="Blog Posts" active={pathname?.startsWith('/dashboard/admin/blog')} onClick={onClose} />
+                        <SidebarSection label="Administration" />
+                        <SidebarLink to="/dashboard/admin" icon="admin_panel_settings" label="Operations Center" active={pathname === '/dashboard/admin'} onClick={onClose} />
+                        <SidebarLink to="/dashboard/admin/shipments" icon="local_shipping" label="All Shipments" active={pathname === '/dashboard/admin/shipments'} onClick={onClose} />
+                        <SidebarLink to="/dashboard/admin/rates" icon="currency_exchange" label="Rates Management" active={pathname === '/dashboard/admin/rates'} onClick={onClose} />
+                        <SidebarLink to="/dashboard/admin/support" icon="support_agent" label="Support Console" active={pathname?.startsWith('/dashboard/admin/support')} onClick={onClose} />
+                        <SidebarLink to="/dashboard/admin/blog" icon="rss_feed" label="Blog Manager" active={pathname === '/dashboard/admin/blog'} onClick={onClose} />
                     </>
                 )}
-                <SidebarLink to="/dashboard/settings" icon="settings" label="Settings" active={pathname === '/dashboard/settings'} onClick={onClose} />
-            </div>
+            </nav>
 
-            <div className="mt-auto pt-6 border-t border-white/10">
-                <div className="flex items-center gap-3 mt-4 px-3">
-                    <div className="size-9 rounded-full bg-white/20 overflow-hidden bg-cover bg-center flex items-center justify-center text-white font-bold" >
+            <div className="relative z-10 mt-auto space-y-4 px-2 pt-4 border-t border-white/10">
+                <button
+                    onClick={() => router.push('/dashboard/new-booking')}
+                    className="w-full bg-[#FFCA00] text-navy-900 py-3 px-4 rounded-xl font-['Work_Sans'] font-semibold text-sm flex items-center justify-center gap-2 shadow-lg hover:bg-[#FFCA00]/90 transition-all active:scale-95"
+                >
+                    <span className="material-symbols-outlined">add</span>
+                    New Shipment
+                </button>
+
+                <div className="flex items-center gap-3 px-2">
+                    <div className="size-9 rounded-full bg-white/20 overflow-hidden flex items-center justify-center text-white font-bold" >
                         {userProfile?.displayName?.charAt(0) || 'U'}
                     </div>
                     <div className="flex flex-col flex-1 overflow-hidden">
                         <span className="text-sm font-medium text-white truncate">{userProfile?.displayName || 'User'}</span>
-                        <span className="text-xs text-white/50 capitalize">{userProfile?.role || 'Guest'}</span>
+                        <span className="text-[10px] text-white/50 uppercase tracking-wider font-bold truncate">{userProfile?.role || 'Guest'}</span>
                     </div>
                     <button
                         onClick={handleSignOut}
@@ -130,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
             {/* Mobile Backdrop */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity"
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
                     onClick={onClose}
                     aria-hidden="true"
                 />

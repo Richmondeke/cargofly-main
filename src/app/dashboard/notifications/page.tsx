@@ -4,6 +4,7 @@ import React from 'react';
 import { useNotifications, Notification } from '@/contexts/NotificationContext';
 import { motion } from 'framer-motion';
 import { fadeInUp, staggerContainer } from '@/lib/animations';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat('en-GB', {
@@ -85,16 +86,14 @@ export default function NotificationHistoryPage() {
                 className="space-y-8"
             >
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div>
-                        <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Notification History</h1>
-                        <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">Keep track of all your shipment updates and system alerts.</p>
-                    </div>
-
+                <DashboardHeader
+                    title="Notification History"
+                    subtitle="Keep track of all your shipment updates and system alerts."
+                >
                     <div className="flex gap-4">
                         <button
                             onClick={markAllAsRead}
-                            className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold transition-all border border-white/10"
+                            className="px-6 py-3 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-900 dark:text-white text-sm font-bold transition-all border border-slate-200 dark:border-white/10"
                         >
                             Mark All as Read
                         </button>
@@ -105,7 +104,7 @@ export default function NotificationHistoryPage() {
                             Clear All
                         </button>
                     </div>
-                </div>
+                </DashboardHeader>
 
                 {/* Content */}
                 <div className="space-y-4">

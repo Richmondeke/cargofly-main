@@ -25,7 +25,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
                         fill
                         className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-50 dark:from-background-dark via-transparent to-transparent opacity-60" />
+                    <div className="absolute inset-0 bg-slate-50 dark:bg-background-dark opacity-60" />
                 </div>
             ) : icon ? (
                 <div className="mb-4 text-4xl text-primary">{icon}</div>

@@ -39,7 +39,7 @@ export default function DashboardLayout({
         <NotificationProvider>
             <div className="flex h-screen w-full flex-row overflow-hidden bg-background-light dark:bg-background-dark" style={{ fontFamily: "'Inter', sans-serif" }}>
                 <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-                <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+                <main className="flex-1 flex flex-col h-full overflow-hidden relative md:ml-72">
                     {isLoading && <LoadingAnimation />}
                     <MobileHeader onOpenConfig={() => setIsSidebarOpen(true)} />
                     {children}

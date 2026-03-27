@@ -16,28 +16,32 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) =
 
     if (normalizedStatus.includes('delivered') || normalizedStatus.includes('approved') || normalizedStatus.includes('success')) {
         variant = 'success';
+        label = 'Delivered';
     } else if (normalizedStatus.includes('pending') || normalizedStatus.includes('review')) {
         variant = 'amber';
+        label = 'Pending';
     } else if (normalizedStatus.includes('transit') || normalizedStatus.includes('progress') || normalizedStatus.includes('active')) {
         variant = 'info';
+        label = 'In Transit';
     } else if (normalizedStatus.includes('hold') || normalizedStatus.includes('customs')) {
-        // Purple/Special variants can be added later if needed, for now amber or warning
         variant = 'amber';
+        label = 'Customs Hold';
     } else if (normalizedStatus.includes('failed') || normalizedStatus.includes('rejected') || normalizedStatus.includes('error')) {
         variant = 'destructive';
-    }
-
-    // Handle specific label mappings if needed
-    if (normalizedStatus === 'in_transit') {
-        label = 'In Transit';
+        label = 'Error';
     }
 
     return (
         <Badge
             variant={variant}
-            className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg", className)}
+            className={cn("inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tight rounded-md border-none",
+                variant === 'success' && "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400",
+                variant === 'amber' && "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
+                variant === 'info' && "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
+                variant === 'destructive' && "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
+                className)}
         >
-            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80"></span>
+            <span className="w-1 h-1 rounded-full bg-current"></span>
             {label}
         </Badge>
     );

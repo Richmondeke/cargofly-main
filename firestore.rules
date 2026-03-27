@@ -26,10 +26,11 @@ service cloud.firestore {
     }
 
     function isValidShipmentWrite(data) {
-      return (!("origin" in data) || isString(data.origin)) &&
-             (!("destination" in data) || isString(data.destination)) &&
-             (!("status" in data) || data.status in ['Pending', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled']) &&
-             (!("trackingNumber" in data) || isString(data.trackingNumber));
+      return (!("status" in data) || data.status in [
+        'pending', 'confirmed', 'picked_up', 'in_transit', 'at_hub', 
+        'out_for_delivery', 'delivered', 'cancelled', 'returned', 'customs_hold'
+      ]) &&
+      (!("trackingNumber" in data) || isString(data.trackingNumber));
     }
 
     // --- Users Collection ---
@@ -37,6 +38,12 @@ service cloud.firestore {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       // Users can write their own profile; Admins can write everyone's. Enforce schema.
       allow write: if request.auth != null && (request.auth.uid == userId || isAdmin()) && isValidUserWrite(request.resource.data);
+      
+      // Notifications sub-collection
+      match /notifications/{notifId} {
+        allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      }
     }
     
     // --- Shipments Collection ---
@@ -47,6 +54,12 @@ service cloud.firestore {
       allow create: if request.auth != null && isValidShipmentWrite(request.resource.data);
       allow update: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin()) && isValidShipmentWrite(request.resource.data);
       allow delete: if isAdmin();
+
+      // Tracking Events sub-collection
+      match /tracking_events/{eventId} {
+        allow read: if true;
+        allow write: if request.auth != null && (get(/databases/$(database)/documents/shipments/$(shipmentId)).data.userId == request.auth.uid || isAdmin());
+      }
     }
     
     // --- Testimonials Collection ---

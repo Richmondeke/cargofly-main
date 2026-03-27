@@ -78,10 +78,10 @@ export default function TrackingWidget({
                             }}
                             placeholder="Enter tracking number (e.g., CF-2025-8473629)"
                             className={cn(
-                                "w-full bg-white/5 border rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-white/30 focus:outline-none transition-all font-body font-mono",
+                                "w-full bg-navy-800 border rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-white/30 focus:outline-none transition-all font-body font-mono",
                                 error
-                                    ? "border-red-500/50 focus:border-red-500"
-                                    : "border-white/10 focus:border-gold-500/50"
+                                    ? "border-red-500 focus:border-red-500"
+                                    : "border-navy-700 focus:border-gold-500"
                             )}
                             maxLength={20}
                             aria-label="Tracking number"
@@ -96,7 +96,7 @@ export default function TrackingWidget({
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={cn(
-                            "px-8 py-4 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed hover:shadow-[0_0_30px_rgba(202,138,4,0.3)]",
+                            "px-8 py-4 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed hover:bg-gold-600",
                             variant === "page" && "sm:w-auto w-full"
                         )}
                     >

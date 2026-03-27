@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -15,11 +16,15 @@ interface PaymentModalProps {
 }
 
 export default function PaymentModal({ isOpen, onClose, amount, userId, shipmentId, wallet, currency = 'USD', description = 'Payment', onSuccess }: PaymentModalProps) {
+    const { user } = useAuth();
     const [selectedMethod, setSelectedMethod] = useState<'wallet_usd' | 'wallet_gbp' | 'card' | 'bank' | null>(null);
     const [loading, setLoading] = useState(false);
+    const [redirecting, setRedirecting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     if (!isOpen) return null;
+
+    const isExternalMethod = selectedMethod === 'card' || selectedMethod === 'bank';
 
     const handlePayment = async () => {
         if (!selectedMethod) {
@@ -31,31 +36,72 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
         setError(null);
 
         try {
-            // Mock API or actual Graph API call goes here
-            const response = await fetch('/api/payments/graph', {
+            // --- Wallet balance deductions (internal) ---
+            if (selectedMethod === 'wallet_usd' || selectedMethod === 'wallet_gbp') {
+                const response = await fetch('/api/payments/graph', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId,
+                        amount,
+                        currency: selectedMethod.includes('gbp') ? 'GBP' : 'USD',
+                        method: selectedMethod,
+                        description,
+                        shipmentId
+                    })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Payment failed');
+                }
+
+                if (onSuccess) onSuccess();
+                onClose();
+                return;
+            }
+
+            // --- Card / Bank Transfer → open Korapay checkout ---
+            const returnPath = shipmentId
+                ? `/dashboard/shipments`
+                : `/dashboard/wallet`;
+
+            const initRes = await fetch('/api/payments/initialize', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId,
                     amount,
-                    currency: selectedMethod.includes('gbp') ? 'GBP' : 'USD',
-                    method: selectedMethod,
+                    currency: currency === 'NGN' ? 'NGN' : 'USD',
                     description,
-                    shipmentId
+                    customer: {
+                        email: user?.email || 'user@cargofly.app',
+                        name: user?.displayName || 'Cargofly User',
+                    },
+                    metadata: {
+                        userId,
+                        shipmentId,
+                        returnPath,
+                    }
                 })
             });
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Payment failed');
+            const initData = await initRes.json();
+
+            if (!initData.status || !initData.data?.checkout_url) {
+                throw new Error(initData.message || 'Could not open payment page. Please try again.');
             }
 
-            if (onSuccess) onSuccess();
-            onClose();
+            // Store return path so the callback page knows where to redirect after verify
+            sessionStorage.setItem('payment_return_path', returnPath);
+            sessionStorage.setItem('payment_reference', initData.data.reference);
+
+            setRedirecting(true);
+            // Redirect to Korapay hosted checkout
+            window.location.href = initData.data.checkout_url;
+
         } catch (err: unknown) {
             const error = err as { message?: string };
             setError(error.message || 'An unexpected error occurred during payment');
-        } finally {
             setLoading(false);
         }
     };
@@ -216,13 +262,23 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                     </button>
                     <button
                         onClick={handlePayment}
-                        disabled={loading || !selectedMethod}
+                        disabled={loading || redirecting || !selectedMethod}
                         className="flex-1 px-4 py-3 font-bold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        {loading ? (
+                        {redirecting ? (
+                            <>
+                                <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                                Opening checkout...
+                            </>
+                        ) : loading ? (
                             <>
                                 <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
                                 Processing...
+                            </>
+                        ) : isExternalMethod ? (
+                            <>
+                                <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                Pay with {selectedMethod === 'card' ? 'Card' : 'Bank Transfer'}
                             </>
                         ) : (
                             `Pay ${currency === 'USD' ? '$' : '£'}${amount.toFixed(2)}`

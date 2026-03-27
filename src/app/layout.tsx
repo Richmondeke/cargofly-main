@@ -51,26 +51,28 @@ export const metadata = {
   },
 };
 
+import { Toaster } from "react-hot-toast";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${humanist.variable}`}>
+    <html lang="en" className={`${humanist.variable}`} suppressHydrationWarning>
       <head>
         {/* Security Headers */}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-        <meta httpEquiv="X-Frame-Options" content="DENY" />
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
 
         <meta name="referrer" content="strict-origin-when-cross-origin" />
         {/* Material Symbols for dashboard icons */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-        {/* Inter font for dashboard */}
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        {/* Inter, Public Sans, and Work Sans fonts */}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Public+Sans:wght@300;400;500;600;700;800;900&family=Work+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body className="bg-white dark:bg-navy-900 text-navy-900 dark:text-white transition-colors duration-300 font-body antialiased">
+        <Toaster position="top-right" />
         <AuthProvider>
           <ThemeProvider>
             <TransitionProvider>

@@ -57,7 +57,7 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
                 {/* Header */}
                 <div className="flex justify-between items-start border-b pb-8 mb-8">
                     <div>
-                        <Image src="/images/logo_icon.png" alt="Cargofly Logo" width={60} height={60} className="mb-4" />
+                        <Image src="/images/logo_icon.png" alt="Cargofly Logo" width={60} height={60} className="mb-4" sizes="60px" />
                         <h1 className="text-4xl font-black uppercase tracking-tight text-navy-900 font-display">CARGOFLY</h1>
                         <p className="text-gray-500 font-mono text-sm mt-1">THE PINNACLE OF WEST AFRICAN AVIATION LOGISTICS</p>
                     </div>

@@ -17,7 +17,7 @@ import {
     signInWithPopup,
     updateProfile,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 interface UserProfile {
@@ -38,6 +38,7 @@ interface AuthContextType {
     signUp: (email: string, password: string, displayName: string) => Promise<void>;
     signInWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
+    refreshBalance: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,6 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Create user profile in Firestore
     async function createUserProfile(user: User, displayName?: string) {
+        if (!db) {
+            console.warn("Firestore not initialized. Skipping profile creation.");
+            return null;
+        }
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
 
@@ -74,22 +79,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = userSnap.data() as UserProfile;
         const adminEmails = ["richmondeke@gmail.com", "godliverse@gmail.com"];
         if (adminEmails.includes(data.email) && data.role !== "admin") {
-            // Auto-fix admin role if it was previously set to customer
-            // We can try to update it if rules allow, or just return it as admin in session
+            // Auto-fix admin role in Firestore
+            try {
+                await updateDoc(doc(db, "users", user.uid), {
+                    role: "admin",
+                    updatedAt: serverTimestamp()
+                });
+                console.log(`Auto-promoted ${data.email} to admin in Firestore`);
+            } catch (err) {
+                console.error("Failed to auto-promote admin in Firestore:", err);
+            }
             return { ...data, role: "admin" as const };
         }
 
         return data;
     }
 
+    // Fetch balance from Graph.finance
+    async function fetchAndSyncBalance(uid: string) {
+        try {
+            const resp = await fetch('/api/payments/graph/balance');
+            if (resp.ok) {
+                const data = await resp.json();
+                const balance = data.balance || 0;
+
+                if (!db) return;
+
+                // Update Firestore if balance changed
+                const userRef = doc(db, "users", uid);
+                await updateDoc(userRef, {
+                    walletBalance: balance,
+                    updatedAt: serverTimestamp(),
+                });
+
+                setUserProfile(prev => prev ? { ...prev, walletBalance: balance } : null);
+            }
+        } catch (error) {
+            console.error("Error fetching Graph.finance balance:", error);
+        }
+    }
+
+    async function refreshBalance() {
+        if (user) {
+            await fetchAndSyncBalance(user.uid);
+        }
+    }
+
     // Listen for auth state changes
     useEffect(() => {
+        if (!auth) {
+            console.warn("Firebase Auth not initialized. Auth provider is disabled.");
+            setLoading(false);
+            return;
+        }
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setUser(user);
 
             if (user) {
                 const profile = await createUserProfile(user);
                 setUserProfile(profile);
+
+                // Initial balance fetch
+                fetchAndSyncBalance(user.uid);
 
                 // Synchronize Firebase auth state with server-side session cookie
                 try {
@@ -153,6 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signInWithGoogle,
         signOut,
+        refreshBalance,
     };
 
     return (

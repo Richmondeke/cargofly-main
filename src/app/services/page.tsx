@@ -120,8 +120,7 @@ export default function ServicesPage() {
     return (
         <div className="min-h-screen pt-32 pb-24 bg-white dark:bg-navy-900 transition-colors duration-500">
             {/* Background */}
-            <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 via-white to-gray-50 dark:from-navy-800 dark:via-navy-900 dark:to-black" />
-            <div className="fixed inset-0 z-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] dark:invert" />
+            <div className="fixed inset-0 z-0 bg-white dark:bg-navy-900" />
 
             <div className="container mx-auto px-6 relative z-10">
                 {/* Header */}
@@ -179,7 +178,7 @@ export default function ServicesPage() {
                         </h2>
                     </div>
 
-                    <div className="glass-panel rounded-3xl overflow-hidden">
+                    <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[600px]">
                                 <thead>
@@ -285,7 +284,7 @@ export default function ServicesPage() {
                                 <motion.button
                                     whileHover={{ y: -2 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="inline-flex items-center gap-2 px-8 py-4 bg-gold-500 text-navy-900 rounded-xl font-bold uppercase tracking-wider hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all"
+                                    className="inline-flex items-center gap-2 px-8 py-4 bg-gold-500 text-navy-900 rounded-xl font-bold uppercase tracking-wider transition-all"
                                 >
                                     Contact Sales
                                     <ArrowRight className="w-5 h-5" />
@@ -293,7 +292,7 @@ export default function ServicesPage() {
                             </Link>
                         </motion.div>
 
-                        <motion.div variants={scaleIn} className="glass-panel rounded-3xl p-8">
+                        <motion.div variants={scaleIn} className="bg-white/5 border border-white/10 rounded-3xl p-8">
                             <div className="grid grid-cols-2 gap-6">
                                 {[
                                     { value: "500+", label: "Enterprise Clients" },
@@ -323,7 +322,7 @@ export default function ServicesPage() {
                     variants={fadeInUp}
                     className="text-center"
                 >
-                    <div className="glass-panel rounded-3xl p-12 bg-gold-500/10 dark:bg-gold-500/5">
+                    <div className="bg-[#FFCA00]/10 border border-[#FFCA00]/20 rounded-3xl p-12">
                         <h2 className="font-display text-3xl md:text-4xl text-navy-900 dark:text-white mb-4">
                             Ready to Ship?
                         </h2>
@@ -334,7 +333,7 @@ export default function ServicesPage() {
                             <motion.button
                                 whileHover={{ y: -3 }}
                                 whileTap={{ scale: 0.98 }}
-                                className="inline-flex items-center gap-2 px-10 py-5 bg-gold-500 text-navy-900 rounded-xl font-bold uppercase tracking-wider hover:shadow-[0_0_40px_rgba(202,138,4,0.4)] transition-all"
+                                className="inline-flex items-center gap-2 px-10 py-5 bg-gold-500 text-navy-900 rounded-xl font-bold uppercase tracking-wider transition-all"
                             >
                                 Get a Quote
                                 <ArrowRight className="w-5 h-5" />

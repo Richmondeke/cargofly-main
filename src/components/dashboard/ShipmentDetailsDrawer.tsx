@@ -2,24 +2,10 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    X,
-    Package,
-    Truck,
-    MapPin,
-    Calendar,
-    DollarSign,
-    AlertCircle,
-    Image as ImageIcon,
-    Video,
-    Download,
-    Upload,
-    ChevronRight,
-    ArrowLeft
-} from 'lucide-react';
+import { X, Package, Truck, MapPin, DollarSign, AlertCircle, Image as ImageIcon, Video, Download, Upload } from 'lucide-react';
+import Image from 'next/image';
 import { DashboardShipment } from '@/lib/dashboard-service';
 import { StatusPill } from './StatusPill';
-import { formatTimestamp } from '@/lib/firestore';
 
 interface ShipmentDetailsDrawerProps {
     isOpen: boolean;
@@ -27,6 +13,7 @@ interface ShipmentDetailsDrawerProps {
     shipment: DashboardShipment | null;
     isAdmin?: boolean;
     onUploadMedia?: (file: File) => Promise<void>;
+    onRefresh?: () => Promise<void>;
 }
 
 export function ShipmentDetailsDrawer({
@@ -34,9 +21,34 @@ export function ShipmentDetailsDrawer({
     onClose,
     shipment,
     isAdmin = false,
-    onUploadMedia
+    onUploadMedia,
+    onRefresh
 }: ShipmentDetailsDrawerProps) {
     const [uploading, setUploading] = useState(false);
+    const [verifying, setVerifying] = useState(false);
+
+    const handleVerifyPayment = React.useCallback(async () => {
+        if (!shipment?.trackingNumber || verifying) return;
+        setVerifying(true);
+        try {
+            const res = await fetch(`/api/payments/verify?reference=${shipment.trackingNumber}`);
+            const result = await res.json();
+            if (result.status && onRefresh) {
+                await onRefresh();
+            }
+        } catch (error) {
+            console.error("Manual verification failed:", error);
+        } finally {
+            setVerifying(false);
+        }
+    }, [shipment?.trackingNumber, verifying, onRefresh]);
+
+    // Auto-verify if payment is pending or failed when drawer opens
+    React.useEffect(() => {
+        if (isOpen && shipment && shipment.paymentStatus !== 'paid' && !verifying) {
+            handleVerifyPayment();
+        }
+    }, [isOpen, shipment, verifying, handleVerifyPayment]);
 
     if (!shipment) return null;
 
@@ -176,12 +188,25 @@ export function ShipmentDetailsDrawer({
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm font-black text-slate-900 dark:text-white">{shipment.totalPrice}</span>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${shipment.paymentStatus === 'paid'
-                                                ? 'bg-emerald-100 text-emerald-700'
-                                                : 'bg-amber-100 text-amber-700'
-                                                }`}>
-                                                {shipment.paymentStatus}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase shadow-sm ${shipment.paymentStatus === 'paid'
+                                                    ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                                                    : shipment.paymentStatus === 'failed'
+                                                        ? 'bg-red-500/10 text-red-600 border border-red-500/20'
+                                                        : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                                                    }`}>
+                                                    {verifying ? 'VERIFYING...' : (shipment.paymentStatus || 'pending')}
+                                                </span>
+                                                {shipment.paymentStatus !== 'paid' && !verifying && (
+                                                    <button
+                                                        onClick={handleVerifyPayment}
+                                                        className="text-[10px] font-black text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[14px]">refresh</span>
+                                                        VERIFY
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -192,7 +217,7 @@ export function ShipmentDetailsDrawer({
                                             <span className="text-sm text-slate-600 dark:text-slate-400">Customs Duty</span>
                                         </div>
                                         <div className="text-sm font-black text-slate-900 dark:text-white">
-                                            {(shipment as any).customsDuty ? `$${(shipment as any).customsDuty.toFixed(2)}` : "None"}
+                                            {shipment.customsDuty ? `$${shipment.customsDuty.toFixed(2)}` : "None"}
                                         </div>
                                     </div>
                                 </div>
@@ -223,7 +248,13 @@ export function ShipmentDetailsDrawer({
                                         shipment.consignmentMedia.map((media, idx) => (
                                             <div key={idx} className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5">
                                                 {media.type === 'image' ? (
-                                                    <img src={media.url} alt={media.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                                    <Image
+                                                        src={media.url}
+                                                        alt={media.name}
+                                                        fill
+                                                        className="object-cover transition-transform group-hover:scale-110"
+                                                        sizes="(max-width: 768px) 50vw, 250px"
+                                                    />
                                                 ) : (
                                                     <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                                                         <Video className="w-8 h-8 text-slate-400" />

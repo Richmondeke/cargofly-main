@@ -24,6 +24,9 @@ async function graphRequest(path: string, body: Record<string, unknown>) {
 }
 
 export async function POST(req: NextRequest) {
+    if (!db) {
+        return NextResponse.json({ error: 'Firebase Database not initialized' }, { status: 500 });
+    }
     try {
         const { userId, amount, currency, method, description, shipmentId } = await req.json();
 

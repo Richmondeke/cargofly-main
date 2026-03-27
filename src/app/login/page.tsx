@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -17,7 +17,7 @@ import AuthLayout from "@/components/auth/AuthLayout";
 function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { signIn, signInWithGoogle } = useAuth();
+    const { signIn, signInWithGoogle, userProfile } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -25,10 +25,12 @@ function LoginContent() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleRedirect = () => {
+    const handleRedirect = (profile: any) => {
         const redirect = searchParams.get("redirect");
         if (redirect) {
             router.push(redirect);
+        } else if (profile?.role === 'admin') {
+            router.push("/dashboard/admin");
         } else {
             router.push("/dashboard");
         }
@@ -41,14 +43,19 @@ function LoginContent() {
 
         try {
             await signIn(email, password);
-            handleRedirect();
         } catch (err) {
             console.error("Login error:", err);
             setError("Invalid email or password. Please try again.");
-        } finally {
             setIsLoading(false);
         }
     };
+
+    // Use a separate useEffect to handle redirection once profile is loaded
+    useEffect(() => {
+        if (userProfile) {
+            handleRedirect(userProfile);
+        }
+    }, [userProfile]);
 
 
     return (
@@ -182,7 +189,6 @@ function LoginContent() {
                     try {
                         setIsLoading(true);
                         await signInWithGoogle();
-                        handleRedirect();
                     } catch (error) {
                         console.error("Google Auth Error:", error);
                         setError("Failed to sign in with Google.");

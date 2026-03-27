@@ -48,7 +48,7 @@ const slideUpWidget = {
 
 export default function Hero() {
     return (
-        <section className="relative w-full flex justify-center items-center py-40 bg-transparent">
+        <section className="relative w-full flex justify-center items-center py-40 bg-navy-900">
 
             {/* Main Content Frame */}
             <div className="w-full max-w-[1200px] min-h-[700px] flex flex-col justify-center items-center gap-spacing-12 px-spacing-06 relative z-10">
@@ -109,7 +109,7 @@ export default function Hero() {
                             variants={slideUpImage}
                             initial="hidden"
                             animate="visible"
-                            className="relative w-full max-w-[500px] aspect-[4/3] rounded-[40px] overflow-hidden shadow-2xl border-4 border-white/10"
+                            className="relative w-full max-w-[500px] aspect-[4/3] rounded-[40px] overflow-hidden shadow-2xl border-4 border-navy-800"
                         >
                             <Image
                                 src="/images/cargofly-truck.jpg"
@@ -117,6 +117,7 @@ export default function Hero() {
                                 fill
                                 className="object-cover"
                                 priority
+                                sizes="(max-width: 768px) 100vw, 500px"
                             />
 
                             {/* Notification Badge */}
@@ -135,7 +136,7 @@ export default function Hero() {
 
                             {/* Logo Overlay on Truck */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-40">
-                                <Image src="/logo-light.png" alt="" width={200} height={60} className="object-contain" />
+                                <Image src="/logo-light.png" alt="" width={200} height={60} className="object-contain" sizes="200px" />
                             </div>
                         </motion.div>
                     </div>

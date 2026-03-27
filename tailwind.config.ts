@@ -12,23 +12,23 @@ const config: Config = {
             colors: {
                 // Cargofly Official Brand Colors
                 primary: {
-                    DEFAULT: "#003399", // Navy Blue - Primary
-                    dark: "#002060",    // Navy Blue 11
-                    light: "#0044CE",   // Navy Blue 10
+                    DEFAULT: "#000080", // Navy Blue - Primary
+                    dark: "#000066",    // Navy Blue - Dark
+                    light: "#4196FF",   // Sky Blue - Light
                 },
                 // Navy Blue Palette
                 navy: {
-                    DEFAULT: "#003399", // Official Navy Blue
-                    900: "#003399",     // Primary Navy
-                    800: "#0044CE",     // Navy Blue 10 (lighter)
-                    700: "#002060",     // Navy Blue 11 (darker/depth)
+                    DEFAULT: "#000080", // Official Navy Blue
+                    900: "#000080",     // Primary Navy
+                    800: "#000099",     // Lighter Navy
+                    700: "#000066",     // Darker Navy
                 },
                 // Cargofly Sky Blue Palette
                 sky: {
                     DEFAULT: "#4196FF", // Cargofly Sky Blue
                     500: "#4196FF",     // Primary Sky Blue
                     400: "#81B7FF",     // Sky Blue 10 (lighter)
-                    600: "#016FFF",     // Sky Blue 11 (darker)
+                    600: "#007FFF",     // Sky Blue 11 (darker)
                 },
                 // Cargofly Yellow Palette
                 gold: {
@@ -51,14 +51,66 @@ const config: Config = {
                 },
                 // Dashboard Surface Colors
                 "surface-light": "#FFFFFF",
-                "surface-dark": "#002060",  // Navy 11 for cards
+                "surface-dark": "#000066",  // Navy 700 for cards
                 "background-light": "#F8FAFC",
-                "background-dark": "#001A4D", // Deep navy for contrast
+                "background-dark": "#000033", // Deep navy for contrast
+                // Tracking Template Colors
+                "background-light-alt": "#f8f6f6",
+                "background-dark-alt": "#101827",
+                "tertiary": "#facc15",
+
+                // Material Design 3 / Premium Aesthetic Colors
+                "surface-container-low": "#f5f3f3",
+                "on-tertiary-fixed-variant": "#584400",
+                "on-tertiary": "#ffffff",
+                "on-primary-fixed-variant": "#153ea3",
+                "on-primary-fixed": "#00164e",
+                "secondary-fixed-dim": "#a7c8ff",
+                "on-surface": "#1b1c1c",
+                "tertiary-fixed": "#ffe08f",
+                "inverse-primary": "#b5c4ff",
+                "on-tertiary-fixed": "#241a00",
+                "surface-container-high": "#e9e8e7",
+                "on-secondary-fixed": "#001b3b",
+                "secondary": "#005eb2",
+                "outline-variant": "#c4c5d5",
+                "primary-m3": "#002068", // Renamed to avoid conflict with existing primary
+                "on-primary-container": "#8aa4ff",
+                "on-error-container": "#93000a",
+                "surface-tint": "#3557bc",
+                "tertiary-fixed-dim": "#f3c000",
+                "surface-dim": "#dbdad9",
+                "surface-container-lowest": "#ffffff",
+                "error": "#ba1a1a",
+                "secondary-container": "#4397ff",
+                "on-secondary-fixed-variant": "#004788",
+                "surface-container": "#efeded",
+                "surface": "#fbf9f8",
+                "surface-container-highest": "#e4e2e2",
+                "on-secondary": "#ffffff",
+                "tertiary-container": "#d2a600",
+                "surface-variant": "#e4e2e2",
+                "on-background": "#1b1c1c",
+                "inverse-surface": "#303031",
+                "primary-fixed": "#dce1ff",
+                "on-tertiary-container": "#503d00",
+                "on-primary": "#ffffff",
+                "inverse-on-surface": "#f2f0f0",
+                "secondary-fixed": "#d5e3ff",
+                "primary-fixed-dim": "#b5c4ff",
+                "surface-bright": "#fbf9f8",
+                "background": "#fbf9f8",
+                "primary-container": "#003399",
+                "on-error": "#ffffff",
+                "error-container": "#ffdad6",
+                "on-surface-variant": "#444653",
+                "outline": "#747684",
+                "on-secondary-container": "#002e5d",
             },
             fontFamily: {
-                display: ["var(--font-humanist)", "sans-serif"],
-                body: ["var(--font-humanist)", "sans-serif"],
-                sans: ["var(--font-humanist)", "sans-serif"],
+                display: ["Public Sans", "var(--font-humanist)", "sans-serif"],
+                body: ["Public Sans", "var(--font-humanist)", "sans-serif"],
+                sans: ["Public Sans", "var(--font-humanist)", "sans-serif"],
             },
             fontSize: {
                 xs: ['12px', { lineHeight: '16px' }],

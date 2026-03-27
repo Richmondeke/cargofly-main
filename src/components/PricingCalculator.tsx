@@ -71,12 +71,14 @@ export default function PricingCalculator() {
             return;
         }
 
-        const weightNum = parseFloat(weight) || 1;
-        const baseRate = selectedRoute.rate;
+        const weightNum = parseFloat(weight) || 0;
+        const baseRate = selectedRoute.rate || 0;
 
         // Simple multiplier for service types if not explicitly defined in route
         const multiplier = service === 'express' ? 1.5 : (service === 'standard' ? 1 : 0.8);
-        const calculatedPrice = baseRate * weightNum * multiplier;
+        let calculatedPrice = baseRate * (weightNum || 1) * multiplier;
+
+        if (isNaN(calculatedPrice)) calculatedPrice = 0;
 
         setQuote({
             price: Math.round(calculatedPrice),

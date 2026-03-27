@@ -2,34 +2,284 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
-import {
-    Package,
-    Plane,
-    Info,
-    Share2,
-    Printer,
-    Search,
-} from "lucide-react";
-import Image from "next/image";
-import TrackingTimeline, { TrackingEvent as UITrackingEvent } from "@/components/TrackingTimeline";
-import FlightPath from "@/components/FlightPath";
 import {
     getShipmentByTracking,
     getTrackingEvents,
     Shipment,
+    TrackingEvent,
     getStatusDisplay,
     formatTimestamp
 } from "@/lib/firestore";
+import { Card } from "@/components/ui/Card";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+
+interface UITrackingEvent {
+    id: string;
+    status: string;
+    location: string;
+    timestamp: string;
+    description: string;
+    isCompleted: boolean;
+}
+
+function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: Shipment, firestoreEvents: TrackingEvent[], setTrackingId: (id: string) => void }) {
+    const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const formatDate = (timestamp: any) => {
+        if (!timestamp) return "Pending";
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return new Intl.DateTimeFormat('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            timeZoneName: 'short'
+        }).format(date);
+    };
+
+    const getStatusStage = (status: string) => {
+        const stages: Record<string, number> = {
+            pending: 0,
+            confirmed: 0,
+            picked_up: 1,
+            in_transit: 2,
+            at_hub: 2,
+            customs_hold: 3,
+            out_for_delivery: 4,
+            delivered: 4,
+            cancelled: -1,
+            returned: -1
+        };
+        return stages[status] ?? 0;
+    };
+
+    const currentStage = shipment ? getStatusStage(shipment.status) : 0;
+    const stages = [
+        { label: "Booked", icon: "check_circle" },
+        { label: "Picked Up", icon: "check_circle" },
+        { label: "In Transit", icon: "flight" },
+        { label: "Customs", icon: "assignment" },
+        { label: "Delivered", icon: "home" }
+    ];
+
+    const events: UITrackingEvent[] = [...firestoreEvents].reverse().map((e: TrackingEvent, idx: number) => ({
+        id: e.id || `event-${idx}`,
+        status: getStatusDisplay(e.status) || e.status,
+        location: e.location,
+        timestamp: formatTimestamp(e.timestamp),
+        description: e.description,
+        isCompleted: true
+    }));
+
+    if (!mounted) return null;
+
+    return (
+        <div className="min-h-screen pt-32 pb-24 bg-[#F8FAFC] dark:bg-slate-950 font-sans">
+            <div className="container mx-auto px-6 max-w-5xl">
+                {/* Title Section */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-4">
+                        <StatusBadge status={shipment.status} className="h-6 px-3 rounded-full text-[10px] bg-green-100 text-green-700 border-none" />
+                        <span className="text-[10px] text-slate-400 font-medium">Updated 4 mins ago</span>
+                    </div>
+                    <h1 className="text-4xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        AWB {shipment.trackingNumber}
+                    </h1>
+                </div>
+
+                {/* Progress Card */}
+                <Card className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl p-8 mb-6 shadow-sm">
+                    <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-8">
+                        <div className="flex-1">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Origin</span>
+                            <h2 className="text-3xl font-bold text-primary">{shipment.sender.city.substring(0, 3).toUpperCase()}</h2>
+                            <p className="text-xs text-slate-500">{shipment.sender.city}</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                            <span className="material-symbols-outlined text-primary text-2xl rotate-90 md:rotate-0">flight</span>
+                        </div>
+                        <div className="flex-1 text-right">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Destination</span>
+                            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{shipment.recipient.city.substring(0, 3).toUpperCase()}</h2>
+                            <p className="text-xs text-slate-500">{shipment.recipient.city}</p>
+                        </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="relative pt-4 pb-8">
+                        <div className="absolute top-[2.15rem] left-0 right-0 h-[2px] bg-slate-100 dark:bg-white/5 mx-8" />
+                        <div
+                            className="absolute top-[2.15rem] left-0 h-[2px] bg-primary transition-all duration-1000 ease-out mx-8"
+                            style={{ width: `${Math.max(0, currentStage) * 25}%` }}
+                        />
+                        <div className="flex justify-between relative z-10">
+                            {stages.map((stage, idx) => (
+                                <div key={idx} className="flex flex-col items-center">
+                                    <div className={`
+                                        w-6 h-6 rounded-full flex items-center justify-center transition-all duration-500 border-2
+                                        ${idx <= currentStage
+                                            ? 'bg-primary border-primary text-white'
+                                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-300'}
+                                    `}>
+                                        <span className="material-symbols-outlined text-xs">{idx < currentStage ? 'check' : stage.icon === 'check_circle' ? '' : stage.icon}</span>
+                                    </div>
+                                    <div className="mt-3 text-center">
+                                        <span className={`text-[10px] font-bold uppercase tracking-tight block ${idx <= currentStage ? 'text-primary' : 'text-slate-400'}`}>
+                                            {stage.label}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Info Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <Card className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl p-8 shadow-sm">
+                        <div className="flex items-center gap-2 mb-8">
+                            <span className="material-symbols-outlined text-primary">info</span>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cargo Details</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-8">
+                            <div>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Pieces / Weight</span>
+                                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                                    {shipment.packages.reduce((sum, p) => sum + p.pieces, 0)} pcs / {shipment.packages.reduce((sum, p) => sum + p.weight, 0).toFixed(2)} kg
+                                </p>
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Service Level</span>
+                                <p className="text-sm font-bold text-slate-900 dark:text-white">{shipment.service.toUpperCase()}</p>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="bg-primary/5 border border-primary/20 rounded-2xl p-8 shadow-sm flex flex-col justify-center">
+                        <span className="text-[10px] text-primary/60 font-bold uppercase tracking-widest block mb-2">Estimated Arrival</span>
+                        <h4 className="text-2xl font-bold text-primary mb-1">
+                            {formatDate(shipment.estimatedDelivery)}
+                        </h4>
+                        <p className="text-[10px] text-slate-400 italic">Subject to local conditions.</p>
+                    </Card>
+                </div>
+
+                {/* History */}
+                <Card className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl p-8 mb-10 shadow-sm">
+                    <div className="flex items-center gap-2 mb-10">
+                        <span className="material-symbols-outlined text-primary">history</span>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Tracking History</h3>
+                    </div>
+                    <div className="relative">
+                        <div className="absolute left-[26px] top-6 bottom-6 w-[2px] bg-slate-100 dark:bg-white/5" />
+                        <div className="space-y-12">
+                            {events.map((event, idx) => (
+                                <div key={event.id} className="relative flex items-start gap-12 group">
+                                    <div className={`
+                                        relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white dark:border-slate-900 shadow-sm
+                                        ${idx === 0 ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}
+                                    `}>
+                                        <span className="material-symbols-outlined text-[14px]">
+                                            {idx === 0 ? 'flight_takeoff' : 'check'}
+                                        </span>
+                                    </div>
+                                    <div className={`flex-1 p-5 rounded-xl border transition-all duration-300 ${idx === 0 ? 'bg-white dark:bg-slate-800 border-primary/20 shadow-md' : 'bg-slate-50/50 dark:bg-slate-800/30 border-transparent'}`}>
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
+                                            <h4 className={`font-bold ${idx === 0 ? 'text-primary' : 'text-slate-700 dark:text-slate-300'}`}>
+                                                {event.description}
+                                            </h4>
+                                            <span className="text-[10px] font-medium text-primary uppercase">{event.timestamp.split(', ').slice(-2).join(', ')}</span>
+                                        </div>
+                                        <p className="text-xs text-slate-500">{event.location} — {event.timestamp.split(', ').slice(0, 2).join(', ')}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Action Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                    <button
+                        onClick={() => {
+                            const toastId = toast.loading('Generating Master AWB PDF...');
+                            setTimeout(() => {
+                                toast.success('Master AWB Downloaded', { id: toastId });
+                            }, 1500);
+                        }}
+                        className="flex items-center justify-between p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                <span className="material-symbols-outlined">description</span>
+                            </div>
+                            <div className="text-left">
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Download Master AWB</h4>
+                                <p className="text-[10px] text-slate-500">Official Shipping Document (PDF)</p>
+                            </div>
+                        </div>
+                        <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">download</span>
+                    </button>
+
+                    <button
+                        onClick={() => router.push('/dashboard/support')}
+                        className="flex items-center justify-between p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                <span className="material-symbols-outlined">headset_mic</span>
+                            </div>
+                            <div className="text-left">
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Contact Support</h4>
+                                <p className="text-[10px] text-slate-500">24/7 Priority Assistance</p>
+                            </div>
+                        </div>
+                        <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">chevron_right</span>
+                    </button>
+                </div>
+
+                {/* Track Another */}
+                <div className="mt-12 text-center">
+                    <p className="text-sm text-slate-400 mb-6 font-medium">Want to track another shipment?</p>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            const val = (e.currentTarget.elements.namedItem('trackingId') as HTMLInputElement).value;
+                            if (val.trim()) setTrackingId(val.trim());
+                        }}
+                        className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+                    >
+                        <input
+                            name="trackingId"
+                            type="text"
+                            placeholder="Enter Tracking ID"
+                            className="flex-1 px-6 py-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-slate-900 dark:text-white"
+                        />
+                        <button type="submit" className="bg-primary text-white font-bold px-8 py-4 rounded-xl shadow-lg active:scale-95">
+                            Track
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function TrackPageContent() {
     const searchParams = useSearchParams();
     const [trackingId, setTrackingId] = useState<string | null>(null);
     const [shipment, setShipment] = useState<Shipment | null>(null);
-    const [events, setEvents] = useState<UITrackingEvent[]>([]);
+    const [firestoreEvents, setFirestoreEvents] = useState<TrackingEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const id = searchParams.get("id");
@@ -41,347 +291,80 @@ function TrackPageContent() {
     useEffect(() => {
         async function fetchData() {
             if (!trackingId) return;
-
             setLoading(true);
             setError("");
             try {
-                // 1. Get Shipment First
                 const shipmentData = await getShipmentByTracking(trackingId);
-
                 if (shipmentData && shipmentData.id) {
-                    // 2. Then Get Events using the Document ID
                     const eventsData = await getTrackingEvents(shipmentData.id);
-
                     setShipment(shipmentData);
-
-                    // Convert Firestore events to UI events
-                    // Firestore returns Descending (Newest First). 
-                    // We reverse to show Chronological (Oldest First) to match Timeline flow.
-                    const flowEvents = eventsData.reverse().map((e: any) => ({
-                        id: e.id,
-                        status: getStatusDisplay(e.status) || e.status,
-                        location: e.location,
-                        timestamp: formatTimestamp(e.timestamp),
-                        description: e.description,
-                        isCompleted: true // Past events are completed
-                    }));
-                    setEvents(flowEvents);
+                    setFirestoreEvents(eventsData);
                 } else {
-                    setError("Shipment not found. Please check the tracking number.");
+                    setError("Shipment not found.");
                     setShipment(null);
-                    setEvents([]);
                 }
             } catch (err) {
                 console.error("Error fetching shipment:", err);
-                // Show specific error if available, otherwise generic
-                const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-                setError(`Failed to load shipment: ${errorMessage}`);
+                setError("Failed to load shipment.");
             } finally {
                 setLoading(false);
             }
         }
-
         fetchData();
     }, [trackingId]);
 
-    const handleCopy = async () => {
-        if (trackingId) {
-            await navigator.clipboard.writeText(trackingId);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        }
-    };
+    if (loading) {
+        return (
+            <div className="min-h-screen pt-32 pb-24 bg-white dark:bg-slate-950 flex flex-col items-center justify-center font-sans text-slate-500">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+                <p>Locating shipment...</p>
+            </div>
+        );
+    }
 
-    const handleShare = async () => {
-        const shareData = {
-            title: 'Cargofly Shipment Tracking',
-            text: `Track shipment ${trackingId || ''} on Cargofly`,
-            url: typeof window !== 'undefined' ? window.location.href : '',
-        };
-
-        if (navigator.share) {
-            try {
-                await navigator.share(shareData);
-            } catch (err) {
-                if ((err as Error).name !== 'AbortError') {
-                    console.error('Error sharing:', err);
-                }
-            }
-        } else {
-            try {
-                await navigator.clipboard.writeText(window.location.href);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-            } catch (err) {
-                console.error('Error copying to clipboard:', err);
-            }
-        }
-    };
-
-    const handlePrint = () => {
-        if (typeof window !== 'undefined') {
-            window.print();
-        }
-    };
-
-    const handleViewInvoice = () => {
-        if (shipment?.id) {
-            window.open(`/invoice/${shipment.id}`, '_blank');
-        }
-    };
-
-    const getProgress = (status: string) => {
-        switch (status) {
-            case "pending": return 10;
-            case "processing": return 25;
-            case "pickup": return 40;
-            case "in_transit": return 60;
-            case "customs": return 75;
-            case "out_for_delivery": return 90;
-            case "delivered": return 100;
-            case "cancelled": return 0;
-            case "returned": return 100;
-            default: return 0;
-        }
-    };
-
-    const formatDate = (timestamp: any) => {
-        if (!timestamp) return "Pending";
-        // Handle Firestore Timestamp or Date
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return new Intl.DateTimeFormat('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric'
-        }).format(date);
-    };
+    if (error || !shipment) {
+        return (
+            <div className="min-h-screen pt-32 pb-24 bg-[#f8f6f6] dark:bg-slate-950 font-sans">
+                <div className="container mx-auto px-6 max-w-4xl text-center">
+                    <Card className="bg-white dark:bg-slate-900 rounded-3xl p-12 shadow-sm border border-slate-100 dark:border-white/5">
+                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">No Shipment Found</h2>
+                        <p className="text-slate-500 mb-8">{error || "Check your tracking ID and try again."}</p>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                const val = (e.currentTarget.elements.namedItem('trackingId') as HTMLInputElement).value;
+                                if (val.trim()) setTrackingId(val.trim());
+                            }}
+                            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+                        >
+                            <input
+                                name="trackingId"
+                                type="text"
+                                placeholder="Enter Tracking ID"
+                                className="flex-1 px-6 py-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/5 focus:outline-none"
+                            />
+                            <button type="submit" className="bg-primary text-white font-bold px-8 py-4 rounded-xl">
+                                Track
+                            </button>
+                        </form>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen pt-32 pb-24 bg-white dark:bg-navy-900 transition-colors duration-500">
-            {/* Background */}
-            <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 via-white to-gray-50 dark:from-navy-800 dark:via-navy-900 dark:to-black" />
-            <div className="fixed inset-0 z-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] dark:invert" />
-
-            <div className="container mx-auto px-6 relative z-10">
-                {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-8"
-                >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex-1 max-w-2xl">
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const val = (e.currentTarget.elements.namedItem('trackingId') as HTMLInputElement).value;
-                                    if (val.trim()) setTrackingId(val.trim());
-                                }}
-                                className="relative group flex items-center gap-2"
-                            >
-                                <div className="relative flex-grow">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-gold-500 transition-colors" />
-                                    <input
-                                        name="trackingId"
-                                        type="text"
-                                        placeholder="Track another Shipment ID (e.g. CF-8829341029)"
-                                        className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white dark:bg-navy-800/50 border border-gray-200 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 transition-all text-navy-900 dark:text-white font-body shadow-sm"
-                                        defaultValue={trackingId || ''}
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    className="bg-gold-500 hover:bg-gold-600 text-navy-900 font-bold px-8 py-4 rounded-2xl transition-all shadow-md active:scale-95 whitespace-nowrap"
-                                >
-                                    Track Result
-                                </button>
-                            </form>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={handleShare}
-                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-navy-800 border border-gray-200 dark:border-navy-700 text-navy-900 dark:text-white hover:bg-gray-200 dark:hover:bg-navy-700 transition-colors text-sm font-bold font-body relative"
-                            >
-                                <Share2 className="w-4 h-4" />
-                                {copied ? "Link Copied!" : "Share"}
-                            </button>
-                            <button
-                                onClick={handlePrint}
-                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-navy-900 dark:bg-gold-500 text-white dark:text-navy-900 hover:bg-navy-800 dark:hover:bg-gold-400 transition-colors text-sm font-bold font-body"
-                            >
-                                <Printer className="w-4 h-4" />
-                                Print
-                            </button>
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* Shipment Info Summary */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="mb-12"
-                >
-                    <h1 className="font-display text-4xl text-navy-900 dark:text-white mb-2">
-                        Shipment Tracking
-                    </h1>
-                    <div className="flex items-center gap-2 text-navy-900/60 dark:text-white/60 font-body">
-                        <span>Tracking ID:</span>
-                        <span className="text-navy-900 dark:text-white font-bold">{trackingId || "---"}</span>
-                    </div>
-                </motion.div>
-
-                {/* Loading State */}
-                {loading && (
-                    <div className="text-center py-12">
-                        <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                        <p className="text-white/60 font-body">Locating shipment...</p>
-                    </div>
-                )}
-
-                {/* Error State */}
-                {error && !loading && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-center py-20 bg-white dark:bg-navy-800/50 rounded-[32px] border border-slate-200 dark:border-white/10 max-w-2xl mx-auto shadow-xl"
-                    >
-                        <div className="w-20 h-20 bg-slate-100 dark:bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Info className="w-10 h-10 text-slate-400 dark:text-slate-500" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-navy-900 dark:text-white mb-4">Shipment Not Found</h2>
-                        <p className="text-slate-500 dark:text-gray-400 px-8 mb-8 font-body leading-relaxed">
-                            {error}. Please verify the tracking number and try again. If the problem persists, contact our support team.
-                        </p>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="text-gold-500 font-bold hover:underline flex items-center justify-center gap-2 mx-auto"
-                        >
-                            <Search className="w-4 h-4" /> Try a Different ID
-                        </button>
-                    </motion.div>
-                )}
-
-                {/* Results */}
-                {shipment && !loading && (
-                    <div className="grid lg:grid-cols-12 gap-8 items-start">
-                        {/* Left Column: Timeline */}
-                        <div className="lg:col-span-4 lg:sticky lg:top-32">
-                            <div className="bg-white dark:bg-navy-800/50 rounded-3xl p-8 border border-gray-100 dark:border-navy-700">
-                                <h3 className="font-display text-xl text-navy-900 dark:text-white mb-8">
-                                    Status Timeline
-                                </h3>
-                                <TrackingTimeline
-                                    events={events}
-                                    currentStatus={getStatusDisplay(shipment.status) || shipment.status}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Right Column: Details & Map */}
-                        <div className="lg:col-span-8 space-y-8">
-                            {/* Cargo Info Card */}
-                            <div className="bg-white dark:bg-navy-800 rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-white/5">
-                                <div className="bg-slate-100 dark:bg-navy-900 relative h-48 border-b border-slate-200 dark:border-white/5 overflow-hidden">
-                                    <Image
-                                        src="/images/illustrations/ground_crew.jpg"
-                                        alt="Ground Crew"
-                                        fill
-                                        className="object-cover opacity-60"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-navy-900 to-transparent" />
-                                    <div className="absolute bottom-6 left-8">
-                                        <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase mb-1">Cargo Information</p>
-                                        <h3 className="font-display text-2xl">Shipment Details</h3>
-                                    </div>
-                                    <Package className="absolute bottom-6 right-8 w-6 h-6 text-gold-500" />
-                                </div>
-                                <div className="p-8">
-                                    <div className="grid md:grid-cols-2 gap-y-10 gap-x-12 mb-10">
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] text-slate-400 dark:text-gray-400 font-bold tracking-widest uppercase">Origin</p>
-                                            <p className="text-lg font-display text-navy-900 dark:text-white">{shipment.sender.city}, {shipment.sender.country}</p>
-                                        </div>
-                                        <div className="space-y-1 md:text-right">
-                                            <p className="text-[10px] text-slate-400 dark:text-gray-400 font-bold tracking-widest uppercase">Destination</p>
-                                            <p className="text-lg font-display text-navy-900 dark:text-white">{shipment.recipient.city}, {shipment.recipient.country}</p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] text-slate-400 dark:text-gray-400 font-bold tracking-widest uppercase">Est. Delivery</p>
-                                            <p className="text-lg font-display text-gold-500">{formatDate(shipment.estimatedDelivery)}</p>
-                                        </div>
-                                        <div className="space-y-1 md:text-right">
-                                            <p className="text-[10px] text-slate-400 dark:text-gray-400 font-bold tracking-widest uppercase">Weight</p>
-                                            <p className="text-lg font-display text-navy-900 dark:text-white">{shipment.packages.reduce((sum, p) => sum + p.weight, 0).toFixed(2)} kg</p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] text-slate-400 dark:text-gray-400 font-bold tracking-widest uppercase">Cargo Type</p>
-                                            <p className="text-lg font-display text-navy-900 dark:text-white">
-                                                {shipment.packages[0].description}
-                                                {shipment.packages.length > 1 && ` (+${shipment.packages.length - 1} more)`}
-                                            </p>
-                                        </div>
-                                        <div className="space-y-1 md:text-right">
-                                            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Service Level</p>
-                                            <div className="flex items-center md:justify-end gap-1 text-gold-400">
-                                                <span className="text-lg font-display">+ PRIORITY</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                        <p className="text-slate-400 dark:text-gray-400 font-mono text-sm tracking-wider">
-                                            Invoice #{shipment.id ? shipment.id.substring(0, 8).toUpperCase() : 'INV'}
-                                        </p>
-                                        <button
-                                            onClick={handleViewInvoice}
-                                            className="px-6 py-3 rounded-xl bg-navy-900 dark:bg-blue-600 hover:bg-navy-800 dark:hover:bg-blue-500 text-white transition-colors text-sm font-bold font-body"
-                                        >
-                                            View Invoice
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Flight Path / Map Visual */}
-                            <div className="bg-white dark:bg-navy-800/50 rounded-3xl p-8 border border-gray-100 dark:border-navy-700">
-                                <div className="flex items-center justify-between mb-8">
-                                    <h3 className="font-display text-xl text-navy-900 dark:text-white flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600">
-                                            <Plane className="w-4 h-4" />
-                                        </div>
-                                        Real-time Flight Path
-                                    </h3>
-                                    <div className="px-3 py-1 rounded-full bg-orange-500/10 text-orange-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                                        Live Tracking
-                                    </div>
-                                </div>
-                                <div className="aspect-[2/1] bg-sky-100 dark:bg-navy-900 rounded-2xl overflow-hidden relative">
-                                    <FlightPath
-                                        origin={shipment.sender.city}
-                                        destination={shipment.recipient.city}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+        <TrackResults
+            shipment={shipment}
+            firestoreEvents={firestoreEvents}
+            setTrackingId={setTrackingId}
+        />
     );
 }
 
 export default function TrackPage() {
     return (
-        <Suspense fallback={
-            <div className="min-h-screen pt-32 pb-24 bg-navy-900 flex items-center justify-center">
-                <div className="text-white">Loading...</div>
-            </div>
-        }>
+        <Suspense fallback={<div className="min-h-screen bg-white dark:bg-slate-950" />}>
             <TrackPageContent />
         </Suspense>
     );

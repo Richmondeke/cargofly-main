@@ -60,11 +60,11 @@ const faqs = [
     },
     {
         question: "What are the requirements for picking up shipments?",
-        answer: "Major shipments must be picked up within 48 hours of arrival at our neighbor island facilities to avoid storage fees."
+        answer: "Major shipments must be picked up within 48 hours of arrival at our destination facilities to avoid storage fees."
     },
     {
         question: "Do you partner with major retailers?",
-        answer: "Yes, we partner with major retailers like Home Depot and Lowe's for inter-island shipping. Through our retail partnerships, we also facilitate shopping from Oʻahu retailers like Costco, Sam's Club, Target, and Walmart."
+        answer: "Yes, we partner with major retail providers for inter-island shipping and facilitate logistics from major retailers. Through our retail partnerships, we ensure seamless delivery for your large purchases."
     },
     {
         question: "Can you handle perishable or special items?",

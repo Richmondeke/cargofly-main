@@ -1,21 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getCustomers, getRecentActivities, formatActivityTime, TeamMember, Activity, getDashboardStats } from '@/lib/dashboard-service';
+import {
+    getCustomers,
+    getRecentActivities,
+    formatActivityTime,
+    TeamMember,
+    Activity,
+    getDashboardStats,
+    getActiveShipments,
+    DashboardShipment
+} from '@/lib/dashboard-service';
 import { useAuth } from '@/contexts/AuthContext';
-import RiveAnimation from '@/components/ui/RiveAnimation';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
-import { StatusPill } from '@/components/dashboard/StatusPill';
-import {
-    Truck,
-    Activity as ActivityIcon,
-    CheckCircle,
-    CreditCard,
-    Eye
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default function AdminPage() {
     const { userProfile } = useAuth();
@@ -23,19 +21,22 @@ export default function AdminPage() {
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<TeamMember[]>([]);
     const [activities, setActivities] = useState<Activity[]>([]);
-    const [stats, setStats] = useState({ totalShipments: 0, inTransit: 0, delivered: 0, totalRevenue: 0 });
+    const [recentShipments, setRecentShipments] = useState<DashboardShipment[]>([]);
+    const [stats, setStats] = useState({ totalShipments: 0, inTransit: 0, delivered: 0, totalRevenue: 0, pending: 0 });
 
     const loadData = async () => {
         setLoading(true);
         try {
-            const [usersData, activityData, statsData] = await Promise.all([
+            const [usersData, activityData, statsData, shipmentsData] = await Promise.all([
                 getCustomers(),
                 getRecentActivities(undefined, 'admin', 10),
                 getDashboardStats(),
+                getActiveShipments(undefined, 'admin', 'all'),
             ]);
             setUsers(usersData);
             setActivities(activityData);
             setStats(statsData);
+            setRecentShipments(shipmentsData.slice(0, 5));
         } catch (error) {
             console.error('Error loading admin data:', error);
         } finally {
@@ -48,220 +49,247 @@ export default function AdminPage() {
     }, []);
 
     const handleViewShipments = (userId: string) => {
-        router.push(`/dashboard/shipments?userId=${userId}`);
+        router.push(`/dashboard/admin/shipments?userId=${userId}`);
     };
 
     const isAdmin = userProfile?.role === 'admin';
 
     if (!isAdmin) {
         return (
-            <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-background-dark">
-                <div className="text-center">
-                    <span className="material-symbols-outlined text-6xl text-slate-400 dark:text-slate-600 mb-4">lock</span>
+            <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-[#0f172a]">
+                <div className="text-center max-w-md px-6">
+                    <span className="material-symbols-outlined text-6xl text-slate-400 mb-4 block">lock</span>
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Access Restricted</h2>
-                    <p className="text-slate-500">You need admin privileges to access this page.</p>
+                    <p className="text-slate-500 mb-6">You need admin privileges to access this page.</p>
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800 text-left">
+                        <p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-2 uppercase tracking-wider">Developer Note:</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-400 mb-4">If you are testing and need admin access, you can promote your account using the setup tool.</p>
+                        <Button
+                            onClick={() => router.push('/admin-setup')}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                            Go to Admin Setup
+                        </Button>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <div className="text-left">
-                    <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Operations</h1>
-                    <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">System administration and team management</p>
-                </div>
-            </div>
+        <div className="flex-1 overflow-y-auto h-full bg-slate-50 dark:bg-[#0f172a] p-8">
+            <div className="max-w-7xl mx-auto">
 
-            {/* System Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {/* Total Shipments */}
-                <Card variant="default">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                                <Truck className="w-4 h-4 text-amber-500" />
-                            </div>
-                            <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Shipments</span>
-                        </div>
-                        {loading ? (
-                            <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                        ) : (
-                            <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{stats.totalShipments.toLocaleString()}</p>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* In Transit */}
-                <Card variant="default">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-sky-50 dark:bg-sky-900/20 rounded-lg">
-                                <ActivityIcon className="w-4 h-4 text-sky-500" />
-                            </div>
-                            <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">In Transit</span>
-                        </div>
-                        {loading ? (
-                            <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                        ) : (
-                            <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{stats.inTransit.toLocaleString()}</p>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* Delivered */}
-                <Card variant="default">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                            </div>
-                            <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Delivered</span>
-                        </div>
-                        {loading ? (
-                            <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                        ) : (
-                            <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{stats.delivered.toLocaleString()}</p>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* Total Revenue */}
-                <Card variant="premium">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-white/10 rounded-lg">
-                                <CreditCard className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-sm font-bold text-white/70 uppercase tracking-wider">Total Revenue</span>
-                        </div>
-                        {loading ? (
-                            <div className="h-8 w-16 bg-white/10 rounded animate-pulse"></div>
-                        ) : (
-                            <p className="text-3xl font-black text-white tracking-tighter">
-                                ${(stats.totalRevenue / 1000).toFixed(1)}k
-                            </p>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Registered Users */}
-                <div className="lg:col-span-2 bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Registered Users</h3>
+                {/* ── Top Header Bar ──────────────────────────────────────────────── */}
+                <header className="flex justify-between items-center mb-10">
+                    <div>
+                        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>
+                            Precision Navigator
+                        </h1>
+                        <p className="text-xs font-medium text-slate-500">Real-time global logistics oversight</p>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 uppercase tracking-wider font-semibold text-xs border-y-0">
-                                <tr>
-                                    <th className="px-4 md:px-6 py-4">User</th>
-                                    <th className="hidden md:table-cell px-6 py-4">Email</th>
-                                    <th className="px-4 md:px-6 py-4">Status</th>
-                                    <th className="hidden lg:table-cell px-6 py-4">Joined</th>
-                                    <th className="px-4 md:px-6 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-navy-800 dark:bg-navy-700 flex items-center justify-center text-white font-bold text-sm border-2 border-slate-100 dark:border-white/10 shadow-sm cursor-pointer hover:border-primary/50 transition-all">
+                            {userProfile?.displayName?.split(' ').map(n => n[0]).join('') || 'RE'}
+                        </div>
+                    </div>
+                </header>
+
+                {/* ── 4-Metric Stats ────────────────────────────────────────────── */}
+                <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                    {[
+                        { label: 'Global Shipments', value: stats.totalShipments.toLocaleString(), icon: 'local_shipping', color: 'blue' },
+                        { label: 'In Transit', value: stats.inTransit.toLocaleString(), icon: 'explore', color: 'emerald' },
+                        { label: 'Pending Action', value: stats.pending.toLocaleString(), icon: 'history', color: 'amber' },
+                        { label: 'Total Revenue', value: stats.totalRevenue ? `$${(stats.totalRevenue).toLocaleString()}` : '$0', icon: 'payments', color: 'indigo' }
+                    ].map((stat, idx) => (
+                        <div key={idx} className="bg-white dark:bg-[#1e293b] p-6 rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-slate-100 dark:border-white/5 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all">
+                            <div className={`absolute top-0 left-0 w-1 h-full bg-${stat.color}-500 opacity-0 group-hover:opacity-100 transition-opacity`} />
+                            <div className="flex justify-between items-start mb-4">
+                                <div className={`w-10 h-10 rounded-xl bg-${stat.color}-50 dark:bg-${stat.color}-900/20 flex items-center justify-center`}>
+                                    <span className={`material-symbols-outlined text-lg text-${stat.color}-600 dark:text-${stat.color}-400`}>{stat.icon}</span>
+                                </div>
+                            </div>
+                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{stat.label}</p>
+                            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
+                                {loading ? '...' : stat.value}
+                            </h3>
+                        </div>
+                    ))}
+                </section>
+
+                {/* ── Main Operations Row ─────────────────────────────────────────── */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+                    {/* Left Col: Operations Table */}
+                    <div className="lg:col-span-2 space-y-10">
+                        <section>
+                            <div className="flex justify-between items-center mb-6 px-2">
+                                <h2 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                                    Global Operations Overview
+                                </h2>
+                                <button
+                                    onClick={() => router.push('/dashboard/admin/shipments')}
+                                    className="text-primary text-[10px] font-bold uppercase tracking-widest hover:underline"
+                                >
+                                    View Detailed Manifest
+                                </button>
+                            </div>
+                            <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-slate-100 dark:border-white/5 overflow-hidden">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-white/10">
+                                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Shipment ID</th>
+                                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Origin/Dest</th>
+                                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                        {loading ? (
+                                            [1, 2, 3, 4, 5].map(i => (
+                                                <tr key={i}><td colSpan={3} className="px-6 py-5"><div className="h-4 bg-slate-100 rounded animate-pulse" /></td></tr>
+                                            ))
+                                        ) : recentShipments.map((shipment, idx) => (
+                                            <tr
+                                                key={idx}
+                                                onClick={() => router.push(`/dashboard/admin/shipments?search=${shipment.id}`)}
+                                                className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                                            >
+                                                <td className="px-6 py-5 text-sm font-bold text-slate-900 dark:text-blue-300 group-hover:text-primary transition-colors">{shipment.id.slice(0, 10)}</td>
+                                                <td className="px-6 py-5">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                        <span>{shipment.origin}</span>
+                                                        <span className="material-symbols-outlined text-[14px] text-slate-300">arrow_forward</span>
+                                                        <span>{shipment.destination}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5">
+                                                    <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${shipment.status === 'delivered' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' :
+                                                        shipment.status === 'cancelled' ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400' :
+                                                            'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+                                                        }`}>
+                                                        {shipment.status.replace('_', ' ')}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <section>
+                            <div className="flex justify-between items-center mb-6 px-2">
+                                <h2 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                                    Registered Users
+                                </h2>
+                            </div>
+                            <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-slate-100 dark:border-white/5 overflow-hidden">
+                                <table className="w-full text-left border-collapse text-sm">
+                                    <thead>
+                                        <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-white/10">
+                                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">User</th>
+                                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Role</th>
+                                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Joined When</th>
+                                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                        {loading ? (
+                                            [1, 2, 3].map(i => (
+                                                <tr key={i}><td colSpan={4} className="px-6 py-4"><div className="h-4 bg-slate-100 rounded animate-pulse" /></td></tr>
+                                            ))
+                                        ) : (
+                                            users.map((u, idx) => (
+                                                <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
+                                                                {u.displayName[0]}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-xs font-bold text-slate-900 dark:text-white">{u.displayName}</p>
+                                                                <p className="text-[10px] text-slate-400">{u.email}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-5">
+                                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full ${u.role === 'admin' ? 'bg-primary text-white' :
+                                                            u.role === 'staff' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10' :
+                                                                'bg-slate-50 text-slate-500 dark:bg-slate-500/10'
+                                                            }`}>
+                                                            {u.role || 'customer'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-5">
+                                                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                                                            {u.joinedAt ? formatActivityTime(u.joinedAt) : 'N/A'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-5 text-right">
+                                                        <button onClick={() => handleViewShipments(u.uid)} className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">View History</button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+
+                    {/* Right Col: Recent Activity */}
+                    <div className="space-y-10">
+                        <section>
+                            <h2 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider mb-6 px-2">
+                                System Activity
+                            </h2>
+                            <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-slate-100 dark:border-white/5 p-6 space-y-6">
                                 {loading ? (
-                                    [1, 2, 3].map((i) => (
-                                        <tr key={i}>
-                                            <td colSpan={5} className="px-4 md:px-6 py-5">
-                                                <div className="h-6 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : users.length > 0 ? (
-                                    users.map((user) => (
-                                        <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                            <td className="px-4 md:px-6 py-4">
-                                                <div className="flex items-center gap-2 md:gap-3">
-                                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-600 dark:text-sky-400 font-bold uppercase text-xs md:text-sm">
-                                                        {user.displayName.charAt(0)}
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <p className="font-semibold text-slate-900 dark:text-white text-sm md:text-base">{user.displayName}</p>
-                                                        {/* Show email on mobile below name */}
-                                                        <span className="md:hidden text-xs text-slate-500 dark:text-slate-400 truncate max-w-[120px]">{user.email}</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="hidden md:table-cell px-6 py-4 text-slate-600 dark:text-slate-300">{user.email}</td>
-                                            <td className="px-4 md:px-6 py-4">
-                                                <StatusPill status="success" />
-                                            </td>
-                                            <td className="hidden lg:table-cell px-6 py-4 text-slate-500">
-                                                {user.joinedAt?.toDate ? user.joinedAt.toDate().toLocaleDateString() : 'N/A'}
-                                            </td>
-                                            <td className="px-4 md:px-6 py-4 text-right">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleViewShipments(user.uid)}
-                                                    className="rounded-xl shadow-sm hover:bg-primary hover:text-white transition-all whitespace-nowrap"
-                                                    leftIcon={<Eye className="w-3.5 h-3.5" />}
-                                                >
-                                                    View <span className="hidden md:inline">Shipments</span>
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                                            <div className="flex flex-col items-center gap-3">
-                                                <div className="w-48 h-48">
-                                                    <RiveAnimation src="/icons/empty-state.riv" />
-                                                </div>
-                                                <p className="font-medium">No users found</p>
+                                    [1, 2, 3].map(i => <div key={i} className="h-10 bg-slate-50 rounded animate-pulse" />)
+                                ) : activities.length === 0 ? (
+                                    <div className="text-center py-4 text-slate-400 text-[10px] uppercase font-bold tracking-widest">No recent activity</div>
+                                ) : activities.map((act, idx) => (
+                                    <div key={idx} className="flex gap-4">
+                                        <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight mb-1">{act.action}</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{act.userName}</span>
+                                                <span className="text-[10px] text-slate-300">•</span>
+                                                <span className="text-[10px] text-slate-400">{formatActivityTime(act.timestamp)}</span>
                                             </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Activity Log */}
-                <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Activity Log</h3>
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
-                        {loading ? (
-                            [1, 2, 3, 4, 5].map((i) => (
-                                <div key={i} className="h-12 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                            ))
-                        ) : activities.length > 0 ? (
-                            activities.map((activity) => (
-                                <div key={activity.id} className="flex gap-3 items-start p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-sm text-slate-500">
-                                            {activity.entityType === 'shipment' ? 'local_shipping' : activity.entityType === 'booking' ? 'add_box' : 'info'}
-                                        </span>
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-slate-900 dark:text-white">{activity.action}</p>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-xs text-slate-500">{activity.userName}</span>
-                                            <span className="text-slate-300">•</span>
-                                            <span className="text-xs text-slate-400">{formatActivityTime(activity.timestamp)}</span>
                                         </div>
                                     </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-8 gap-3 text-slate-500">
-                                <div className="w-32 h-32">
-                                    <RiveAnimation src="/icons/empty-state.riv" />
-                                </div>
-                                <p>No activity yet</p>
+                                ))}
                             </div>
-                        )}
+                        </section>
+
+                        <section className="bg-navy-900 dark:bg-indigo-600 p-8 rounded-3xl shadow-xl shadow-primary/20 relative overflow-hidden text-white group cursor-pointer hover:shadow-2xl transition-all" onClick={() => router.push('/dashboard/admin/shipments')}>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                            <div className="relative z-10">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-2">Internal Manifest</p>
+                                <h4 className="text-xl font-black mb-6">Operations Center</h4>
+                                <div className="space-y-4">
+                                    <div className="p-3 bg-white/10 rounded-xl flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-white text-sm">hub</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase text-white/70">Transit Hub Status</p>
+                                            <p className="text-lg font-bold">Lagos Main Hub</p>
+                                        </div>
+                                    </div>
+                                    <Button className="w-full bg-white text-navy-900 font-black text-xs uppercase tracking-widest h-10 rounded-xl hover:bg-white/90 shadow-lg">
+                                        Open Monitor
+                                    </Button>
+                                </div>
+                            </div>
+                        </section>
                     </div>
+
                 </div>
+
             </div>
         </div>
     );

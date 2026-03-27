@@ -78,7 +78,7 @@ const AIChat: React.FC = () => {
                     {/* Header */}
                     <div className="p-4 bg-primary text-white rounded-t-2xl flex justify-between items-center shadow-md">
                         <div className="flex items-center gap-3">
-                            <div className="bg-white/20 p-2 rounded-full">
+                            <div className="bg-white/10 p-2 rounded-full border border-white/20">
                                 <span className="material-symbols-outlined text-xl">smart_toy</span>
                             </div>
                             <div>
@@ -105,9 +105,9 @@ const AIChat: React.FC = () => {
                                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div
-                                    className={`max-w-[80%] rounded-2xl p-3 text-sm shadow-sm ${msg.sender === 'user'
+                                    className={`max-w-[80%] rounded-2xl p-4 text-sm shadow-sm ${msg.sender === 'user'
                                             ? 'bg-primary text-white rounded-tr-none'
-                                            : 'bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-tl-none'
+                                            : 'bg-white dark:bg-navy-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 rounded-tl-none'
                                         }`}
                                 >
                                     {msg.text}

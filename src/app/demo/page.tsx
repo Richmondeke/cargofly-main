@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateTrackingNumber, createShipment, Shipment, ShipmentStatus } from "@/lib/firestore";
 import { Timestamp } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,9 +22,16 @@ const DEMO_STATUSES: ShipmentStatus[] = [
 
 export default function DemoPage() {
     const { user } = useAuth();
+    const [mounted, setMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [createdShipments, setCreatedShipments] = useState<any[]>([]);
     const [logs, setLogs] = useState<string[]>([]);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     const addLog = (msg: string) => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev]);
 

@@ -9,10 +9,10 @@ const Card = React.forwardRef<
         ref={ref}
         className={cn(
             "rounded-2xl border transition-all duration-300",
-            variant === 'default' && "bg-white border-slate-200 shadow-sm hover:shadow-md dark:bg-surface-dark dark:border-slate-700",
+            variant === 'default' && "bg-white border-slate-100 shadow-sm hover:shadow-md dark:bg-slate-900 dark:border-white/5",
             variant === 'glass' && "bg-white/70 backdrop-blur-xl border-white/20 shadow-2xl dark:bg-white/5 dark:border-white/10",
-            variant === 'flat' && "bg-slate-50 border-transparent dark:bg-slate-900",
-            variant === 'premium' && "bg-slate-900 border-slate-800 shadow-xl shadow-slate-900/20 text-white dark:bg-slate-800 dark:border-slate-700",
+            variant === 'flat' && "bg-slate-50 border-transparent dark:bg-slate-900/50",
+            variant === 'premium' && "bg-white border-primary/20 shadow-[0_20px_40px_-12px_rgba(37,99,235,0.1)] dark:bg-slate-900 dark:border-primary/30",
             className
         )}
         {...props}

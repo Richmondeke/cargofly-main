@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { getLocations, getRoutes, Location, Route } from '@/lib/dashboard-service';
 
 import dynamic from 'next/dynamic';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 const NetworkMap = dynamic(() => import('@/components/dashboard/NetworkMap'), {
     ssr: false,
@@ -46,12 +47,10 @@ export default function NetworkPage() {
     return (
         <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <div>
-                    <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Global Network</h1>
-                    <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">View hubs, warehouses, and shipping routes</p>
-                </div>
-            </div>
+            <DashboardHeader
+                title="Global Network"
+                subtitle="View hubs, warehouses, and shipping routes"
+            />
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

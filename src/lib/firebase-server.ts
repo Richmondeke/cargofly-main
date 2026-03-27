@@ -10,7 +10,12 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase without "use client" so API routes can use it safely
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase safely for both build-time evaluation and run-time usage
+const app = (() => {
+    if (getApps().length > 0) return getApp();
+    if (firebaseConfig.apiKey) return initializeApp(firebaseConfig);
+    return undefined;
+})();
 
-export const serverDb = getFirestore(app);
+// Export serverDb with a fallback to avoid crashing build if config is missing
+export const serverDb = app ? getFirestore(app) : (undefined as unknown as ReturnType<typeof getFirestore>);

@@ -13,6 +13,7 @@ import {
     Ticket,
     Message
 } from '@/lib/ticket-service';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function AdminTicketDetailPage() {
     const { id } = useParams();
@@ -122,51 +123,45 @@ export default function AdminTicketDetailPage() {
     return (
         <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-background-dark">
             {/* Header */}
-            <div className="flex-shrink-0 p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark">
-                <Link
-                    href="/dashboard/admin/support"
-                    className="inline-flex items-center gap-1 text-slate-500 hover:text-primary mb-3 transition-colors text-sm"
+            <div className="flex-shrink-0 bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-slate-700 px-6 pt-2">
+                <DashboardHeader
+                    title={ticket.subject}
+                    subtitle={`${ticket.category} • ${ticket.priority} priority`}
+                    backUrl="/dashboard/admin/support"
                 >
-                    <span className="material-symbols-outlined text-sm">arrow_back</span>
-                    Back to Tickets
-                </Link>
-                <div className="flex items-start justify-between gap-6">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2 relative z-[60]">
-                            <span className="text-xs font-mono text-slate-400">#{ticket.id}</span>
-                            <div className="relative">
-                                <select
-                                    value={ticket.status}
-                                    onChange={(e) => handleStatusChange(e.target.value as Ticket['status'])}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200/50 appearance-none pr-8 cursor-pointer shadow-sm transition-all focus:ring-2 focus:ring-primary/20 ${getStatusColor(ticket.status)}`}
-                                >
-                                    <option value="open">Open</option>
-                                    <option value="in-progress">In Progress</option>
-                                    <option value="resolved">Resolved</option>
-                                    <option value="closed">Closed</option>
-                                </select>
-                                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-sm pointer-events-none opacity-50">
-                                    expand_more
-                                </span>
-                            </div>
-                        </div>
-                        <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">{ticket.subject}</h1>
-                    </div>
-                    <div className="text-right text-sm">
+                    <div className="text-right text-sm hidden lg:block">
                         <p className="font-medium text-slate-900 dark:text-white">{ticket.userName}</p>
                         <p className="text-slate-500">{ticket.userEmail}</p>
-                        <p className="text-xs text-slate-400 mt-1">
-                            {ticket.category} • {ticket.priority} priority
-                        </p>
-                        {ticket.shipmentId && (
-                            <Link
-                                href={`/dashboard/shipments/${ticket.shipmentId}`}
-                                className="text-primary hover:underline text-xs mt-1 inline-block"
-                            >
-                                🚚 {ticket.shipmentId}
-                            </Link>
-                        )}
                     </div>
+                </DashboardHeader>
+
+                <div className="pb-4 -mt-6 ml-10 flex items-center justify-between">
+                    <div className="flex items-center gap-3 relative z-[60]">
+                        <span className="text-xs font-mono text-slate-400">#{ticket.id}</span>
+                        <div className="relative">
+                            <select
+                                value={ticket.status}
+                                onChange={(e) => handleStatusChange(e.target.value as Ticket['status'])}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200/50 appearance-none pr-8 cursor-pointer shadow-sm transition-all focus:ring-2 focus:ring-primary/20 ${getStatusColor(ticket.status)}`}
+                            >
+                                <option value="open">Open</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                            <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-sm pointer-events-none opacity-50">
+                                expand_more
+                            </span>
+                        </div>
+                    </div>
+                    {ticket.shipmentId && (
+                        <Link
+                            href={`/dashboard/shipments/${ticket.shipmentId}`}
+                            className="text-primary hover:underline text-xs inline-block font-bold"
+                        >
+                            🚚 Shipment: {ticket.shipmentId}
+                        </Link>
+                    )}
                 </div>
             </div>
 

@@ -80,8 +80,7 @@ export default function AboutPage() {
     return (
         <div className="min-h-screen pt-32 pb-24 bg-white dark:bg-navy-900 transition-colors duration-500">
             {/* Background */}
-            <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 via-white to-gray-50 dark:from-navy-800 dark:via-navy-900 dark:to-black" />
-            <div className="fixed inset-0 z-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] dark:invert" />
+            <div className="fixed inset-0 z-0 bg-white dark:bg-navy-900" />
 
             <div className="container mx-auto px-6 relative z-10">
                 {/* Header */}
@@ -215,7 +214,7 @@ export default function AboutPage() {
                             <motion.div
                                 key={index}
                                 variants={fadeInUp}
-                                className="glass-panel p-8 hover:bg-white/10 transition-colors group"
+                                className="bg-white/5 border border-white/10 p-8 hover:bg-white/10 transition-colors group rounded-3xl"
                             >
                                 <div className="w-12 h-12 rounded-xl bg-gold-500/20 flex items-center justify-center mb-6 group-hover:bg-gold-500/30 transition-colors">
                                     <div className="text-gold-400">{value.icon}</div>
@@ -285,11 +284,10 @@ export default function AboutPage() {
                             whileInView="visible"
                             viewport={{ once: true }}
                             variants={fadeInRight}
-                            className="relative h-[600px] rounded-3xl overflow-hidden glass-panel"
+                            className="relative h-[600px] rounded-3xl overflow-hidden bg-white/5 border border-white/10"
                         >
                             {/* Abstract Map Visualization */}
                             <div className="absolute inset-0 bg-navy-900">
-                                <div className="absolute inset-0 opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
                                 {/* Dots representing hubs */}
                                 {offices.map((_, i) => (
                                     <div
@@ -307,21 +305,14 @@ export default function AboutPage() {
                                     <path
                                         d="M 30% 20% Q 50% 50% 45% 40% T 60% 60%"
                                         fill="none"
-                                        stroke="url(#gradient-line)"
+                                        stroke="#CA8A04"
                                         strokeWidth="1"
                                         className="opacity-20"
                                     />
-                                    <defs>
-                                        <linearGradient id="gradient-line" x1="0%" y1="0%" x2="100%" y2="0%">
-                                            <stop offset="0%" stopColor="#CA8A04" stopOpacity="0" />
-                                            <stop offset="50%" stopColor="#CA8A04" stopOpacity="0.5" />
-                                            <stop offset="100%" stopColor="#CA8A04" stopOpacity="0" />
-                                        </linearGradient>
-                                    </defs>
                                 </svg>
                             </div>
 
-                            <div className="absolute bottom-8 left-8 right-8 text-center p-6 bg-navy-900/80 backdrop-blur-md rounded-2xl border border-white/10">
+                            <div className="absolute bottom-8 left-8 right-8 text-center p-6 bg-navy-900 border border-white/10 rounded-2xl">
                                 <Plane className="w-8 h-8 text-gold-400 mx-auto mb-4" />
                                 <p className="text-white font-body">
                                     Operating regular scheduled flights between Lagos and key European/Middle Eastern hubs.
@@ -339,7 +330,7 @@ export default function AboutPage() {
                     variants={fadeInUp}
                     className="text-center"
                 >
-                    <div className="glass-panel rounded-3xl p-12 bg-gold-500/10">
+                    <div className="bg-[#FFCA00]/10 border border-[#FFCA00]/20 rounded-3xl p-12">
                         <h2 className="font-display text-3xl md:text-4xl text-white mb-6">
                             Join Our Team
                         </h2>

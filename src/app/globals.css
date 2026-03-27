@@ -4,10 +4,10 @@
 
 @theme {
   /* Cargofly Official Brand Colors */
-  --color-navy: #003399;
-  --color-navy-700: #002060;
-  --color-navy-800: #0044CE;
-  --color-navy-900: #003399;
+  --color-navy: #000080;
+  --color-navy-700: #000066;
+  --color-navy-800: #000099;
+  --color-navy-900: #000080;
   --color-sky: #4196FF;
   --color-sky-400: #81B7FF;
   --color-sky-500: #4196FF;
@@ -21,15 +21,15 @@
   --color-gray-light: #CCCCCC;
 
   /* Surface & Background tokens */
-  --color-surface-dark: #002060;
-  --color-background-dark: #001A4D;
+  --color-surface-dark: #000066;
+  --color-background-dark: #000033;
   --color-surface-light: #FFFFFF;
   --color-background-light: #F8FAFC;
 
   /* Primary token */
-  --color-primary: #003399;
-  --color-primary-dark: #002060;
-  --color-primary-light: #0044CE;
+  --color-primary: #000080;
+  --color-primary-dark: #000066;
+  --color-primary-light: #4196FF;
 
   --font-display: var(--font-kabel);
   --font-body: var(--font-humanist);

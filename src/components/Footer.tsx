@@ -47,7 +47,7 @@ export default function Footer({ isLanding }: { isLanding?: boolean }) {
             className={cn("relative border-t border-white/5 py-16 md:py-40", isLanding ? "bg-transparent" : "bg-navy-900")}
         >
             {/* Background Effects */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-navy-800/50 via-transparent to-transparent pointer-events-none opacity-0 dark:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-navy-900 pointer-events-none transition-opacity duration-300" />
 
             <div className="container mx-auto px-6 relative z-10">
                 <div className="py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 border-b border-navy-800/50">

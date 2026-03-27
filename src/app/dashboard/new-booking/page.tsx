@@ -8,8 +8,27 @@ import LottieAnimation from '@/components/ui/LottieAnimation';
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
-import { Select } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from "@/lib/utils";
+import {
+    Package,
+    ArrowRight,
+    ShieldCheck,
+    CreditCard,
+    Wallet,
+    ChevronRight,
+    ChevronLeft,
+    Box,
+    Activity,
+    Plane,
+    User,
+    CheckCircle2,
+    X
+} from 'lucide-react';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -43,10 +62,7 @@ export default function NewBookingPage() {
         recipientPhone: '',
         recipientEmail: '',
         // Payment
-        cardName: '',
-        cardNumber: '',
-        expiry: '',
-        cvv: '',
+        paymentMethod: 'card' as 'card' | 'wallet',
     });
 
     // Update form if search params change
@@ -113,14 +129,14 @@ export default function NewBookingPage() {
             return;
         }
 
-        // Basic validation for payment
-        if (!formData.cardNumber || !formData.expiry || !formData.cvv) {
-            alert('Please enter payment details');
+        if (formData.paymentMethod === 'wallet' && (userProfile?.walletBalance || 0) < totalPrice) {
+            alert("Insufficient wallet balance. Please fund your wallet or use a card.");
             return;
         }
 
         setLoading(true);
         try {
+            // 1. Create the booking FIRST (with pending status)
             const tracking = await createBooking(user.uid, {
                 origin: formData.origin,
                 destination: formData.destination,
@@ -149,15 +165,67 @@ export default function NewBookingPage() {
                     total: totalPrice,
                     currency: currency,
                 },
-            }, "paid");
+            }, "pending");
 
             setTrackingNumber(tracking);
-            setCurrentStep(4);
-        } catch (error) {
+
+            // 2. Process Payment
+            if (formData.paymentMethod === 'card') {
+                const response = await fetch('/api/payments/initialize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: totalPrice,
+                        currency: currency === 'USD' ? 'USD' : 'NGN',
+                        customer: {
+                            name: user.displayName || formData.senderName,
+                            email: user.email
+                        },
+                        description: `Shipment #${tracking}`,
+                        metadata: {
+                            trackingNumber: tracking,
+                            userId: user.uid
+                        }
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status && result.data?.checkout_url) {
+                    // Redirect to Korapay Checkout
+                    window.location.href = result.data.checkout_url;
+                } else {
+                    throw new Error(result.message || "Failed to initialize secure checkout");
+                }
+            } else {
+                // Wallet payment
+                const res = await fetch('/api/payments/graph', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user.uid,
+                        amount: totalPrice,
+                        currency: currency,
+                        method: 'wallet_usd',
+                        description: `Payment for Shipment #${tracking}`,
+                        shipmentId: tracking
+                    })
+                });
+
+                if (res.ok) {
+                    setCurrentStep(4);
+                } else {
+                    const err = await res.json();
+                    throw new Error(err.message || "Wallet payment failed");
+                }
+            }
+        } catch (error: any) {
             console.error('Error creating booking:', error);
-            alert('Failed to create booking. Please try again.');
+            alert(error.message || 'Failed to create booking. Please try again.');
         } finally {
-            setLoading(false);
+            if (formData.paymentMethod !== 'card') {
+                setLoading(false);
+            }
         }
     };
 
@@ -187,374 +255,741 @@ export default function NewBookingPage() {
     // Calculate estimated price
     const calculatePrices = () => {
         const totalWeight = packages.reduce((sum, p) => sum + (parseFloat(p.weight) || 0), 0) || 1;
+        const weightToUse = Math.max(totalWeight, 0);
 
         if (!currentRoute) {
             const base = formData.serviceType === 'express' ? 250 : (formData.serviceType === 'standard' ? 150 : 100);
-            const weightP = totalWeight * 10;
-            return { base, total: base + weightP + 25, currency: 'USD' };
+            const weightP = weightToUse * 10;
+            const total = base + weightP + 25;
+            return {
+                base,
+                total: isNaN(total) ? 275 : total,
+                currency: 'USD'
+            };
         }
 
+        const rate = currentRoute.rate || 0;
         const multiplier = formData.serviceType === 'express' ? 1.5 : (formData.serviceType === 'standard' ? 1 : 0.8);
-        const base = currentRoute.rate * totalWeight * multiplier;
-        return { base, total: base + 25, currency: currentRoute.currency };
+        const base = rate * weightToUse * multiplier;
+        const total = base + 25;
+
+        return {
+            base,
+            total: isNaN(total) ? 0 : total,
+            currency: currentRoute.currency || 'USD'
+        };
     };
 
     const { base: basePrice, total: totalPrice, currency } = calculatePrices();
 
-    return (
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 h-full bg-slate-50 dark:bg-background-dark">
-            {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">New Booking</h1>
-                <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">Create a new shipment request</p>
-            </div>
+    const progressPercent = ((currentStep - 1) / (steps.length - 1)) * 100;
+    const stepLabel = steps.find(s => s.number === currentStep)?.label || '';
 
-            {/* Progress Steps - Responsive */}
-            <div className="flex items-center justify-center gap-2 sm:gap-4 mb-10 overflow-x-auto py-2 no-scrollbar">
-                {steps.map((step, index) => (
-                    <React.Fragment key={step.number}>
-                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all ${currentStep >= step.number
-                                ? 'bg-primary text-white shadow-lg'
-                                : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
-                                }`}>
-                                {currentStep > step.number ? (
-                                    <span className="material-symbols-outlined text-sm sm:text-base">check</span>
-                                ) : (
-                                    step.number
-                                )}
-                            </div>
-                            <span className={`text-[10px] sm:text-sm font-semibold whitespace-nowrap ${currentStep >= step.number ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
-                                {step.label}
-                            </span>
-                        </div>
-                        {index < steps.length - 1 && (
-                            <div className={`w-8 sm:w-16 h-0.5 shrink-0 ${currentStep > step.number ? 'bg-primary shadow-sm' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
-                        )}
-                    </React.Fragment>
-                ))}
+    return (
+        <div className="flex-1 overflow-y-auto py-10 px-4 md:px-10 h-full bg-[#f8f6f6] dark:bg-background-dark">
+            <div className="flex flex-col max-w-[800px] mx-auto flex-1">
+
+            {/* Progress Section */}
+            <div className="flex flex-col gap-4 mb-8 bg-white dark:bg-slate-900/40 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">New Shipment</h1>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Step {currentStep}: {stepLabel}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-primary font-bold text-lg">{Math.round(progressPercent === 0 ? 33 : progressPercent)}%</p>
+                        <p className="text-slate-400 text-xs uppercase tracking-wider">Complete</p>
+                    </div>
+                </div>
+                <div className="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                    <div
+                        className="bg-primary h-full rounded-full transition-all duration-500"
+                        style={{ width: `${progressPercent === 0 ? 33.33 : progressPercent}%` }}
+                    />
+                </div>
             </div>
 
             {/* Form Content */}
-            <div className="max-w-2xl mx-auto w-full">
-                <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 sm:p-8">
-                    {currentStep === 1 && (
-                        <>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Shipment Details</h3>
-                            <div className="space-y-5">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="origin">Origin</Label>
-                                        <Input
-                                            id="origin"
-                                            type="text"
-                                            name="origin"
-                                            value={formData.origin}
-                                            onChange={handleChange}
-                                            placeholder="e.g., Lagos, NG"
-                                        />
+            <div className="w-full relative">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={currentStep}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                    >
+                        {currentStep === 1 && (
+                            <>
+                                {/* Step 1 Form Card */}
+                                <div className="bg-white dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                                    {/* Section Header */}
+                                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary">location_on</span>
+                                            Origin &amp; Destination
+                                        </h3>
                                     </div>
-                                    <div>
-                                        <Label htmlFor="destination">Destination</Label>
-                                        <Input
-                                            id="destination"
-                                            type="text"
-                                            name="destination"
-                                            value={formData.destination}
-                                            onChange={handleChange}
-                                            placeholder="e.g., London, UK"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <Label htmlFor="serviceType">Service Type</Label>
-                                    <Select
-                                        id="serviceType"
-                                        name="serviceType"
-                                        value={formData.serviceType}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="express">Express Air (2-3 days)</option>
-                                        <option value="standard">Standard (5-7 days)</option>
-                                        <option value="economy">Economy (7-14 days)</option>
-                                    </Select>
-                                </div>
-                            </div>
-                        </>
-                    )}
 
-                    {currentStep === 2 && (
-                        <>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Package & Contact Details</h3>
-                            <div className="space-y-8">
-                                {packages.map((pkg, index) => (
-                                    <div key={index} className="space-y-5 relative">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="font-semibold text-slate-900 dark:text-white">
-                                                Package {index + 1}
-                                            </h4>
-                                            {packages.length > 1 && (
-                                                <button
-                                                    onClick={() => removePackage(index)}
-                                                    className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1 font-medium"
+                                    {/* Fields Grid */}
+                                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* Origin */}
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Origin City/Airport</label>
+                                            <AddressAutocomplete
+                                                id="origin"
+                                                label=""
+                                                value={formData.origin}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, origin: val }))}
+                                                placeholder="e.g. London (LHR)"
+                                            />
+                                        </div>
+
+                                        {/* Destination */}
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Destination City/Airport</label>
+                                            <AddressAutocomplete
+                                                id="destination"
+                                                label=""
+                                                value={formData.destination}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, destination: val }))}
+                                                placeholder="e.g. New York (JFK)"
+                                            />
+                                        </div>
+
+                                        {/* Departure Date */}
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Preferred Departure Date</label>
+                                            <div className="relative">
+                                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">calendar_month</span>
+                                                <input
+                                                    type="date"
+                                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Service Level dropdown */}
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Service Level</label>
+                                            <div className="relative">
+                                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">layers</span>
+                                                <select
+                                                    name="serviceType"
+                                                    value={formData.serviceType}
+                                                    onChange={handleChange}
+                                                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none appearance-none text-sm"
                                                 >
-                                                    <span className="material-symbols-outlined text-base">delete</span>
-                                                    Remove
-                                                </button>
-                                            )}
-                                        </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                            <div>
-                                                <Label htmlFor={`weight-${index}`}>Weight (kg)</Label>
-                                                <Input
-                                                    id={`weight-${index}`}
-                                                    type="number"
-                                                    name="weight"
-                                                    value={pkg.weight}
-                                                    onChange={(e) => handlePackageChange(index, e as any)}
-                                                    placeholder="0"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label htmlFor={`length-${index}`}>L (cm)</Label>
-                                                <Input
-                                                    id={`length-${index}`}
-                                                    type="number"
-                                                    name="length"
-                                                    value={pkg.length}
-                                                    onChange={(e) => handlePackageChange(index, e as any)}
-                                                    placeholder="0"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label htmlFor={`width-${index}`}>W (cm)</Label>
-                                                <Input
-                                                    id={`width-${index}`}
-                                                    type="number"
-                                                    name="width"
-                                                    value={pkg.width}
-                                                    onChange={(e) => handlePackageChange(index, e as any)}
-                                                    placeholder="0"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label htmlFor={`height-${index}`}>H (cm)</Label>
-                                                <Input
-                                                    id={`height-${index}`}
-                                                    type="number"
-                                                    name="height"
-                                                    value={pkg.height}
-                                                    onChange={(e) => handlePackageChange(index, e as any)}
-                                                    placeholder="0"
-                                                />
+                                                    <option value="express">Express (1-2 days)</option>
+                                                    <option value="standard">Standard (3-5 days)</option>
+                                                    <option value="economy">Eco (5-7 days)</option>
+                                                </select>
+                                                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[20px]">expand_more</span>
                                             </div>
                                         </div>
-                                        <div>
-                                            <Label htmlFor={`description-${index}`}>Description</Label>
-                                            <Textarea
-                                                id={`description-${index}`}
-                                                name="description"
-                                                value={pkg.description}
-                                                onChange={(e) => handlePackageChange(index, e as any)}
-                                                rows={2}
-                                                placeholder="Describe the package contents"
-                                                className="resize-none"
-                                            />
-                                        </div>
-                                        <label className="flex items-center gap-3 cursor-pointer">
-                                            <Checkbox
-                                                name="isFragile"
-                                                checked={pkg.isFragile}
-                                                onChange={(e) => handlePackageChange(index, { target: { name: 'isFragile', type: 'checkbox', checked: e.target.checked } } as any)}
-                                            />
-                                            <span className="text-sm text-slate-600 dark:text-slate-400">This package is fragile</span>
-                                        </label>
-
-                                        {index < packages.length - 1 && (
-                                            <hr className="border-slate-100 dark:border-slate-800 my-6" />
-                                        )}
                                     </div>
-                                ))}
 
+                                    {/* Service Level Quick Select Cards */}
+                                    <div className="px-6 pb-8">
+                                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Quick Service Select</p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            {[
+                                                { value: 'express', icon: 'bolt', label: 'Express', sub: 'Highest priority' },
+                                                { value: 'standard', icon: 'package_2', label: 'Standard', sub: 'Most popular' },
+                                                { value: 'economy', icon: 'eco', label: 'Economy', sub: 'Lowest cost' },
+                                            ].map((opt) => (
+                                                <button
+                                                    key={opt.value}
+                                                    onClick={() => setFormData(prev => ({ ...prev, serviceType: opt.value }))}
+                                                    className={cn(
+                                                        "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-center group",
+                                                        formData.serviceType === opt.value
+                                                            ? "border-primary bg-primary/5"
+                                                            : "border-slate-100 dark:border-slate-800 hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    <span className={cn(
+                                                        "material-symbols-outlined text-3xl",
+                                                        formData.serviceType === opt.value ? "text-primary" : "text-slate-400 group-hover:text-primary"
+                                                    )}>{opt.icon}</span>
+                                                    <span className="font-bold text-sm">{opt.label}</span>
+                                                    <span className="text-xs text-slate-500">{opt.sub}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Footer */}
+                                    <div className="bg-slate-50 dark:bg-slate-800/30 p-6 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
+                                        <button
+                                            onClick={() => router.push('/dashboard')}
+                                            className="px-6 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentStep(2)}
+                                            className="px-10 py-2.5 rounded-xl bg-primary text-white font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
+                                        >
+                                            Next Step
+                                            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Info Alert */}
+                                <div className="mt-6 flex items-start gap-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
+                                    <span className="material-symbols-outlined text-blue-500">info</span>
+                                    <div>
+                                        <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">Pro-Tip</p>
+                                        <p className="text-xs text-blue-700 dark:text-blue-300">You can save this shipment as a template later if you frequently ship between these locations.</p>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {currentStep === 2 && (
+                            <div className="space-y-6">
+                                {/* Section: Shipment Specifications - per package */}
+                                {packages.map((pkg, index) => {
+                                    const l = parseFloat((pkg as any).length) || 0;
+                                    const w = parseFloat((pkg as any).width) || 0;
+                                    const h = parseFloat((pkg as any).height) || 0;
+                                    const volume = (l * w * h) / 1000000; // cm³ → m³
+                                    return (
+                                        <div key={index} className="space-y-4">
+                                            {/* Shipment Specifications */}
+                                            <section className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm overflow-hidden">
+                                                <div className="p-6 pb-4 flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="material-symbols-outlined text-primary">inventory_2</span>
+                                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                                            {packages.length > 1 ? `Shipment #${index + 1} – Specifications` : 'Shipment Specifications'}
+                                                        </h3>
+                                                    </div>
+                                                    {packages.length > 1 && (
+                                                        <button
+                                                            onClick={() => removePackage(index)}
+                                                            className="flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-600 transition-colors"
+                                                        >
+                                                            <X className="w-3.5 h-3.5" />
+                                                            Remove
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="px-6 pb-6 grid grid-cols-1 gap-5 md:grid-cols-3">
+                                                    {/* Number of Pieces */}
+                                                    <div className="flex flex-col gap-2">
+                                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Number of Pieces</label>
+                                                        <div className="relative">
+                                                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">dataset</span>
+                                                            <input
+                                                                type="number"
+                                                                name="pieces"
+                                                                value={(pkg as any).pieces || ''}
+                                                                onChange={(e) => handlePackageChange(index, e as any)}
+                                                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-4 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                                                placeholder="e.g. 10"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    {/* Total Weight */}
+                                                    <div className="flex flex-col gap-2">
+                                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Total Weight (kg)</label>
+                                                        <div className="relative">
+                                                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">weight</span>
+                                                            <input
+                                                                type="number"
+                                                                name="weight"
+                                                                value={pkg.weight}
+                                                                onChange={(e) => handlePackageChange(index, e as any)}
+                                                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-4 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                                                placeholder="e.g. 500"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    {/* Commodity Type */}
+                                                    <div className="flex flex-col gap-2">
+                                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Commodity Type</label>
+                                                        <div className="relative">
+                                                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">category</span>
+                                                            <select
+                                                                name="description"
+                                                                value={pkg.description}
+                                                                onChange={(e) => handlePackageChange(index, e as any)}
+                                                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-4 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none text-sm"
+                                                            >
+                                                                <option value="">Select Type</option>
+                                                                <option value="General Cargo">General Cargo</option>
+                                                                <option value="Perishable Goods">Perishable Goods</option>
+                                                                <option value="Hazardous Materials">Hazardous Materials</option>
+                                                                <option value="Valuables">Valuables</option>
+                                                                <option value="Fragile Items">Fragile Items</option>
+                                                            </select>
+                                                            <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+
+                                            {/* Dimensions per Piece */}
+                                            <section className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm overflow-hidden">
+                                                <div className="p-6 pb-4 flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="material-symbols-outlined text-primary">straighten</span>
+                                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Dimensions per Piece (cm)</h3>
+                                                    </div>
+                                                    <span className="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">Metric System</span>
+                                                </div>
+                                                <div className="px-6 pb-4 grid grid-cols-1 gap-5 sm:grid-cols-3">
+                                                    {['length', 'width', 'height'].map((dim) => (
+                                                        <div key={dim} className="flex flex-col gap-2">
+                                                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 capitalize">{dim}</label>
+                                                            <input
+                                                                type="number"
+                                                                name={dim}
+                                                                value={(pkg as any)[dim]}
+                                                                onChange={(e) => handlePackageChange(index, e as any)}
+                                                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 py-3 px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                                                placeholder="0"
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                {/* Volume Calculation */}
+                                                <div className="px-6 pb-6 mt-2">
+                                                    <div className="flex items-center justify-between rounded-lg bg-primary/5 border border-primary/10 p-4">
+                                                        <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Volume Calculation:</span>
+                                                        <span className="text-lg font-bold text-primary">{volume.toFixed(4)} m³</span>
+                                                    </div>
+                                                </div>
+                                                {/* Fragile toggle */}
+                                                <div className="px-6 pb-6 flex items-center gap-3">
+                                                    <Checkbox
+                                                        checked={pkg.isFragile}
+                                                        onChange={(e) => handlePackageChange(index, { target: { name: 'isFragile', type: 'checkbox', checked: e.target.checked } } as any)}
+                                                    />
+                                                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 cursor-pointer">Fragile handling required</label>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Add Another Shipment */}
                                 <button
                                     onClick={addPackage}
-                                    className="w-full py-3 border-2 border-dashed border-primary/30 text-primary font-semibold rounded-xl hover:bg-primary/5 transition-colors flex items-center justify-center gap-2"
+                                    className="w-full py-4 border-2 border-dashed border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 text-primary font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2"
                                 >
-                                    <span className="material-symbols-outlined pb-0.5 text-lg">add_circle</span>
-                                    Add Another Package
+                                    <span className="material-symbols-outlined">add_circle</span>
+                                    Add Another Shipment
                                 </button>
 
-                                <hr className="border-slate-200 dark:border-slate-700" />
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <div className="space-y-4">
-                                        <h4 className="font-semibold text-slate-900 dark:text-white">Sender</h4>
-                                        <Input
-                                            type="text"
-                                            name="senderName"
-                                            value={formData.senderName}
-                                            onChange={handleChange}
-                                            placeholder="Full Name"
-                                        />
-                                        <Input
-                                            type="tel"
-                                            name="senderPhone"
-                                            value={formData.senderPhone}
-                                            onChange={handleChange}
-                                            placeholder="Phone"
-                                        />
-                                    </div>
-                                    <div className="space-y-4">
-                                        <h4 className="font-semibold text-slate-900 dark:text-white">Recipient</h4>
-                                        <Input
-                                            type="text"
-                                            name="recipientName"
-                                            value={formData.recipientName}
-                                            onChange={handleChange}
-                                            placeholder="Full Name"
-                                        />
-                                        <Input
-                                            type="tel"
-                                            name="recipientPhone"
-                                            value={formData.recipientPhone}
-                                            onChange={handleChange}
-                                            placeholder="Phone"
-                                        />
+                                {/* Pro-Tip Banner */}
+                                <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                                    <span className="material-symbols-outlined text-primary mt-0.5">lightbulb</span>
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-sm font-bold text-primary">Pro-Tip: Dimensional Weight</p>
+                                        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                                            Airlines charge based on the greater of actual weight or dimensional weight. Ensure your measurements are accurate to avoid additional handling fees at the warehouse.
+                                        </p>
                                     </div>
                                 </div>
+
+                                {/* Contacts Section */}
+                                <section className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm overflow-hidden">
+                                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                                        <h3 className="text-lg font-bold flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary">contacts</span>
+                                            Contact Information
+                                        </h3>
+                                    </div>
+                                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <User className="w-4 h-4 text-slate-400" />
+                                                <h4 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Sender</h4>
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Full Name</label>
+                                                <input
+                                                    name="senderName"
+                                                    value={formData.senderName}
+                                                    onChange={handleChange}
+                                                    placeholder="Legal full name"
+                                                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 py-3 px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Phone Number</label>
+                                                <PhoneInput
+                                                    id="senderPhone"
+                                                    label=""
+                                                    value={formData.senderPhone}
+                                                    onChange={(val) => setFormData(prev => ({ ...prev, senderPhone: val }))}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <User className="w-4 h-4 text-slate-400" />
+                                                <h4 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Recipient</h4>
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Full Name</label>
+                                                <input
+                                                    name="recipientName"
+                                                    value={formData.recipientName}
+                                                    onChange={handleChange}
+                                                    placeholder="Receiver full name"
+                                                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 py-3 px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Phone Number</label>
+                                                <PhoneInput
+                                                    id="recipientPhone"
+                                                    label=""
+                                                    value={formData.recipientPhone}
+                                                    onChange={(val) => setFormData(prev => ({ ...prev, recipientPhone: val }))}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
                             </div>
-                        </>
-                    )}
+                        )}
 
-                    {currentStep === 3 && (
-                        <>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Review & Payment</h3>
-                            <div className="space-y-6">
-                                <div className="p-6 rounded-xl bg-gold-50 dark:bg-gold-900/10 border border-gold-200 dark:border-gold-800/30">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-slate-600 dark:text-slate-400">Total Estimated Cost</span>
-                                        <span className="text-3xl font-black text-slate-900 dark:text-white">
-                                            {currency === 'NGN' ? '₦' : '$'}{totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-slate-500">Includes base rate, weight charges, and fuel surcharge.</p>
-                                </div>
+                        {currentStep === 3 && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {/* Left: Details */}
+                                <div className="lg:col-span-2 space-y-5">
 
-                                <div className="space-y-4">
-                                    <h4 className="font-semibold text-slate-900 dark:text-white">Payment Method</h4>
-                                    <div className="grid grid-cols-1 gap-4">
-                                        <div className="border border-primary bg-primary/5 rounded-xl p-4 flex items-center gap-3">
-                                            <span className="material-symbols-outlined text-primary">credit_card</span>
-                                            <span className="font-medium text-slate-900 dark:text-white">Credit/Debit Card</span>
+                                    {/* Route Details Card */}
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary">distance</span>
+                                            <h3 className="font-bold text-slate-900 dark:text-white">Route Details</h3>
+                                        </div>
+                                        <div className="p-5">
+                                            <div className="flex items-start gap-4">
+                                                <div className="flex flex-col items-center shrink-0">
+                                                    <div className="w-3 h-3 rounded-full bg-primary"></div>
+                                                    <div className="w-0.5 h-10 border-l-2 border-dashed border-slate-300 dark:border-slate-700"></div>
+                                                    <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
+                                                </div>
+                                                <div className="flex-1 space-y-4">
+                                                    <div>
+                                                        <p className="text-xs font-bold text-slate-400 uppercase">Origin</p>
+                                                        <p className="text-base font-bold text-slate-900 dark:text-white">{formData.origin || '—'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-bold text-slate-400 uppercase">Destination</p>
+                                                        <p className="text-base font-bold text-slate-900 dark:text-white">{formData.destination || '—'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="shrink-0">
+                                                    <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded text-xs font-bold capitalize">{formData.serviceType}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <Input
-                                            type="text"
-                                            name="cardName"
-                                            value={formData.cardName}
-                                            onChange={handleChange}
-                                            placeholder="Name on Card"
-                                        />
-                                        <Input
-                                            type="text"
-                                            name="cardNumber"
-                                            value={formData.cardNumber}
-                                            onChange={handleChange}
-                                            placeholder="Card Number"
-                                        />
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <Input
-                                                type="text"
-                                                name="expiry"
-                                                value={formData.expiry}
-                                                onChange={handleChange}
-                                                placeholder="MM/YY"
-                                            />
-                                            <Input
-                                                type="text"
-                                                name="cvv"
-                                                value={formData.cvv}
-                                                onChange={handleChange}
-                                                placeholder="CVV"
-                                            />
+                                    {/* Cargo Specifications Card */}
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+                                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary">inventory_2</span>
+                                            <h3 className="font-bold text-slate-900 dark:text-white">Cargo Specifications</h3>
+                                        </div>
+                                        <div className="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <div className="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-lg">
+                                                <p className="text-xs font-bold text-slate-400 uppercase mb-1">Shipments</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">{packages.length}</p>
+                                                <p className="text-xs text-slate-500">Total units</p>
+                                            </div>
+                                            <div className="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-lg">
+                                                <p className="text-xs font-bold text-slate-400 uppercase mb-1">Total Weight</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                    {packages.reduce((s, p) => s + (parseFloat(p.weight) || 0), 0)} kg
+                                                </p>
+                                                <p className="text-xs text-slate-500">Gross inclusive</p>
+                                            </div>
+                                            <div className="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-lg">
+                                                <p className="text-xs font-bold text-slate-400 uppercase mb-1">Total Volume</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                    {packages.reduce((s, p) => s + ((parseFloat((p as any).length)||0) * (parseFloat((p as any).width)||0) * (parseFloat((p as any).height)||0)) / 1000000, 0).toFixed(2)} m³
+                                                </p>
+                                                <p className="text-xs text-slate-500">Combined volume</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Selected Service Card */}
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+                                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary">verified_user</span>
+                                            <h3 className="font-bold text-slate-900 dark:text-white">Selected Service</h3>
+                                        </div>
+                                        <div className="p-5 flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                    <span className="material-symbols-outlined text-2xl">
+                                                        {formData.serviceType === 'express' ? 'bolt' : formData.serviceType === 'standard' ? 'package_2' : 'eco'}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-slate-900 dark:text-white capitalize">{formData.serviceType} Freight</p>
+                                                    <p className="text-sm text-slate-500">
+                                                        {formData.serviceType === 'express' ? '1–2 business days' : formData.serviceType === 'standard' ? '3–5 business days' : '5–7 business days'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded text-xs font-bold">Insurance Opt.</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Sender / Recipient */}
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+                                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary">contacts</span>
+                                            <h3 className="font-bold text-slate-900 dark:text-white">Contacts</h3>
+                                        </div>
+                                        <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase mb-2">Sender</p>
+                                                <p className="font-semibold text-slate-900 dark:text-white">{formData.senderName || '—'}</p>
+                                                <p className="text-sm text-slate-500">{formData.senderPhone || '—'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase mb-2">Recipient</p>
+                                                <p className="font-semibold text-slate-900 dark:text-white">{formData.recipientName || '—'}</p>
+                                                <p className="text-sm text-slate-500">{formData.recipientPhone || '—'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right: Final Quote Sidebar */}
+                                <div className="space-y-5">
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border-2 border-primary p-6 sticky top-8">
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-5">Final Quote</h3>
+                                        <div className="space-y-3 mb-6">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-slate-500">Base Freight</span>
+                                                <span className="font-semibold text-slate-900 dark:text-white">{currency === 'NGN' ? '₦' : '$'}{basePrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-slate-500">Fuel Surcharge</span>
+                                                <span className="font-semibold text-slate-900 dark:text-white">{currency === 'NGN' ? '₦' : '$'}25.00</span>
+                                            </div>
+                                            <div className="border-t border-slate-100 dark:border-slate-800 pt-3 mt-3">
+                                                <div className="flex justify-between items-end">
+                                                    <div>
+                                                        <p className="text-xs font-bold text-slate-400 uppercase">Total Amount</p>
+                                                        <p className="text-3xl font-bold text-slate-900 dark:text-white leading-none mt-1">
+                                                            {currency === 'NGN' ? '₦' : '$'}{totalPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-xs text-slate-400 mb-1">{currency}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Payment Method */}
+                                        <div className="space-y-2 mb-5">
+                                            <p className="text-xs font-bold text-slate-400 uppercase">Payment Method</p>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {(['card', 'wallet'] as const).map(method => (
+                                                    <button
+                                                        key={method}
+                                                        onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method }))}
+                                                        className={cn(
+                                                            "p-3 rounded-lg border-2 text-sm font-bold flex items-center gap-2 transition-all",
+                                                            formData.paymentMethod === method
+                                                                ? 'border-primary bg-primary/5 text-primary'
+                                                                : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary/50'
+                                                        )}
+                                                    >
+                                                        {method === 'card' ? <CreditCard className="w-4 h-4" /> : <Wallet className="w-4 h-4" />}
+                                                        <span className="capitalize">{method === 'card' ? 'Card' : 'Wallet'}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            {formData.paymentMethod === 'wallet' && (
+                                                <p className="text-xs text-slate-500">
+                                                    Balance: {currency === 'NGN' ? '₦' : '$'}{(userProfile?.walletBalance || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                                </p>
+                                            )}
+                                            {formData.paymentMethod === 'wallet' && (userProfile?.walletBalance || 0) < totalPrice && (
+                                                <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30">
+                                                    <p className="text-xs font-bold text-red-600">Insufficient balance</p>
+                                                    <button onClick={() => router.push('/dashboard/wallet')} className="text-xs font-bold text-red-600 underline">Top Up</button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <button
+                                                onClick={handlePaymentAndSubmit}
+                                                disabled={loading}
+                                                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                            >
+                                                {loading ? (
+                                                    <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Processing</>
+                                                ) : (
+                                                    <><span className="material-symbols-outlined">check_circle</span>Confirm Booking</>
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => setCurrentStep(2)}
+                                                className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700"
+                                            >
+                                                <ChevronLeft className="w-4 h-4" />
+                                                Back to Cargo Info
+                                            </button>
+                                        </div>
+                                        <p className="text-[10px] text-slate-400 text-center mt-4">
+                                            Quote valid for 48 hours. Subject to space availability.
+                                        </p>
+                                    </div>
+
+                                    {/* Help Section */}
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-200 dark:border-slate-800">
+                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-3">Need Assistance?</h4>
+                                        <div className="space-y-3">
+                                            {[
+                                                { icon: 'support_agent', label: 'Live Chat with Support' },
+                                                { icon: 'call', label: '+1 (800) AIR-CARGO' },
+                                                { icon: 'help_center', label: 'Booking Guidelines' },
+                                            ].map(item => (
+                                                <div key={item.icon} className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
+                                                    <span className="material-symbols-outlined text-primary text-lg">{item.icon}</span>
+                                                    <span>{item.label}</span>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </>
-                    )}
+                        )}
 
-                    {currentStep === 4 && trackingNumber && (
-                        <div className="text-center py-8">
-                            <div className="w-32 h-32 mx-auto mb-2">
-                                <LottieAnimation
-                                    src="https://assets9.lottiefiles.com/packages/lf20_yom6uvgj.json"
-                                    loop={false}
-                                    width="100%"
-                                    height="100%"
-                                />
-                            </div>
-                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Booking Confirmed!</h3>
-                            <p className="text-slate-500 dark:text-slate-400 mb-6">Your payment was successful and shipment created.</p>
-                            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 mb-6">
-                                <p className="text-sm text-slate-500 mb-2">Tracking Number</p>
-                                <p className="text-2xl font-bold text-primary">{trackingNumber}</p>
-                            </div>
-                            <div className="flex gap-4 justify-center">
-                                <button
-                                    onClick={() => router.push('/dashboard/shipments')}
-                                    className="px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                                >
-                                    View Shipments
-                                </button>
-                                <button
-                                    onClick={() => router.push(`/dashboard/track/${trackingNumber}`)}
-                                    className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors"
-                                >
-                                    Track Package
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                        {currentStep === 4 && trackingNumber && (
+                            <div className="max-w-[640px] mx-auto text-center py-4">
+                                {/* Success Icon */}
+                                <div className="mb-6 flex justify-center">
+                                    <div className="h-24 w-24 bg-primary/10 rounded-full flex items-center justify-center border-4 border-primary/20">
+                                        <span className="material-symbols-outlined text-primary text-5xl">check_circle</span>
+                                    </div>
+                                </div>
 
-                    {/* Navigation Buttons */}
-                    {currentStep < 4 && (
-                        <div className="flex justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
-                            <button
-                                onClick={() => setCurrentStep(prev => (prev > 1 ? (prev - 1) as Step : prev))}
-                                disabled={currentStep === 1}
-                                className="px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Back
-                            </button>
-                            {currentStep === 3 ? (
+                                {/* Header */}
+                                <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight mb-2">Booking Confirmed!</h1>
+                                <div className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full mb-8">
+                                    <span className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Air Waybill (AWB):</span>
+                                    <span className="text-slate-900 dark:text-primary text-lg font-bold">{trackingNumber}</span>
+                                    <button
+                                        onClick={() => navigator.clipboard.writeText(trackingNumber)}
+                                        className="ml-1 text-slate-400 hover:text-primary transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined text-base">content_copy</span>
+                                    </button>
+                                </div>
+
+                                {/* Shipment Details Card */}
+                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden mb-8 text-left">
+                                    <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+                                        <h3 className="font-bold text-lg flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary">inventory_2</span>
+                                            Booking Details Summary
+                                        </h3>
+                                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded uppercase">{formData.serviceType}</span>
+                                    </div>
+                                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-5">
+                                            <div>
+                                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Route</p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold text-slate-900 dark:text-white text-sm">{formData.origin || '—'}</span>
+                                                    <span className="material-symbols-outlined text-primary text-sm">trending_flat</span>
+                                                    <span className="font-bold text-slate-900 dark:text-white text-sm">{formData.destination || '—'}</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Cargo Type</p>
+                                                <p className="text-slate-900 dark:text-slate-200 font-medium">
+                                                    {packages.map(p => p.description).filter(Boolean).join(', ') || 'General Cargo'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-5">
+                                            <div>
+                                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Weight & Volume</p>
+                                                <p className="text-slate-900 dark:text-slate-200 font-medium">
+                                                    {packages.reduce((s,p) => s + (parseFloat(p.weight)||0), 0)} kg •{' '}
+                                                    {packages.reduce((s, p) => s + ((parseFloat((p as any).length)||0)*(parseFloat((p as any).width)||0)*(parseFloat((p as any).height)||0))/1000000, 0).toFixed(2)} m³
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Total Charged</p>
+                                                <p className="text-primary font-bold text-lg">
+                                                    {currency === 'NGN' ? '₦' : '$'}{totalPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                                    <button
+                                        onClick={() => router.push(`/dashboard/track/${trackingNumber}`)}
+                                        className="w-full sm:w-auto flex min-w-[200px] items-center justify-center rounded-xl h-14 px-8 bg-primary text-white text-base font-bold hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 gap-2"
+                                    >
+                                        <span className="material-symbols-outlined">location_searching</span>
+                                        Track Shipment
+                                    </button>
+                                    <button
+                                        onClick={() => router.push('/dashboard/shipments')}
+                                        className="w-full sm:w-auto flex min-w-[200px] items-center justify-center rounded-xl h-14 px-8 bg-white dark:bg-transparent border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-base font-bold hover:border-primary hover:text-primary transition-all gap-2"
+                                    >
+                                        <span className="material-symbols-outlined">dashboard</span>
+                                        Dashboard
+                                    </button>
+                                </div>
+
                                 <button
-                                    onClick={handlePaymentAndSubmit}
-                                    disabled={loading}
-                                    className="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    onClick={() => router.push('/dashboard')}
+                                    className="inline-flex items-center gap-2 text-slate-500 hover:text-primary transition-colors font-semibold"
                                 >
-                                    {loading ? (
-                                        <>
-                                            <span className="material-symbols-outlined animate-spin">progress_activity</span>
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        'Pay & Book'
-                                    )}
+                                    <span className="material-symbols-outlined">arrow_back</span>
+                                    Return to Dashboard
                                 </button>
-                            ) : (
+                            </div>
+                        )}
+
+                        {/* Navigation Bar for Step 2 only — Step 3 has its own actions in the sidebar */}
+                        {currentStep === 2 && (
+                            <div className="flex items-center justify-between pt-6 border-t border-slate-200 dark:border-slate-800 mt-2">
                                 <button
-                                    onClick={() => setCurrentStep(prev => (prev < 4 ? (prev + 1) as Step : prev))}
-                                    className="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all"
+                                    onClick={() => setCurrentStep(1)}
+                                    className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                                 >
-                                    Continue
+                                    <span className="material-symbols-outlined">arrow_back</span>
+                                    Back to Route
                                 </button>
-                            )}
-                        </div>
-                    )}
-                </div>
+                                <button
+                                    onClick={() => setCurrentStep(3)}
+                                    className="flex items-center gap-2 px-8 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all"
+                                >
+                                    Continue to Review
+                                    <span className="material-symbols-outlined">arrow_forward</span>
+                                </button>
+                            </div>
+                        )}
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+
             </div>
         </div>
     );

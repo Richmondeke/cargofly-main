@@ -25,6 +25,7 @@ import {
     getStatusDisplay,
     formatTimestamp
 } from "@/lib/firestore";
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -137,15 +138,11 @@ function TrackingContent({ id }: { id: string }) {
     return (
         <div className="p-8 max-w-7xl mx-auto">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-8">
-                <Link href="/dashboard/shipments" className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                    <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
-                </Link>
-                <div>
-                    <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Shipment Details</h1>
-                    <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">Tracking ID: {id}</p>
-                </div>
-            </div>
+            <DashboardHeader
+                title="Shipment Details"
+                subtitle={`Tracking ID: ${id}`}
+                backUrl="/dashboard/shipments"
+            />
 
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Main Content */}

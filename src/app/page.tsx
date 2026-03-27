@@ -3,7 +3,7 @@ import Hero from "@/components/landing-b/Hero";
 import DetailedServices from "@/components/landing-b/DetailedServices";
 import Process from "@/components/landing-b/Process";
 import Products from "@/components/landing-b/Products";
-import Team from "@/components/landing-b/Team";
+import FAQ from "@/components/landing-b/FAQ";
 import Newsletter from "@/components/landing-b/Newsletter";
 
 export default function Home() {
@@ -15,7 +15,7 @@ export default function Home() {
             <DetailedServices />
             <Process />
             <Products />
-            <Team />
+            <FAQ />
             <Newsletter />
 
             <footer className="bg-black text-white py-12 px-6 border-t border-white/10">

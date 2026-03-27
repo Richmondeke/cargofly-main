@@ -29,8 +29,8 @@ export default function ServiceCard({
             className={cn(
                 "group relative rounded-2xl overflow-hidden transition-all duration-500",
                 featured
-                    ? "bg-gold-500/20 border border-gold-500/30 dark:bg-blue-sky/10 dark:border-blue-sky/30"
-                    : "bg-white/5 border border-white/10 hover:border-gold-500/30 dark:bg-blue-sky/5 dark:border-blue-sky/20 dark:hover:border-gold-500/50"
+                    ? "bg-[#FFCA00]/10 border border-[#FFCA00]/30 dark:bg-[#4196FF]/10 dark:border-[#4196FF]/30"
+                    : "bg-navy-900/5 border border-navy-900/10 hover:border-[#FFCA00]/30 dark:bg-white/5 dark:border-white/10 dark:hover:border-[#FFCA00]/50"
             )}
         >
             {/* Featured Badge */}

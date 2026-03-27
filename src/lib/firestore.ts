@@ -13,6 +13,7 @@ import {
     Timestamp,
     serverTimestamp,
     arrayUnion,
+    writeBatch,
 } from "firebase/firestore";
 import {
     ref,
@@ -307,7 +308,7 @@ export async function getAllShipments(): Promise<Shipment[]> {
     }
 }
 
-// Update customs duty (Admin)
+// Update customs duty (Admin) - Batch version recommended for complex flows
 export async function updateShipmentCustomsDuty(
     shipmentId: string,
     amount: number,
@@ -319,6 +320,47 @@ export async function updateShipmentCustomsDuty(
         customsDutyStatus: status,
         updatedAt: serverTimestamp()
     });
+}
+
+// Atomic apply customs duty and set status to customs_hold
+export async function applyCustomsDutyWithStatus(
+    shipmentId: string,
+    amount: number,
+    location: string,
+    description: string,
+    updatedBy?: string
+): Promise<void> {
+    if (shipmentId.startsWith("mock_")) return;
+
+    const batch = writeBatch(db);
+    const shipmentRef = doc(db, "shipments", shipmentId);
+    const eventRef = doc(collection(db, "shipments", shipmentId, "tracking_events"));
+
+    // Progress for customs_hold is 50
+    batch.update(shipmentRef, {
+        customsDuty: amount,
+        customsDutyStatus: "pending",
+        status: "customs_hold",
+        currentLocation: location,
+        progress: 50,
+        updatedAt: serverTimestamp()
+    });
+
+    const eventData: any = {
+        shipmentId,
+        status: "customs_hold",
+        location,
+        description,
+        timestamp: serverTimestamp() as Timestamp,
+    };
+
+    if (updatedBy) {
+        eventData.createdBy = updatedBy;
+    }
+
+    batch.set(eventRef, eventData);
+
+    await batch.commit();
 }
 
 // Get shipments with pending customs duties for a user
@@ -422,7 +464,9 @@ export async function updateShipmentStatus(
 ): Promise<void> {
     if (shipmentId.startsWith("mock_")) return; // Don't write for mock
 
+    const batch = writeBatch(db);
     const shipmentRef = doc(db, "shipments", shipmentId);
+    const eventRef = doc(collection(db, "shipments", shipmentId, "tracking_events"));
 
     // Calculate progress based on status
     const progressMap: Record<ShipmentStatus, number> = {
@@ -438,7 +482,7 @@ export async function updateShipmentStatus(
         customs_hold: 50,
     };
 
-    await updateDoc(shipmentRef, {
+    batch.update(shipmentRef, {
         status,
         currentLocation: location,
         progress: progressMap[status],
@@ -447,15 +491,21 @@ export async function updateShipmentStatus(
         ...(status === "picked_up" && { pickedUpAt: serverTimestamp() }),
     });
 
-    // Add tracking event
-    await addTrackingEvent(shipmentId, {
+    const eventData: any = {
         shipmentId,
-        status,
+        status: status,
         location,
         description,
         timestamp: serverTimestamp() as Timestamp,
-        createdBy: updatedBy,
-    });
+    };
+
+    if (updatedBy) {
+        eventData.createdBy = updatedBy;
+    }
+
+    batch.set(eventRef, eventData);
+
+    await batch.commit();
 }
 
 

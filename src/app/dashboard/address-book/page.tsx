@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAddresses, addAddress, deleteAddress, SavedAddress } from '@/lib/dashboard-service';
 import EmptyState from '@/components/common/EmptyState';
+import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { motion, AnimatePresence } from 'framer-motion';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function AddressBookPage() {
     const { user } = useAuth();
@@ -92,11 +95,11 @@ export default function AddressBookPage() {
 
     return (
         <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-2xl sm:text-[32px] font-bold text-[#1e293b] dark:text-white leading-tight">Address Book</h1>
-                    <p className="text-[14px] text-[#64748b] dark:text-slate-400 mt-1">Manage your saved addresses for faster booking</p>
-                </div>
+            <DashboardHeader
+                title="Address Book"
+                subtitle="Manage your saved addresses for faster booking"
+            />
+            <div className="flex justify-end items-center mb-8">
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
                     className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors flex items-center gap-2"
@@ -131,16 +134,26 @@ export default function AddressBookPage() {
                                     <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Phone</label>
-                                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white" />
+                                    <PhoneInput
+                                        id="phone"
+                                        label="Phone"
+                                        value={formData.phone}
+                                        onChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
+                                        placeholder="Phone Number"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
                                     <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white" />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Street Address</label>
-                                    <input type="text" name="street" value={formData.street} onChange={handleChange} required className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white" />
+                                    <AddressAutocomplete
+                                        id="street"
+                                        label="Street Address"
+                                        value={formData.street}
+                                        onChange={(addr) => setFormData(prev => ({ ...prev, street: addr }))}
+                                        placeholder="Enter full address..."
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">City</label>
