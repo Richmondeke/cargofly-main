@@ -12,7 +12,6 @@ import {
     formatTimestamp,
     uploadConsignmentMedia
 } from "@/lib/firestore";
-import { pushNotification } from '@/contexts/NotificationContext';
 import { StatusPill } from "@/components/dashboard/StatusPill";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { ShipmentDetailsDrawer } from "@/components/dashboard/ShipmentDetailsDrawer";

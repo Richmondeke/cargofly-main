@@ -17,7 +17,8 @@ import {
     deleteDoc,
     limit
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from './firebase';
 
 // Types
 export interface BlogPost {
@@ -127,4 +128,16 @@ export async function updateBlogPost(id: string, data: Partial<CreateBlogPostDat
  */
 export async function deleteBlogPost(id: string): Promise<void> {
     await deleteDoc(doc(db, 'blogs', id));
+}
+
+/**
+ * Upload blog post image
+ */
+export async function uploadBlogImage(file: File): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `blog_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const storageRef = ref(storage, `blogs/${fileName}`);
+
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
 }

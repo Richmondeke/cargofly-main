@@ -1,3 +1,5 @@
+"use client";
+import { motion } from "framer-motion";
 import { Plane, Activity, Thermometer, ShieldCheck, ArrowRight } from "lucide-react";
 
 const serviceCategories = [

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getBlogPosts, createBlogPost, updateBlogPost, deleteBlogPost, uploadBlogImage, BlogPost } from "@/lib/firestore";
+import { getBlogPosts, createBlogPost, updateBlogPost, deleteBlogPost, uploadBlogImage, BlogPost } from "@/lib/blog-service";
 import { useAuth } from "@/contexts/AuthContext";
 import { Timestamp } from "firebase/firestore";
 import { Plus, Trash2, Edit, AlertCircle, RefreshCw } from "lucide-react";
@@ -160,9 +160,14 @@ export default function AdminBlogPage() {
             setSeeding(true);
             for (const post of DUMMY_POSTS) {
                 await createBlogPost({
-                    ...post,
-                    publishedAt: Timestamp.now(),
-                    updatedAt: Timestamp.now()
+                    title: post.title,
+                    slug: post.slug,
+                    excerpt: post.excerpt,
+                    content: post.content,
+                    category: post.category,
+                    author: post.author,
+                    image: post.image,
+                    isPublished: true
                 });
             }
             toast.success("Dummy posts created successfully!");
@@ -202,15 +207,26 @@ export default function AdminBlogPage() {
             setIsSaving(true);
             if (currentPost.id) {
                 await updateBlogPost(currentPost.id, {
-                    ...currentPost,
-                    updatedAt: Timestamp.now()
+                    title: currentPost.title || '',
+                    slug: currentPost.slug || '',
+                    excerpt: currentPost.excerpt || '',
+                    content: currentPost.content || '',
+                    category: currentPost.category || '',
+                    author: currentPost.author || '',
+                    image: currentPost.image || '',
+                    isPublished: currentPost.isPublished || false
                 });
                 toast.success("Post updated successfully");
             } else {
                 await createBlogPost({
-                    ...(currentPost as BlogPost),
-                    publishedAt: Timestamp.now(),
-                    updatedAt: Timestamp.now()
+                    title: currentPost.title || '',
+                    slug: currentPost.slug || '',
+                    excerpt: currentPost.excerpt || '',
+                    content: currentPost.content || '',
+                    category: currentPost.category || '',
+                    author: currentPost.author || '',
+                    image: currentPost.image || '',
+                    isPublished: currentPost.isPublished || false
                 });
                 toast.success("Post created successfully");
             }
