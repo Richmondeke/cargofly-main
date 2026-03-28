@@ -296,7 +296,7 @@ export default function ServicesPage() {
                             <div className="grid grid-cols-2 gap-6">
                                 {[
                                     { value: "500+", label: "Enterprise Clients" },
-                                    { value: "99.9%", label: "Uptime SLA" },
+                                    { value: "99.9%", label: "Uptime Guarantee" },
                                     { value: "24/7", label: "Support Available" },
                                     { value: "200+", label: "API Integrations" },
                                 ].map((stat, i) => (

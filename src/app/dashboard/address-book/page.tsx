@@ -8,6 +8,7 @@ import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { SuccessModal } from '@/components/common/SuccessModal';
 
 export default function AddressBookPage() {
     const { user } = useAuth();
@@ -27,6 +28,20 @@ export default function AddressBookPage() {
         postalCode: '',
         country: '',
         isDefault: false,
+    });
+
+    const [successModal, setSuccessModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'success' | 'error';
+        onConfirm?: () => void;
+        showConfirm?: boolean;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'success'
     });
 
     useEffect(() => {
@@ -74,23 +89,53 @@ export default function AddressBookPage() {
                 isDefault: false,
             });
             await fetchAddresses();
+            setSuccessModal({
+                isOpen: true,
+                title: 'Address Saved',
+                message: 'New address has been added to your address book.',
+                type: 'success'
+            });
         } catch (error) {
             console.error('Error adding address:', error);
-            alert('Failed to add address');
+            setSuccessModal({
+                isOpen: true,
+                title: 'Save Failed',
+                message: 'Failed to add address. Please try again.',
+                type: 'error'
+            });
         } finally {
             setSubmitting(false);
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this address?')) return;
-        try {
-            await deleteAddress(id);
-            setAddresses(prev => prev.filter(a => a.id !== id));
-        } catch (error) {
-            console.error('Error deleting address:', error);
-            alert('Failed to delete address');
-        }
+    const handleDelete = async (id: string, name: string) => {
+        setSuccessModal({
+            isOpen: true,
+            title: 'Delete Address',
+            message: `Are you sure you want to delete the address for "${name}"?`,
+            type: 'error',
+            showConfirm: true,
+            onConfirm: async () => {
+                try {
+                    await deleteAddress(id);
+                    setAddresses(prev => prev.filter(a => a.id !== id));
+                    setSuccessModal({
+                        isOpen: true,
+                        title: 'Address Deleted',
+                        message: 'The address has been removed from your address book.',
+                        type: 'success'
+                    });
+                } catch (error) {
+                    console.error('Error deleting address:', error);
+                    setSuccessModal({
+                        isOpen: true,
+                        title: 'Delete Failed',
+                        message: 'Failed to delete address. Please try again.',
+                        type: 'error'
+                    });
+                }
+            }
+        });
     };
 
     return (
@@ -205,7 +250,7 @@ export default function AddressBookPage() {
                         <div key={addr.id} className="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow relative group">
                             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
-                                    onClick={() => handleDelete(addr.id)}
+                                    onClick={() => handleDelete(addr.id, addr.name)}
                                     className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
                                 >
                                     <span className="material-symbols-outlined text-sm">delete</span>
@@ -257,6 +302,15 @@ export default function AddressBookPage() {
                     />
                 </div>
             )}
+            <SuccessModal
+                isOpen={successModal.isOpen}
+                onClose={() => setSuccessModal(prev => ({ ...prev, isOpen: false }))}
+                title={successModal.title}
+                message={successModal.message}
+                type={successModal.type}
+                showConfirm={successModal.showConfirm}
+                onConfirm={successModal.onConfirm}
+            />
         </div>
     );
 }

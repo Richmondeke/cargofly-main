@@ -427,7 +427,7 @@ export default function TicketDetailPage() {
                             <div className="p-6 border-b border-slate-50 dark:border-white/5 flex items-center gap-3">
                                 <LayoutGrid className="w-4 h-4 text-primary" />
                                 <h3 className="font-medium text-slate-900 dark:text-white uppercase text-[10px] tracking-widest">
-                                    Ticket Intelligence
+                                    Ticket Details
                                 </h3>
                             </div>
                             <div className="p-6 space-y-6">
@@ -470,7 +470,7 @@ export default function TicketDetailPage() {
                                 {isAdmin && (
                                     <div className="flex flex-col gap-2 pt-4 border-t border-slate-50 dark:border-white/5">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-[9px] text-slate-400 uppercase font-medium tracking-widest">SLA Compliance</span>
+                                            <span className="text-[9px] text-slate-400 uppercase font-medium tracking-widest">Resolution Performance</span>
                                             <span className="text-[9px] font-medium text-emerald-500 uppercase tracking-widest">Active</span>
                                         </div>
                                         <div className="w-full bg-slate-100 dark:bg-white/5 h-2 rounded-full overflow-hidden">
@@ -513,7 +513,7 @@ export default function TicketDetailPage() {
                             <div className="bg-white dark:bg-[#1e293b] rounded-3xl shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] border border-slate-100 dark:border-white/5 overflow-hidden">
                                 <div className="p-6 border-b border-slate-50 dark:border-white/5 flex justify-between items-center">
                                     <h3 className="font-medium text-slate-900 dark:text-white uppercase text-[10px] tracking-widest">
-                                        Network Stakeholders
+                                        Involved Parties
                                     </h3>
                                     <button className="w-6 h-6 flex items-center justify-center rounded-full bg-slate-50 dark:bg-white/5 text-slate-400 hover:text-primary hover:bg-white transition-all">
                                         <span className="material-symbols-outlined text-sm">person_add</span>
@@ -538,7 +538,7 @@ export default function TicketDetailPage() {
                                             <span className="material-symbols-outlined text-xs">support_agent</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-xs font-medium text-slate-900 dark:text-white tracking-tight">Support Node</span>
+                                            <span className="text-xs font-medium text-slate-900 dark:text-white tracking-tight">Support Office</span>
                                             <span className="text-[9px] font-medium text-slate-400 uppercase tracking-widest">Operator</span>
                                         </div>
                                     </div>
@@ -557,7 +557,7 @@ export default function TicketDetailPage() {
                                         <ArrowLeft className="w-4 h-4" />
                                     </div>
                                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:text-primary transition-colors">
-                                        Return to Nexus
+                                        Return to Dashboard
                                     </span>
                                 </Link>
                                 <Link
@@ -568,7 +568,7 @@ export default function TicketDetailPage() {
                                         <PlusCircle className="w-4 h-4" />
                                     </div>
                                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">
-                                        Initialize New Ticket
+                                        Create New Ticket
                                     </span>
                                 </Link>
                             </div>

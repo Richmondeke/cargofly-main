@@ -7,6 +7,7 @@ import EmptyState from '@/components/common/EmptyState';
 import { StatusPill } from '@/components/dashboard/StatusPill';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { SuccessModal } from '@/components/common/SuccessModal';
 
 export default function ClaimsPage() {
     const { user } = useAuth();
@@ -22,6 +23,18 @@ export default function ClaimsPage() {
         description: '',
         amount: '',
         currency: 'USD',
+    });
+
+    const [successModal, setSuccessModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'success' | 'error';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'success'
     });
 
     useEffect(() => {
@@ -72,9 +85,20 @@ export default function ClaimsPage() {
             // Refresh claims
             const newClaims = await getClaims(user.uid);
             setClaims(newClaims);
+            setSuccessModal({
+                isOpen: true,
+                title: 'Claim Filed',
+                message: 'Your insurance claim has been submitted successfully and is now under review.',
+                type: 'success'
+            });
         } catch (error) {
             console.error('Error filing claim:', error);
-            alert('Failed to file claim');
+            setSuccessModal({
+                isOpen: true,
+                title: 'Submission Failed',
+                message: 'Failed to file claim. Please check your connection and try again.',
+                type: 'error'
+            });
         } finally {
             setSubmitting(false);
         }
@@ -196,6 +220,13 @@ export default function ClaimsPage() {
                     />
                 </div>
             )}
+            <SuccessModal
+                isOpen={successModal.isOpen}
+                onClose={() => setSuccessModal(prev => ({ ...prev, isOpen: false }))}
+                title={successModal.title}
+                message={successModal.message}
+                type={successModal.type}
+            />
         </div>
     );
 }

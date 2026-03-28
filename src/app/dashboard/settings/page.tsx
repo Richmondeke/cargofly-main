@@ -29,7 +29,8 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/Checkbox";
-import SuccessModal from "@/components/ui/SuccessModal";
+import { SuccessModal } from "@/components/common/SuccessModal";
+import { AlertCircle } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  Invite Modal (unchanged)                                                    */
@@ -120,8 +121,18 @@ export default function SettingsPage() {
     const [pushStatus, setPushStatus] = useState<'checking' | 'unsupported' | 'denied' | 'granted' | 'default'>('checking');
     const [enablingPush, setEnablingPush] = useState(false);
 
-    // Success Modal
-    const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
+    // Success/Notification Modal
+    const [successModal, setSuccessModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'success' | 'error';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'success'
+    });
 
     // Security modals
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -239,10 +250,20 @@ export default function SettingsPage() {
                 timezone: formData.timezone,
                 notifications: formData.notifications,
             });
-            setSuccessModal({ isOpen: true, title: 'Settings Saved', message: 'Your profile settings have been successfully updated.' });
+            setSuccessModal({
+                isOpen: true,
+                title: 'Settings Saved',
+                message: 'Your profile settings have been successfully updated.',
+                type: 'success'
+            });
         } catch (error) {
             console.error('Error saving settings:', error);
-            alert('Failed to save settings. Please try again.');
+            setSuccessModal({
+                isOpen: true,
+                title: 'Save Failed',
+                message: 'Failed to save settings. Please try again.',
+                type: 'error'
+            });
         } finally {
             setSaving(false);
         }
@@ -256,9 +277,20 @@ export default function SettingsPage() {
             if (result.success) {
                 setPushStatus('granted');
                 setFormData(prev => ({ ...prev, notifications: { ...prev.notifications, push: true } }));
+                setSuccessModal({
+                    isOpen: true,
+                    title: 'Push Notifications',
+                    message: 'Notifications enabled successfully!',
+                    type: 'success'
+                });
             } else {
                 setPushStatus('denied');
-                alert(result.error || 'Failed to enable push notifications');
+                setSuccessModal({
+                    isOpen: true,
+                    title: 'Permission Denied',
+                    message: result.error || 'Failed to enable push notifications',
+                    type: 'error'
+                });
             }
         } catch (error) {
             console.error('Error enabling push:', error);
@@ -279,7 +311,12 @@ export default function SettingsPage() {
             await updatePassword(user, passwordForm.new);
             setShowPasswordModal(false);
             setPasswordForm({ current: '', new: '', confirm: '' });
-            setSuccessModal({ isOpen: true, title: 'Password Updated', message: 'Your password has been changed successfully.' });
+            setSuccessModal({
+                isOpen: true,
+                title: 'Password Updated',
+                message: 'Your password has been changed successfully.',
+                type: 'success'
+            });
         } catch (error: unknown) {
             const err = error as { code?: string };
             if (err.code === 'auth/wrong-password') {
@@ -392,8 +429,8 @@ export default function SettingsPage() {
                                     {formData.email}
                                 </p>
                                 <span className={`mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${userProfile?.role === 'admin'
-                                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                                        : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                                     }`}>
                                     <span className="w-1.5 h-1.5 rounded-full bg-current" />
                                     {userProfile?.role || 'User'}
@@ -794,8 +831,8 @@ export default function SettingsPage() {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${member.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                                                                    : member.role === 'manager' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                                                        : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                                                : member.role === 'manager' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                                                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
                                                                 }`}>
                                                                 {member.role}
                                                             </span>
@@ -803,8 +840,8 @@ export default function SettingsPage() {
                                                         <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{member.department}</td>
                                                         <td className="px-6 py-4">
                                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${member.status === 'active'
-                                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                                                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                                : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
                                                                 }`}>
                                                                 <span className="w-1.5 h-1.5 rounded-full bg-current" />
                                                                 {member.status}
@@ -820,15 +857,39 @@ export default function SettingsPage() {
                                                                 </button>
                                                                 {activeMenuId === member.id && (
                                                                     <div className="absolute right-0 bottom-full mb-2 z-50 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-1">
-                                                                        <button onClick={() => { alert(`Edit role for ${member.displayName}`); setActiveMenuId(null); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
+                                                                        <button onClick={() => {
+                                                                            setSuccessModal({
+                                                                                isOpen: true,
+                                                                                title: 'Role Management',
+                                                                                message: `Role editing for ${member.displayName} will be available in the next update.`,
+                                                                                type: 'success'
+                                                                            });
+                                                                            setActiveMenuId(null);
+                                                                        }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
                                                                             <span className="material-symbols-outlined text-lg">edit</span> Edit Role
                                                                         </button>
-                                                                        <button onClick={() => { alert(`${member.status === 'active' ? 'Deactivate' : 'Activate'} ${member.displayName}`); setActiveMenuId(null); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
+                                                                        <button onClick={() => {
+                                                                            setSuccessModal({
+                                                                                isOpen: true,
+                                                                                title: 'Account Status',
+                                                                                message: `${member.status === 'active' ? 'Deactivation' : 'Activation'} for ${member.displayName} requested.`,
+                                                                                type: 'success'
+                                                                            });
+                                                                            setActiveMenuId(null);
+                                                                        }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
                                                                             <span className="material-symbols-outlined text-lg">{member.status === 'active' ? 'person_off' : 'person'}</span>
                                                                             {member.status === 'active' ? 'Deactivate' : 'Activate'}
                                                                         </button>
                                                                         <div className="border-t border-slate-200 dark:border-slate-700 my-1" />
-                                                                        <button onClick={() => { if (confirm(`Remove ${member.displayName}?`)) alert(`Removed ${member.displayName}`); setActiveMenuId(null); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                                        <button onClick={() => {
+                                                                            setSuccessModal({
+                                                                                isOpen: true,
+                                                                                title: 'Remove Member',
+                                                                                message: `Removal of ${member.displayName} is currently restricted for demo safety.`,
+                                                                                type: 'error'
+                                                                            });
+                                                                            setActiveMenuId(null);
+                                                                        }} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
                                                                             <span className="material-symbols-outlined text-lg">delete</span> Remove
                                                                         </button>
                                                                     </div>
@@ -971,6 +1032,13 @@ export default function SettingsPage() {
                     </div>
                 </div>
             )}
+            <SuccessModal
+                isOpen={successModal.isOpen}
+                onClose={() => setSuccessModal(prev => ({ ...prev, isOpen: false }))}
+                title={successModal.title}
+                message={successModal.message}
+                type={successModal.type}
+            />
         </div>
     );
 }

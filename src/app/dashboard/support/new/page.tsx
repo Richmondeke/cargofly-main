@@ -12,6 +12,7 @@ import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { ArrowLeft, Send } from 'lucide-react';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { SuccessModal } from '@/components/common/SuccessModal';
 
 export default function NewTicketPage() {
     const { user, userProfile } = useAuth();
@@ -23,6 +24,18 @@ export default function NewTicketPage() {
         priority: 'medium' as Ticket['priority'],
         description: '',
         shipmentId: '',
+    });
+
+    const [successModal, setSuccessModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'success' | 'error';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'success'
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -44,7 +57,12 @@ export default function NewTicketPage() {
             router.push(`/dashboard/support/${ticketId}`);
         } catch (error) {
             console.error('Error creating ticket:', error);
-            alert('Failed to create ticket. Please try again.');
+            setSuccessModal({
+                isOpen: true,
+                title: 'Submission Failed',
+                message: 'Failed to create ticket. Please check your connection and try again.',
+                type: 'error'
+            });
         } finally {
             setLoading(false);
         }
@@ -168,6 +186,13 @@ export default function NewTicketPage() {
                     </Card>
                 </form>
             </div>
+            <SuccessModal
+                isOpen={successModal.isOpen}
+                onClose={() => setSuccessModal(prev => ({ ...prev, isOpen: false }))}
+                title={successModal.title}
+                message={successModal.message}
+                type={successModal.type}
+            />
         </div>
     );
 }

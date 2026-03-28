@@ -31,14 +31,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
                 <div className="mb-4 text-4xl text-primary">{icon}</div>
             ) : null}
 
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
+            <h3 className="text-xl font-medium text-slate-900 dark:text-white mb-2">{title}</h3>
             {description && (
                 <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6 leading-relaxed">
                     {description}
                 </p>
             )}
             {action && (
-                <div className="mt-2 text-primary font-bold">
+                <div className="mt-2 text-primary font-medium">
                     {action}
                 </div>
             )}

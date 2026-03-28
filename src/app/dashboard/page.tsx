@@ -18,7 +18,7 @@ import { Eye } from 'lucide-react';
 // Modals
 import QuoteModal from '@/components/dashboard/QuoteModal';
 import TrackModal from '@/components/dashboard/TrackModal';
-import ReportModal from '@/components/dashboard/ReportModal';
+import { SuccessModal } from '@/components/common/SuccessModal';
 
 // Status icon helper
 function getStatusIcon(status: string) {
@@ -45,6 +45,8 @@ export default function DashboardPage() {
     // Quick Action Modal States
     const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
     const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [successData, setSuccessData] = useState({ title: '', message: '' });
 
     useEffect(() => {
         setMounted(true);
@@ -90,7 +92,7 @@ export default function DashboardPage() {
                         }}
                     />
 
-                    <div className="z-10 relative space-y-3">
+                    <div className="z-10 relative space-y-4 w-full sm:w-auto">
                         <span className="inline-block px-3 py-1 bg-gold-500 text-navy-900 text-[10px] font-medium uppercase tracking-widest rounded">
                             Route Expansion
                         </span>
@@ -101,13 +103,13 @@ export default function DashboardPage() {
                         <p className="text-white/80 max-w-md text-sm">
                             Book your cargo space early to take advantage of introductory low rates for our new daily service.
                         </p>
-                        <div className="flex gap-4 pt-2 flex-wrap">
-                            <Link href="/dashboard/new-booking">
-                                <button className="bg-gold-500 text-navy-900 px-6 py-3 rounded-xl font-medium text-sm hover:brightness-110 transition-all shadow-xl shadow-gold-500/20 active:scale-95 cursor-pointer">
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                            <Link href="/dashboard/new-booking" className="w-full sm:w-auto">
+                                <button className="w-full bg-gold-500 text-navy-900 px-8 py-4 rounded-2xl font-medium text-sm hover:brightness-110 transition-all shadow-xl shadow-gold-500/20 active:scale-95 cursor-pointer">
                                     Book This Route
                                 </button>
                             </Link>
-                            <button className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-6 py-3 rounded-xl font-medium text-sm hover:bg-white/20 transition-all active:scale-95 cursor-pointer">
+                            <button className="w-full sm:w-auto bg-white/10 backdrop-blur-md text-white border border-white/20 px-8 py-4 rounded-2xl font-medium text-sm hover:bg-white/20 transition-all active:scale-95 cursor-pointer">
                                 Learn More
                             </button>
                         </div>
@@ -123,17 +125,17 @@ export default function DashboardPage() {
                 </section>
 
                 {/* Quick Action Bar */}
-                <section className="flex flex-wrap gap-4 items-center justify-between border-b border-navy/5 dark:border-white/5 pb-8">
-                    <div className="flex gap-4 flex-wrap">
-                        <Link href="/dashboard/new-booking">
-                            <button className="flex items-center gap-2 bg-navy text-white px-6 py-3.5 rounded-xl font-medium shadow-xl shadow-navy/20 hover:scale-105 transition-all text-sm active:scale-95 cursor-pointer">
+                <section className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between border-b border-navy/5 dark:border-white/5 pb-8">
+                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        <Link href="/dashboard/new-booking" className="w-full sm:w-auto">
+                            <button className="w-full flex items-center justify-center gap-3 bg-navy dark:bg-navy-700 text-white h-14 px-8 rounded-2xl font-medium shadow-xl shadow-navy/20 hover:scale-[1.02] transition-all text-sm active:scale-[0.98] cursor-pointer">
                                 <span className="material-symbols-outlined text-[20px]">add_circle</span>
                                 New Shipment
                             </button>
                         </Link>
                         <button
                             onClick={() => setIsTrackModalOpen(true)}
-                            className="flex items-center gap-2 bg-white dark:bg-navy-800 text-navy dark:text-white border border-navy/10 dark:border-navy-600 px-6 py-3.5 rounded-xl font-medium hover:bg-navy/5 dark:hover:bg-navy-700 transition-all text-sm active:scale-95 cursor-pointer shadow-sm"
+                            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-navy-800 text-navy dark:text-white border border-navy/10 dark:border-navy-600 h-14 px-8 rounded-2xl font-medium hover:bg-navy/5 dark:hover:bg-navy-700 transition-all text-sm active:scale-[0.98] cursor-pointer shadow-sm"
                         >
                             <span className="material-symbols-outlined text-[20px]">track_changes</span>
                             Track Shipment
@@ -267,55 +269,91 @@ export default function DashboardPage() {
                                 </button>
                             </Link>
                         </div>
-                        <div className="overflow-x-auto flex-1">
-                            <table className="w-full text-left">
-                                <thead className="bg-navy/5 dark:bg-navy-800/50 text-[10px] uppercase font-medium text-navy-500/70 dark:text-sky-400/50 tracking-wider">
-                                    <tr>
-                                        <th className="px-6 py-4">Booking ID</th>
-                                        <th className="px-6 py-4">Route</th>
-                                        <th className="px-6 py-4">Weight</th>
-                                        <th className="px-6 py-4">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="text-sm divide-y divide-navy/5 dark:divide-navy-800">
-                                    {loading ? (
-                                        [1, 2, 3, 4].map(i => (
-                                            <tr key={i}>
-                                                <td colSpan={4} className="px-6 py-4">
-                                                    <div className="h-5 bg-navy/5 dark:bg-navy-800 rounded animate-pulse" />
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : recentBookings.length > 0 ? (
-                                        recentBookings.map(s => (
-                                            <tr
-                                                key={s.id}
-                                                className="hover:bg-navy/5 dark:hover:bg-navy-800/50 cursor-pointer transition-colors"
-                                                onClick={() => { setSelectedShipment(s); setIsDrawerOpen(true); }}
-                                            >
-                                                <td className="px-6 py-4 font-medium text-navy dark:text-white">
-                                                    {s.trackingNumber ? s.trackingNumber.slice(0, 12) : s.id.slice(0, 8)}
-                                                </td>
-                                                <td className="px-6 py-4 text-navy-700 dark:text-sky-400/80">
-                                                    {s.origin} → {s.destination}
-                                                </td>
-                                                <td className="px-6 py-4 text-navy/50 dark:text-navy-400">
-                                                    {s.weight || '—'}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <StatusBadge status={s.status} />
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
+                        <div className="flex-1">
+                            {/* Desktop View */}
+                            <div className="hidden sm:block overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead className="bg-navy/5 dark:bg-navy-800/50 text-[10px] uppercase font-medium text-navy-500/70 dark:text-sky-400/50 tracking-wider font-display">
                                         <tr>
-                                            <td colSpan={4} className="px-6 py-10 text-center text-slate-400 text-sm">
-                                                No bookings yet.
-                                            </td>
+                                            <th className="px-6 py-4">Booking ID</th>
+                                            <th className="px-6 py-4">Route</th>
+                                            <th className="px-6 py-4">Weight</th>
+                                            <th className="px-6 py-4">Status</th>
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="text-sm divide-y divide-navy/5 dark:divide-navy-800">
+                                        {loading ? (
+                                            [1, 2, 3, 4].map(i => (
+                                                <tr key={i}>
+                                                    <td colSpan={4} className="px-6 py-4">
+                                                        <div className="h-5 bg-navy/5 dark:bg-navy-800 rounded animate-pulse" />
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : recentBookings.length > 0 ? (
+                                            recentBookings.map(s => (
+                                                <tr
+                                                    key={s.id}
+                                                    className="hover:bg-navy/5 dark:hover:bg-navy-800/50 cursor-pointer transition-colors"
+                                                    onClick={() => { setSelectedShipment(s); setIsDrawerOpen(true); }}
+                                                >
+                                                    <td className="px-6 py-4 font-medium text-navy dark:text-white">
+                                                        {s.trackingNumber ? s.trackingNumber.slice(0, 12) : s.id.slice(0, 8)}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-navy-700 dark:text-sky-400/80">
+                                                        {s.origin} → {s.destination}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-navy/50 dark:text-navy-400">
+                                                        {s.weight || '—'}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <StatusBadge status={s.status} />
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={4} className="px-6 py-10 text-center text-slate-400 text-sm">
+                                                    No bookings yet.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Card View */}
+                            <div className="sm:hidden divide-y divide-navy/5 dark:divide-navy-800">
+                                {loading ? (
+                                    [1, 2, 3].map(i => (
+                                        <div key={i} className="p-4 space-y-3">
+                                            <div className="h-4 bg-navy/5 dark:bg-navy-800 rounded animate-pulse w-1/2" />
+                                            <div className="h-4 bg-navy/5 dark:bg-navy-800 rounded animate-pulse w-3/4" />
+                                        </div>
+                                    ))
+                                ) : recentBookings.length > 0 ? (
+                                    recentBookings.map(s => (
+                                        <div
+                                            key={s.id}
+                                            className="p-4 active:bg-navy/5 dark:active:bg-navy-800 transition-colors"
+                                            onClick={() => { setSelectedShipment(s); setIsDrawerOpen(true); }}
+                                        >
+                                            <div className="flex justify-between items-start mb-2">
+                                                <p className="font-medium text-navy dark:text-white">#{s.trackingNumber ? s.trackingNumber.slice(0, 12) : s.id.slice(0, 8)}</p>
+                                                <StatusBadge status={s.status} />
+                                            </div>
+                                            <div className="flex items-center justify-between text-xs text-navy/50 dark:text-navy-400">
+                                                <span>{s.origin} → {s.destination}</span>
+                                                <span className="font-medium">{s.weight || '—'}</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="p-10 text-center text-slate-400 text-sm">
+                                        No bookings yet.
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -334,6 +372,14 @@ export default function DashboardPage() {
                 <TrackModal
                     isOpen={isTrackModalOpen}
                     onClose={() => setIsTrackModalOpen(false)}
+                />
+
+                <SuccessModal
+                    isOpen={isSuccessModalOpen}
+                    onClose={() => setIsSuccessModalOpen(false)}
+                    title={successData.title}
+                    message={successData.message}
+                    actionLabel="Done"
                 />
             </div>
         </div>

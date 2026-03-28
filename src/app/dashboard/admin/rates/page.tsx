@@ -37,6 +37,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { SuccessModal } from '@/components/common/SuccessModal';
+import { AlertCircle } from "lucide-react";
 
 export default function AdminRatesPage() {
     const [routes, setRoutes] = useState<Route[]>([]);
@@ -45,6 +47,17 @@ export default function AdminRatesPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editForm, setEditForm] = useState<Partial<Route>>({});
     const [showAddModal, setShowAddModal] = useState(false);
+    const [notification, setNotification] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'success' | 'error';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'success'
+    });
     const [newRoute, setNewRoute] = useState<Partial<Route>>({
         origin: "Lagos",
         destination: "",
@@ -102,18 +115,32 @@ export default function AdminRatesPage() {
             setEditingId(null);
             fetchRoutes();
         } catch (error) {
-            alert("Failed to update route");
+            setNotification({
+                isOpen: true,
+                title: 'Update Failed',
+                message: 'Failed to update route. Please try again.',
+                type: 'error'
+            });
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm("Are you sure you want to deactivate this route?")) {
-            try {
-                await deleteRoute(id);
-                fetchRoutes();
-            } catch (error) {
-                alert("Failed to delete route");
-            }
+        try {
+            await deleteRoute(id);
+            setNotification({
+                isOpen: true,
+                title: 'Route Deactivated',
+                message: 'The route has been successfully deactivated.',
+                type: 'success'
+            });
+            fetchRoutes();
+        } catch (error) {
+            setNotification({
+                isOpen: true,
+                title: 'Deactivation Failed',
+                message: 'Failed to deactivate route. Please try again.',
+                type: 'error'
+            });
         }
     };
 
@@ -134,7 +161,12 @@ export default function AdminRatesPage() {
             });
             fetchRoutes();
         } catch (error) {
-            alert("Failed to add route");
+            setNotification({
+                isOpen: true,
+                title: 'Addition Failed',
+                message: 'Failed to add route. Please try again.',
+                type: 'error'
+            });
         }
     };
 
@@ -473,6 +505,13 @@ export default function AdminRatesPage() {
                     </div>
                 )}
             </AnimatePresence>
+            <SuccessModal
+                isOpen={notification.isOpen}
+                onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
+                title={notification.title}
+                message={notification.message}
+                type={notification.type}
+            />
         </div>
     );
 }

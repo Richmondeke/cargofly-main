@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                 {userProfile?.role === 'admin' && (
                     <>
                         <SidebarSection label="Administration" />
-                        <SidebarLink to="/dashboard/admin" icon="admin_panel_settings" label="Operations Center" active={pathname === '/dashboard/admin'} onClick={onClose} />
+                        <SidebarLink to="/dashboard/admin" icon="admin_panel_settings" label="Admin Panel" active={pathname === '/dashboard/admin'} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/shipments" icon="local_shipping" label="All Shipments" active={pathname === '/dashboard/admin/shipments'} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/rates" icon="currency_exchange" label="Rates Management" active={pathname === '/dashboard/admin/rates'} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/support" icon="support_agent" label="Support Console" active={pathname?.startsWith('/dashboard/admin/support')} onClick={onClose} />

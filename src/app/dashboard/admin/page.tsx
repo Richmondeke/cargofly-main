@@ -84,7 +84,7 @@ export default function AdminPage() {
                 <header className="flex justify-between items-center mb-10">
                     <div>
                         <h1 className="text-2xl font-medium text-slate-900 dark:text-white tracking-tight font-display">
-                            Precision Navigator
+                            Dashboard
                         </h1>
                         <p className="text-xs font-medium text-slate-500">Real-time global logistics oversight</p>
                     </div>
@@ -269,7 +269,7 @@ export default function AdminPage() {
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-700" />
                             <div className="relative z-10">
                                 <p className="text-[10px] font-medium uppercase tracking-widest text-white/60 mb-2">Internal Manifest</p>
-                                <h4 className="text-xl font-medium mb-6">Operations Center</h4>
+                                <h4 className="text-xl font-medium mb-6">Admin Panel</h4>
                                 <div className="space-y-4">
                                     <div className="p-3 bg-white/10 rounded-xl flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
