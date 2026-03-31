@@ -2,8 +2,8 @@ import Header from "@/components/landing-b/Header";
 import Hero from "@/components/landing-b/Hero";
 import DetailedServices from "@/components/landing-b/DetailedServices";
 import Process from "@/components/landing-b/Process";
-import Products from "@/components/landing-b/Products";
 import Newsletter from "@/components/landing-b/Newsletter";
+
 
 export default function Home() {
     return (
@@ -13,8 +13,8 @@ export default function Home() {
             <Hero />
             <DetailedServices />
             <Process />
-            <Products />
             <Newsletter />
+
 
             <footer className="bg-black text-white py-12 px-6 border-t border-white/10">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">

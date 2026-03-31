@@ -3,8 +3,8 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/landing-b/Hero";
 import DetailedServices from "@/components/landing-b/DetailedServices";
 import Process from "@/components/landing-b/Process";
-import Products from "@/components/landing-b/Products";
 import FAQ from "@/components/landing-b/FAQ";
+
 import Newsletter from "@/components/landing-b/Newsletter";
 import BlogSection from "@/components/landing-b/BlogSection";
 
@@ -16,8 +16,8 @@ export default function Home() {
             <Hero />
             <DetailedServices />
             <Process />
-            <Products />
             <BlogSection />
+
             <FAQ />
             <Newsletter />
 
