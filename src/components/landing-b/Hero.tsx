@@ -61,15 +61,7 @@ export default function Hero() {
 
             <div className="flex-grow flex items-center justify-center pt-32 pb-20">
                 <div className="relative z-10 max-w-6xl mx-auto text-center">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ ...smoothTransition, duration: 2 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8"
-                    >
-                        <span className="w-2 h-2 rounded-full bg-gold-400 animate-pulse" />
-                        <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/60">Elite Logistics Network</span>
-                    </motion.div>
+
 
                     <motion.h1
                         className="text-5xl md:text-7xl lg:text-[100px] font-bold tracking-tight mb-6 leading-[0.9] lg:leading-[0.85]"
