@@ -15,9 +15,9 @@ const humanist = localFont({
 
 
 export const metadata = {
-  title: "Cargofly | Caverton Cargo Division - Premium Aviation Logistics",
+  title: "Cargofly - Welcome to the future of Air logistics.",
   description:
-    "The pinnacle of West African aviation logistics. Premium cargo services, real-time tracking, and white-glove delivery for discerning clients worldwide.",
+    "Cargofly - Welcome to the future of Air logistics.",
   keywords: [
     "cargo",
     "logistics",
@@ -31,9 +31,9 @@ export const metadata = {
   ],
   authors: [{ name: "Caverton Group" }],
   openGraph: {
-    title: "Cargofly | Premium Aviation Logistics",
+    title: "Cargofly - Welcome to the future of Air logistics.",
     description:
-      "Where luxury meets logistics. Premium cargo services for discerning clients.",
+      "Cargofly - Welcome to the future of Air logistics.",
     type: "website",
     locale: "en_US",
     siteName: "Cargofly",
@@ -42,15 +42,15 @@ export const metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Cargofly Landing Page",
+        alt: "Cargofly - Welcome to the future of Air logistics.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cargofly | Premium Aviation Logistics",
+    title: "Cargofly - Welcome to the future of Air logistics.",
     description:
-      "Where luxury meets logistics. Premium cargo services for discerning clients.",
+      "Cargofly - Welcome to the future of Air logistics.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -61,6 +61,7 @@ export const metadata = {
     icon: "/favicon.png",
   },
 };
+
 
 import { Toaster } from "react-hot-toast";
 
