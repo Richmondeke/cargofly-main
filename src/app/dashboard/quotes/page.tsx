@@ -94,7 +94,6 @@ export default function QuotesPage() {
                     <EmptyState
                         title="No saved quotes"
                         description="Get a quote for your shipment and save it for later to lock in the price."
-                        imageSrc="/images/illustrations/logistics_checklist.jpg"
                         action={
                             <button
                                 onClick={() => router.push('/ship')}

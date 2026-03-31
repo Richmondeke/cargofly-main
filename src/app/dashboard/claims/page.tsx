@@ -73,7 +73,7 @@ export default function ClaimsPage() {
                 description: formData.description,
                 amount: parseFloat(formData.amount) || 0,
                 currency: formData.currency,
-            });
+            }, user.displayName || 'User');
             setShowFileForm(false);
             setFormData({
                 shipmentId: '',
@@ -216,7 +216,6 @@ export default function ClaimsPage() {
                     <EmptyState
                         title="No active claims"
                         description="Your shipments are all safe and sound."
-                        imageSrc="/images/illustrations/warehouse_workers.jpg"
                     />
                 </div>
             )}

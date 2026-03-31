@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { getActiveShipments, getUserById, DashboardShipment } from '@/lib/dashboard-service';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShipmentDetailsDrawer } from '@/components/dashboard/ShipmentDetailsDrawer';
+import EmptyState from '@/components/common/EmptyState';
 
 type FilterStatus = 'All' | 'In Transit' | 'Customs Hold' | 'Delivered';
 
@@ -340,17 +341,13 @@ export default function ShipmentsPage() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-16 text-center">
-                                            <div className="w-40 h-40 mx-auto mb-4 relative opacity-60">
-                                                <Image
-                                                    src="/images/illustrations/empty_logistics.png"
-                                                    alt="No shipments"
-                                                    fill
-                                                    className="object-contain"
-                                                />
-                                            </div>
-                                            <h3 className="text-base font-medium text-slate-900 dark:text-white mb-1">No shipments found</h3>
-                                            <p className="text-sm text-slate-400">Try adjusting your filters or search query.</p>
+                                        <td colSpan={6} className="px-6 py-12">
+                                            <EmptyState
+                                                title="No shipments found"
+                                                description="Try adjusting your filters or search query."
+                                                actionLabel="Book a Shipment"
+                                                onAction={() => router.push('/dashboard/new-booking')}
+                                            />
                                         </td>
                                     </tr>
                                 )}

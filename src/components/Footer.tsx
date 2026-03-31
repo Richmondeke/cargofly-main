@@ -18,8 +18,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 const footerLinks = {
     company: [
         { name: "About", href: "/about" },
-        { name: "Staffing", href: "/staffing" },
-        { name: "Drivers", href: "/drivers" },
+        { name: "Contact Us", href: "/contact" },
+        { name: "Locations", href: "/about#network" },
     ],
     resources: [
         { name: "Blog", href: "/blog" },

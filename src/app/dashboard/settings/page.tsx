@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserSettings, updateUserSettings, getTeamMembers, inviteTeamMember, TeamMember } from '@/lib/dashboard-service';
-import RiveAnimation from '@/components/ui/RiveAnimation';
+import EmptyState from '@/components/common/EmptyState';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { UserPlus } from 'lucide-react';
@@ -18,11 +18,7 @@ import {
 import {
     updatePassword,
     reauthenticateWithCredential,
-    EmailAuthProvider,
-    multiFactor,
-    PhoneAuthProvider,
-    PhoneMultiFactorGenerator,
-    RecaptchaVerifier
+    EmailAuthProvider
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Input } from "@/components/ui/Input";
@@ -136,17 +132,9 @@ export default function SettingsPage() {
 
     // Security modals
     const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
-    const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
-    const [passwordError, setPasswordError] = useState('');
     const [passwordLoading, setPasswordLoading] = useState(false);
-    const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-    const [twoFactorStep, setTwoFactorStep] = useState<'phone' | 'verify'>('phone');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [verificationCode, setVerificationCode] = useState('');
-    const [verificationId, setVerificationId] = useState('');
-    const [twoFactorLoading, setTwoFactorLoading] = useState(false);
-    const [twoFactorError, setTwoFactorError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
 
     const [formData, setFormData] = useState({
         displayName: '',
@@ -331,55 +319,7 @@ export default function SettingsPage() {
         }
     };
 
-    const handleSendVerification = async () => {
-        if (!user) return;
-        setTwoFactorError('');
-        setTwoFactorLoading(true);
-        try {
-            let formattedPhone = phoneNumber;
-            if (!phoneNumber.startsWith('+')) formattedPhone = '+234' + phoneNumber.replace(/^0/, '');
-            const recaptchaContainer = document.getElementById('recaptcha-container');
-            if (!recaptchaContainer) throw new Error('Recaptcha container not found');
-            const recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainer, { size: 'invisible' });
-            const mfaUser = multiFactor(user);
-            const session = await mfaUser.getSession();
-            const phoneProvider = new PhoneAuthProvider(auth);
-            const verId = await phoneProvider.verifyPhoneNumber({ phoneNumber: formattedPhone, session }, recaptchaVerifier);
-            setVerificationId(verId);
-            setTwoFactorStep('verify');
-        } catch (error: unknown) {
-            const err = error as { code?: string; message?: string };
-            if (err.code === 'auth/requires-recent-login') {
-                setTwoFactorError('Please log out and log back in to enable 2FA');
-            } else {
-                setTwoFactorError(err.message || 'Failed to send verification code');
-            }
-        } finally {
-            setTwoFactorLoading(false);
-        }
-    };
 
-    const handleVerifyCode = async () => {
-        if (!user) return;
-        setTwoFactorError('');
-        setTwoFactorLoading(true);
-        try {
-            const cred = PhoneAuthProvider.credential(verificationId, verificationCode);
-            const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
-            const mfaUser = multiFactor(user);
-            await mfaUser.enroll(multiFactorAssertion, 'Phone Number');
-            setTwoFactorEnabled(true);
-            setShowTwoFactorModal(false);
-            setTwoFactorStep('phone');
-            setPhoneNumber('');
-            setVerificationCode('');
-        } catch (error: unknown) {
-            const err = error as { message?: string };
-            setTwoFactorError(err.message || 'Invalid verification code');
-        } finally {
-            setTwoFactorLoading(false);
-        }
-    };
 
     /* ── nav items ── */
     const navItems: { id: SettingsSection; label: string; icon: string; adminOnly?: boolean }[] = [
@@ -734,34 +674,7 @@ export default function SettingsPage() {
                                         </button>
                                     </div>
 
-                                    {/* 2FA row */}
-                                    <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${twoFactorEnabled ? 'bg-green-100 dark:bg-green-900/30' : 'bg-slate-200 dark:bg-slate-600'}`}>
-                                                <span className={`material-symbols-outlined text-xl ${twoFactorEnabled ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-300'}`}>
-                                                    {twoFactorEnabled ? 'verified_user' : 'security'}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-slate-900 dark:text-white text-sm">Two-Factor Authentication</p>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                    {twoFactorEnabled ? '2FA is active – phone verification enabled' : 'Add extra security to your account'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        {twoFactorEnabled ? (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-current" /> Active
-                                            </span>
-                                        ) : (
-                                            <button
-                                                onClick={() => setShowTwoFactorModal(true)}
-                                                className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-                                            >
-                                                Enable 2FA
-                                            </button>
-                                        )}
-                                    </div>
+
 
                                     {/* Sessions info */}
                                     <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
@@ -900,13 +813,11 @@ export default function SettingsPage() {
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan={5} className="px-6 py-16 text-center text-slate-500">
-                                                        <div className="flex flex-col items-center gap-3">
-                                                            <div className="w-36 h-36">
-                                                                <RiveAnimation src="/icons/empty-state.riv" />
-                                                            </div>
-                                                            <p className="font-medium">No team members found</p>
-                                                        </div>
+                                                    <td colSpan={5} className="px-6 py-16">
+                                                        <EmptyState
+                                                            title="No team members found"
+                                                            description="You haven't added any team members yet. Invite your colleagues to get started."
+                                                        />
                                                     </td>
                                                 </tr>
                                             )}
@@ -965,73 +876,7 @@ export default function SettingsPage() {
                 </div>
             )}
 
-            {/* ── 2FA MODAL ── */}
-            {showTwoFactorModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-                        <h3 className="text-xl font-medium text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">security</span>
-                            Enable Two-Factor Authentication
-                        </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
-                            {twoFactorStep === 'phone' ? "We'll verify your identity via phone." : "Enter the 6-digit code sent to your phone."}
-                        </p>
 
-                        {twoFactorStep === 'phone' ? (
-                            <div className="space-y-4">
-                                <div>
-                                    <Label htmlFor="phoneNumber">Phone Number</Label>
-                                    <Input
-                                        id="phoneNumber"
-                                        type="tel"
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
-                                        placeholder="+234 800 000 0000"
-                                    />
-                                </div>
-                                <div id="recaptcha-container" />
-                            </div>
-                        ) : (
-                            <div>
-                                <Label htmlFor="verificationCode">Verification Code</Label>
-                                <Input
-                                    id="verificationCode"
-                                    type="text"
-                                    value={verificationCode}
-                                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                    className="text-center text-2xl tracking-widest"
-                                    placeholder="000000"
-                                    maxLength={6}
-                                />
-                            </div>
-                        )}
-
-                        {twoFactorError && (
-                            <p className="text-red-500 text-sm flex items-center gap-1 mt-3">
-                                <span className="material-symbols-outlined text-sm">error</span> {twoFactorError}
-                            </p>
-                        )}
-
-                        <div className="flex gap-3 mt-6">
-                            <button
-                                onClick={() => { setShowTwoFactorModal(false); setTwoFactorStep('phone'); setPhoneNumber(''); setVerificationCode(''); setTwoFactorError(''); }}
-                                className="flex-1 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl font-medium transition-colors">
-                                Cancel
-                            </button>
-                            <button
-                                onClick={twoFactorStep === 'phone' ? handleSendVerification : handleVerifyCode}
-                                disabled={twoFactorLoading || (twoFactorStep === 'phone' ? !phoneNumber : verificationCode.length !== 6)}
-                                className="flex-1 px-4 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                                {twoFactorLoading ? (
-                                    <><span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>{twoFactorStep === 'phone' ? 'Sending...' : 'Verifying...'}</>
-                                ) : (
-                                    twoFactorStep === 'phone' ? 'Send Code' : 'Verify & Enable'
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
             <SuccessModal
                 isOpen={successModal.isOpen}
                 onClose={() => setSuccessModal(prev => ({ ...prev, isOpen: false }))}

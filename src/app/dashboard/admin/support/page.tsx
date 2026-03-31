@@ -128,7 +128,11 @@ export default function AdminSupportPage() {
         <div className="flex-1 overflow-y-auto p-8 h-full bg-slate-50 dark:bg-background-dark">
             <div className="max-w-7xl mx-auto">
                 {/* New Banner Header */}
-                <SupportBanner />
+                <SupportBanner
+                    badge="Operational Control"
+                    title={<>Support Operations <br /><span className="text-[#FFCA00]">Command Center</span></>}
+                    description="Monitor and manage global cargo inquiries. Ensure 24/7 resolution of critical shipment issues across all regions."
+                />
 
                 {/* Premium Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">

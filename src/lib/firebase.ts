@@ -17,13 +17,26 @@ const firebaseConfig = {
 // Initialize Firebase safely (prevent multiple initializations or crashing if config is missing)
 const app = (() => {
     if (getApps().length > 0) return getApps()[0];
-    if (firebaseConfig.apiKey) return initializeApp(firebaseConfig);
-    return undefined;
+
+    // Check for required config
+    if (!firebaseConfig.apiKey) {
+        if (typeof window !== 'undefined') {
+            console.error("Firebase API Key is missing. Check your environment variables.");
+        }
+        return undefined;
+    }
+
+    try {
+        return initializeApp(firebaseConfig);
+    } catch (error) {
+        console.error("Failed to initialize Firebase:", error);
+        return undefined;
+    }
 })();
 
 // Export services with fallbacks to avoid crashing build if config is missing
-export const auth = app ? getAuth(app) : (undefined as unknown as ReturnType<typeof getAuth>);
-export const db = app ? getFirestore(app) : (undefined as unknown as ReturnType<typeof getFirestore>);
-export const storage = app ? getStorage(app) : (undefined as unknown as ReturnType<typeof getStorage>);
+export const auth = app ? getAuth(app) : undefined as any;
+export const db = app ? getFirestore(app) : undefined as any;
+export const storage = app ? getStorage(app) : undefined as any;
 
 export default app;

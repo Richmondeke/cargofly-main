@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Package, Truck, MapPin, DollarSign, AlertCircle, Image as ImageIcon, Video, Download, Upload } from 'lucide-react';
+import { X, Package, Truck, MapPin, DollarSign, AlertCircle, Image as ImageIcon, Video, Download, Upload, FileText, ImagePlus, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import { DashboardShipment } from '@/lib/dashboard-service';
 import { StatusPill } from './StatusPill';

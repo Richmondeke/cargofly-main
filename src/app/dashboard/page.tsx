@@ -97,7 +97,7 @@ export default function DashboardPage() {
                             Route Expansion
                         </span>
                         <h2 className="text-white text-2xl sm:text-3xl font-display font-medium leading-tight">
-                            New Route to Singapore <br className="hidden sm:block" />
+                            New Route to Ghana <br className="hidden sm:block" />
                             Starting Next Month
                         </h2>
                         <p className="text-white/80 max-w-md text-sm">
@@ -115,9 +115,9 @@ export default function DashboardPage() {
                         </div>
                     </div>
                     <div
-                        className="absolute right-0 top-0 h-full w-1/3 sm:w-2/5 opacity-40 pointer-events-none transition-transform group-hover:scale-105 duration-700 z-10"
+                        className="absolute right-0 top-0 h-full w-1/3 sm:w-2/5 opacity-100 pointer-events-none transition-transform group-hover:scale-105 duration-700 z-10"
                         style={{
-                            backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCj32WxKMQJJjPpeGLU41bKxnpgDqvVvH4DxU94dpj2u-QSOXOb9gIIpMEB7z0msS40fh5EnRzayghD3ChwBJe9nf4XDp7EVafYqL_aqT8k3TcP5batWJQvKvh9S8P9ExMPhbcv48N6ErQ2vyR_8dz8CwgI6BzbjwLOjnq8RdpPCzhlDqDUteub66JOuj0mmXCNrM_zWbbj7JLEC2TgGH63pKmvYjgL4HVwHMP1EQryzNajyDK1YxojNTBGclCFA9V6Wt2L1FmjTUmj')",
+                            backgroundImage: "url('/images/hero-aircraft.png')",
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                         }}
@@ -147,50 +147,66 @@ export default function DashboardPage() {
                 </section>
 
                 {/* Stats Cards */}
-                <section className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    {/* Total Shipments */}
-                    <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-                        <div className="min-w-0">
-                            <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest truncate">Total Shipments</p>
-                            <h3 className="text-3xl font-display font-medium mt-1 text-navy dark:text-white flex items-baseline gap-1">
-                                {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : stats.totalShipments}
-                                <span className="text-xs font-normal text-navy/40 dark:text-white/40">Total</span>
-                            </h3>
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {/* Global Shipments */}
+                    <Link href="/dashboard/shipments" className="block">
+                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]">
+                            <div className="min-w-0">
+                                <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest truncate">Global Shipments</p>
+                                <h3 className="text-3xl font-display font-medium mt-1 text-navy dark:text-white flex items-baseline gap-1">
+                                    {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : stats.totalShipments}
+                                </h3>
+                            </div>
+                            <div className="size-14 bg-navy/5 dark:bg-navy-800 rounded-2xl flex-shrink-0 flex items-center justify-center text-navy dark:text-sky-400 group-hover:scale-110 transition-transform">
+                                <span className="material-symbols-outlined text-3xl">local_shipping</span>
+                            </div>
                         </div>
-                        <div className="size-14 bg-navy/5 dark:bg-navy-800 rounded-2xl flex-shrink-0 flex items-center justify-center text-navy dark:text-sky-400 group-hover:scale-110 transition-transform">
-                            <span className="material-symbols-outlined text-3xl">weight</span>
-                        </div>
-                    </div>
+                    </Link>
 
                     {/* In Transit */}
-                    <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-                        <div>
-                            <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Active Shipments</p>
-                            <h3 className="text-3xl font-display font-medium mt-1 text-navy dark:text-white">
-                                {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : stats.inTransit}
-                                <span className="text-sm font-normal text-navy/40 ml-1">In Transit</span>
-                            </h3>
+                    <Link href="/dashboard/shipments?status=in_transit" className="block">
+                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]">
+                            <div>
+                                <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">In Transit</p>
+                                <h3 className="text-3xl font-display font-medium mt-1 text-navy dark:text-white">
+                                    {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : stats.inTransit}
+                                </h3>
+                            </div>
+                            <div className="size-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                                <span className="material-symbols-outlined text-3xl">explore</span>
+                            </div>
+                        </div>
+                    </Link>
 
+                    {/* Pending Action */}
+                    <Link href="/dashboard/shipments?status=pending" className="block">
+                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]">
+                            <div>
+                                <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Pending Action</p>
+                                <h3 className="text-3xl font-display font-medium mt-1 text-navy dark:text-white">
+                                    {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : ((stats as any).pending || 0)}
+                                </h3>
+                            </div>
+                            <div className="size-14 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
+                                <span className="material-symbols-outlined text-3xl">history</span>
+                            </div>
                         </div>
-                        <div className="size-14 bg-gold-50 dark:bg-gold-900/20 rounded-2xl flex items-center justify-center text-gold-600">
-                            <span className="material-symbols-outlined text-3xl">local_shipping</span>
-                        </div>
-                    </div>
+                    </Link>
 
-                    {/* Pending / Quotes */}
-                    <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-                        <div>
-                            <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Pending</p>
-                            <h3 className="text-3xl font-display font-medium mt-1 text-navy dark:text-white">
-                                {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : ((stats as any).pending || 0)}
-                                <span className="text-sm font-normal text-navy/40 ml-1">Awaiting Action</span>
-                            </h3>
-
+                    {/* Total Spent */}
+                    <Link href="/dashboard/wallet" className="block">
+                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]">
+                            <div>
+                                <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Total Spent</p>
+                                <h3 className="text-3xl font-display font-medium mt-1 text-navy dark:text-white">
+                                    {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : `$${(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`}
+                                </h3>
+                            </div>
+                            <div className="size-14 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                                <span className="material-symbols-outlined text-3xl">account_balance_wallet</span>
+                            </div>
                         </div>
-                        <div className="size-14 bg-navy/5 dark:bg-navy-800 rounded-2xl flex items-center justify-center text-navy dark:text-sky-400">
-                            <span className="material-symbols-outlined text-3xl">request_quote</span>
-                        </div>
-                    </div>
+                    </Link>
                 </section>
 
                 {/* Data Tables */}

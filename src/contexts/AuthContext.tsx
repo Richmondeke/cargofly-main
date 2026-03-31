@@ -174,11 +174,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Sign in with email/password
     async function signIn(email: string, password: string) {
+        if (!auth) throw new Error("Authentication service is not available.");
         await signInWithEmailAndPassword(auth, email, password);
     }
 
     // Sign up with email/password
     async function signUp(email: string, password: string, displayName: string) {
+        if (!auth) throw new Error("Authentication service is not available.");
         const { user } = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(user, { displayName });
         await createUserProfile(user, displayName);
@@ -193,7 +195,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Sign out
     async function signOut() {
-        await firebaseSignOut(auth);
+        if (auth) {
+            await firebaseSignOut(auth);
+        }
         setUser(null);
         setUserProfile(null);
     }

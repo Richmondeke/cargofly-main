@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/Label";
 import toast from "react-hot-toast";
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { SuccessModal } from '@/components/common/SuccessModal';
+import EmptyState from "@/components/common/EmptyState";
 
 const DUMMY_POSTS = [
     // ... existing posts ...
@@ -293,26 +294,12 @@ export default function AdminBlogPage() {
                         </CardContent>
                     </Card>
                 ) : posts.length === 0 ? (
-                    <Card variant="default" className="text-center">
-                        <CardContent className="p-16 flex flex-col items-center">
-                            <div className="relative w-64 h-64 mb-6">
-                                <img
-                                    src="/images/illustrations/empty_logistics.png"
-                                    alt="No Blog Posts"
-                                    className="object-contain w-full h-full opacity-80"
-                                />
-                            </div>
-                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No Blog Posts Found</h3>
-                            <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">You haven't published any articles yet. Start by creating a new post or use the dummy generator.</p>
-                            <Button
-                                variant="link"
-                                onClick={handleSeedDummyData}
-                                className="font-bold"
-                            >
-                                Click here to seed "Introducing Cargofly 3" dummy posts
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <EmptyState
+                        title="No Blog Posts Found"
+                        description="You haven't published any articles yet. Start by creating a new post or use the dummy generator."
+                        actionLabel="Generate Dummy Posts"
+                        onAction={handleSeedDummyData}
+                    />
                 ) : (
                     <Card>
                         <div className="overflow-x-auto">

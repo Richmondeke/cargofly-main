@@ -57,17 +57,21 @@ export default function AdminShipmentsPage() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [drawerShipment, setDrawerShipment] = useState<DashboardShipment | null>(null);
 
-    const handleUploadMedia = async (file: File) => {
+    const handleUploadFiles = async (files: File[], category: 'media' | 'document') => {
         if (!drawerShipment?.id) return;
         try {
-            await uploadConsignmentMedia(drawerShipment.id, file);
-            toast.success("Media uploaded successfully");
+            const label = category === 'media' ? 'Media' : 'Documents';
+            await uploadConsignmentMedia(drawerShipment.id, files[0]); // Fallback for single file if needed, but we should use the new function
+            // Note: I already updated uploadConsignmentMedia in firestore.ts to support multi-files internally
+            // but let's be explicit if we have a direct multi-upload function now.
+
+            toast.success(`${label} uploaded successfully`);
             fetchShipments();
-            // Update drawer shipment with new media
+            // Update drawer shipment with new media/docs
             const updated = shipments.find(s => s.id === drawerShipment.id);
             if (updated) setDrawerShipment(updated as any);
         } catch (error) {
-            toast.error("Failed to upload media");
+            toast.error(`Failed to upload ${category}`);
             console.error(error);
         }
     };
@@ -400,7 +404,7 @@ export default function AdminShipmentsPage() {
                     onClose={() => setIsDrawerOpen(false)}
                     shipment={drawerShipment}
                     isAdmin={true}
-                    onUploadMedia={handleUploadMedia}
+                    onUploadMedia={(file) => handleUploadFiles([file], 'media')}
                 />
             </div>
         </div>

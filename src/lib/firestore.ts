@@ -98,6 +98,12 @@ export interface Shipment {
         name: string;
         createdAt: Timestamp;
     }[];
+    shippingDocuments?: {
+        url: string;
+        name: string;
+        type: string;
+        createdAt: Timestamp;
+    }[];
     price: ShipmentPrice;
     paymentStatus: "pending" | "paid" | "failed" | "refunded";
     paymentMethod?: string;
@@ -427,31 +433,55 @@ export async function updateShipmentStatus(
 }
 
 
-// Upload consignment media
+// Upload shipment files (media or documents)
+export async function uploadShipmentFiles(
+    shipmentId: string,
+    files: File[],
+    category: 'media' | 'document'
+): Promise<void> {
+    const shipmentRef = doc(db, "shipments", shipmentId);
+
+    for (const file of files) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const folder = category === 'media' ? 'consignment_media' : 'shipping_documents';
+        const storageRef = ref(storage, `shipments/${shipmentId}/${folder}/${fileName}`);
+
+        // 1. Upload to Storage
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+
+        // 2. Update Firestore based on category
+        if (category === 'media') {
+            await updateDoc(shipmentRef, {
+                consignmentMedia: arrayUnion({
+                    url: downloadURL,
+                    type: file.type.startsWith('video') ? 'video' : 'image',
+                    name: file.name,
+                    createdAt: Timestamp.now()
+                }),
+                updatedAt: serverTimestamp()
+            });
+        } else {
+            await updateDoc(shipmentRef, {
+                shippingDocuments: arrayUnion({
+                    url: downloadURL,
+                    name: file.name,
+                    type: fileExt || 'unknown',
+                    createdAt: Timestamp.now()
+                }),
+                updatedAt: serverTimestamp()
+            });
+        }
+    }
+}
+
+// Kept for backward compatibility if any other components use it
 export async function uploadConsignmentMedia(
     shipmentId: string,
     file: File
 ): Promise<void> {
-
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const storageRef = ref(storage, `shipments/${shipmentId}/${fileName}`);
-
-    // 1. Upload to Storage
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-
-    // 2. Update Firestore
-    const shipmentRef = doc(db, "shipments", shipmentId);
-    await updateDoc(shipmentRef, {
-        consignmentMedia: arrayUnion({
-            url: downloadURL,
-            type: file.type.startsWith('video') ? 'video' : 'image',
-            name: file.name,
-            createdAt: Timestamp.now()
-        }),
-        updatedAt: serverTimestamp()
-    });
+    return uploadShipmentFiles(shipmentId, [file], 'media');
 }
 
 // Format timestamp for display

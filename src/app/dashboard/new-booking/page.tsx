@@ -188,7 +188,7 @@ export default function NewBookingPage() {
                     total: totalPrice,
                     currency: currency,
                 },
-            }, "pending");
+            }, "pending", user.displayName || userProfile?.displayName || 'User');
 
             setTrackingNumber(tracking);
 

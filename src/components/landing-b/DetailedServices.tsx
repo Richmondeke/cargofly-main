@@ -1,25 +1,30 @@
 "use client";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Plane, Activity, Thermometer, ShieldCheck, ArrowRight } from "lucide-react";
 
 const serviceCategories = [
     {
         title: "Global Air Freight",
+        slug: "global-air-freight",
         description: "Priority handling and real-time monitoring for time-critical shipments across six continents. Our network ensures your cargo never stops moving.",
         icon: <Plane className="w-6 h-6" />,
     },
     {
         title: "AOG Specialist",
+        slug: "aog-specialist",
         description: "Dedicated 24/7 support for Aircraft on Ground logistics. We move critical components with zero-latency response times to keep fleets airborne.",
         icon: <Activity className="w-6 h-6" />,
     },
     {
         title: "Sensitive Cargo",
+        slug: "sensitive-cargo",
         description: "Precision-controlled logistics for pharmaceuticals and high-value tech. Advanced thermal monitoring and vibration-dampened handling.",
         icon: <Thermometer className="w-6 h-6" />,
     },
     {
         title: "Secure Logistics",
+        slug: "secure-logistics",
         description: "Military-grade security protocols for high-value assets. Full chain of custody with end-to-end encryption for all digital documentation.",
         icon: <ShieldCheck className="w-6 h-6" />,
     },
@@ -78,32 +83,37 @@ export default function DetailedServices() {
                 {/* Categories Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
                     {serviceCategories.map((category, idx) => (
-                        <motion.div
-                            key={category.title}
-                            initial={{ opacity: 0, y: 40 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: "-50px" }}
-                            transition={{
-                                delay: idx * 0.1,
-                                duration: 0.8,
-                                ease: [0.23, 1, 0.32, 1]
-                            }}
-                            className="group p-10 md:p-14 rounded-[3rem] bg-gray-50 border border-gray-100 hover:border-blue-600/30 transition-all duration-700 hover:shadow-premium-xl relative overflow-hidden"
-                        >
-                            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <category.icon.type {...category.icon.props} className="w-32 h-32" />
-                            </div>
-
-                            <div className="relative z-10">
-                                <div className="w-16 h-16 rounded-3xl bg-blue-600 flex items-center justify-center text-white mb-10 shadow-premium group-hover:scale-110 transition-transform duration-500">
-                                    {category.icon}
+                        <Link key={category.slug} href={`/services/${category.slug}`}>
+                            <motion.div
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{
+                                    delay: idx * 0.1,
+                                    duration: 0.8,
+                                    ease: [0.23, 1, 0.32, 1]
+                                }}
+                                className="group p-10 md:p-14 rounded-[3rem] bg-gray-50 border border-gray-100 hover:border-blue-600/30 transition-all duration-700 hover:shadow-premium-xl relative overflow-hidden h-full"
+                            >
+                                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                                    <category.icon.type {...category.icon.props} className="w-32 h-32" />
                                 </div>
-                                <h3 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight text-navy-900">{category.title}</h3>
-                                <p className="text-xl text-gray-500 leading-relaxed font-medium">
-                                    {category.description}
-                                </p>
-                            </div>
-                        </motion.div>
+
+                                <div className="relative z-10">
+                                    <div className="w-16 h-16 rounded-3xl bg-blue-600 flex items-center justify-center text-white mb-10 shadow-premium group-hover:scale-110 transition-transform duration-500">
+                                        {category.icon}
+                                    </div>
+                                    <h3 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight text-navy-900">{category.title}</h3>
+                                    <p className="text-xl text-gray-500 leading-relaxed font-medium mb-8">
+                                        {category.description}
+                                    </p>
+                                    <div className="flex items-center gap-3 text-blue-600 font-bold text-sm uppercase tracking-widest group-hover:gap-5 transition-all">
+                                        Learn More
+                                        <ArrowRight className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </Link>
                     ))}
                 </div>
 

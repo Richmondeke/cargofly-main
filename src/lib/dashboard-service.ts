@@ -44,6 +44,12 @@ export interface DashboardShipment {
         name: string;
         createdAt: Timestamp;
     }[];
+    shippingDocuments?: {
+        url: string;
+        name: string;
+        type: string;
+        createdAt: Timestamp;
+    }[];
 }
 
 export interface MonthlyVolume {
@@ -646,17 +652,17 @@ export async function getClaims(userId: string): Promise<Claim[]> {
     })) as Claim[];
 }
 
-export async function createClaim(userId: string, data: Omit<Claim, "id" | "userId" | "createdAt" | "updatedAt" | "status">): Promise<string> {
+export async function createClaim(userId: string, data: Omit<Claim, "id" | "userId" | "createdAt" | "updatedAt" | "status">, userName: string = "User"): Promise<string> {
     const docRef = await addDoc(collection(db, "claims"), {
-        userId,
         ...data,
-        status: "pending",
+        userId,
+        status: "under_review",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
     });
 
     // Log the activity
-    await logActivity(userId, "User", `Filed a claim for shipment ${data.shipmentId}`, "system", docRef.id);
+    await logActivity(userId, userName, `Filed a claim for shipment ${data.shipmentId}`, "system", docRef.id);
 
     return docRef.id;
 }
@@ -857,7 +863,8 @@ export async function createBooking(
             currency: string;
         };
     },
-    paymentStatus: Shipment['paymentStatus'] = "pending"
+    paymentStatus: Shipment['paymentStatus'] = "pending",
+    userName: string = "User"
 ): Promise<string> {
 
 
@@ -919,7 +926,7 @@ export async function createBooking(
     await addDoc(collection(db, "shipments"), shipment);
 
     // Log activity
-    await logActivity(userId, "User", `Created new booking ${trackingNumber}`, "booking", trackingNumber);
+    await logActivity(userId, userName, `Created new booking ${trackingNumber}`, "booking", trackingNumber);
 
     return trackingNumber;
 }

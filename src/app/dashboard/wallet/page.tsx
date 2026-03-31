@@ -214,15 +214,10 @@ export default function WalletPage() {
                                 {transactions.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="px-6 py-20 text-center">
-                                            <div className="flex flex-col items-center gap-4 max-w-xs mx-auto">
-                                                <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300">
-                                                    <span className="material-symbols-outlined text-4xl">history</span>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <p className="font-medium text-slate-900 dark:text-white">Empty Vault</p>
-                                                    <p className="text-xs text-slate-500">Your financial history will materialize here once you initiate orders or deposits.</p>
-                                                </div>
-                                            </div>
+                                            <EmptyState
+                                                title="Empty Vault"
+                                                description="Your financial history will materialize here once you initiate orders or deposits."
+                                            />
                                         </td>
                                     </tr>
                                 ) : (

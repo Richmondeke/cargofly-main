@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { getInvoices, getFinancialStats, Invoice } from '@/lib/dashboard-service';
 import { useAuth } from '@/contexts/AuthContext';
-import RiveAnimation from '@/components/ui/RiveAnimation';
+import EmptyState from '@/components/common/EmptyState';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function FinancialPage() {
@@ -234,13 +234,11 @@ export default function FinancialPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                                        <div className="flex flex-col items-center gap-3">
-                                            <div className="w-48 h-48">
-                                                <RiveAnimation src="/icons/empty-state.riv" />
-                                            </div>
-                                            <p className="font-medium">No invoices found</p>
-                                        </div>
+                                    <td colSpan={5} className="px-6 py-12">
+                                        <EmptyState
+                                            title="No invoices found"
+                                            description="You don't have any recent invoices to display."
+                                        />
                                     </td>
                                 </tr>
                             )}

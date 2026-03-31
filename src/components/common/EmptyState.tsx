@@ -6,14 +6,18 @@ interface EmptyStateProps {
     icon?: React.ReactNode;
     imageSrc?: string;
     action?: React.ReactNode;
+    actionLabel?: string;
+    onAction?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
     title,
     description,
     icon,
-    imageSrc = "/images/illustrations/courier_plane.jpg",
-    action
+    imageSrc = "/images/EMPTY STATE.png",
+    action,
+    actionLabel,
+    onAction
 }) => {
     return (
         <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
@@ -37,11 +41,21 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
                     {description}
                 </p>
             )}
-            {action && (
-                <div className="mt-2 text-primary font-medium">
+
+            {action ? (
+                <div className="mt-2">
                     {action}
                 </div>
-            )}
+            ) : actionLabel && onAction ? (
+                <div className="mt-2">
+                    <button
+                        onClick={onAction}
+                        className="px-6 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-all shadow-sm active:scale-95 text-sm"
+                    >
+                        {actionLabel}
+                    </button>
+                </div>
+            ) : null}
         </div>
     );
 };

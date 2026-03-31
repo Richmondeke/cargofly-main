@@ -85,13 +85,15 @@ export default function AdminRatesPage() {
             if (data.length === 0) {
                 // FALLBACK MOCK DATA FOR THE USER'S SPECIFIC REQUEST
                 const mockRoutes: Route[] = [
-                    { id: 'r1', origin: 'Lagos', destination: 'Benin', rate: 2500, currency: 'NGN', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '1.5 Hours' },
-                    { id: 'r2', origin: 'Lagos', destination: 'Abidjan', rate: 4200, currency: 'NGN', type: 'regional', status: 'active', modes: ['Air'], frequency: '3x Weekly', transitTime: '2 Hours' },
-                    { id: 'r3', origin: 'Lagos', destination: 'Togo', rate: 2800, currency: 'NGN', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '45 Mins' },
-                    { id: 'r4', origin: 'Lagos', destination: 'Dubai', rate: 12.5, currency: 'USD', type: 'international', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '7 Hours' },
-                    { id: 'r5', origin: 'Lagos', destination: 'Ghana', rate: 3500, currency: 'NGN', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '1 Hour' },
-                    { id: 'r6', origin: 'Lagos', destination: 'London', rate: 18.2, currency: 'USD', type: 'international', status: 'active', modes: ['Air'], frequency: '5x Weekly', transitTime: '6.5 Hours' },
-                    { id: 'r7', origin: 'Regional', destination: 'West Africa', rate: 15.0, currency: 'USD', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Variable', transitTime: '2-4 Hours' },
+                    { id: 'r1', origin: 'Lagos', destination: 'North - Central', rate: 2500, currency: 'NGN', type: 'local', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '1.5HRS' },
+                    { id: 'r2', origin: 'Lagos', destination: 'North - East', rate: 3500, currency: 'NGN', type: 'local', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '2.6HRS' },
+                    { id: 'r3', origin: 'Lagos', destination: 'North-West', rate: 3500, currency: 'NGN', type: 'local', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '2.4HRS' },
+                    { id: 'r4', origin: 'Lagos', destination: 'South - East', rate: 2500, currency: 'NGN', type: 'local', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '1.2HRS' },
+                    { id: 'r5', origin: 'Lagos', destination: 'South - South', rate: 2500, currency: 'NGN', type: 'local', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '0.9HRS' },
+                    { id: 'r6', origin: 'Lagos', destination: 'Ghana', rate: 8, currency: 'USD', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '1.18HRS' },
+                    { id: 'r7', origin: 'Lagos', destination: 'Benin', rate: 7, currency: 'USD', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '0.32HRS' },
+                    { id: 'r8', origin: 'Lagos', destination: 'Togo', rate: 7, currency: 'USD', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '0.59HRS' },
+                    { id: 'r9', origin: 'Lagos', destination: 'Abidjan', rate: 8.5, currency: 'USD', type: 'regional', status: 'active', modes: ['Air'], frequency: 'Daily', transitTime: '1.76HRS' },
                 ];
                 setRoutes(mockRoutes);
             } else {

@@ -105,7 +105,6 @@ export default function SupportPage() {
                             <EmptyState
                                 title="No tickets yet"
                                 description="Need help? Create a support ticket and we'll get back to you."
-                                imageSrc="/images/illustrations/ground_crew.jpg"
                                 action={
                                     <Link
                                         href="/dashboard/support/new"

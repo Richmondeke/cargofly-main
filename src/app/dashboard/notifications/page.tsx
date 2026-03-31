@@ -34,9 +34,9 @@ const NotificationRow = ({ notification }: { notification: Notification }) => {
     return (
         <motion.div
             variants={fadeInUp}
-            className={`p-6 rounded-2xl border transition-all hover:bg-white/5 cursor-pointer ${notification.isRead
-                ? 'bg-transparent border-white/5 opacity-70'
-                : 'bg-white/5 border-white/10 shadow-lg glow-border'
+            className={`p-6 rounded-2xl border transition-all hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer ${notification.isRead
+                ? 'bg-transparent border-slate-100 dark:border-white/5 opacity-70'
+                : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 shadow-sm hover:shadow-md'
                 }`}
             onClick={() => !notification.isRead && markAsRead(notification.id)}
         >
@@ -48,24 +48,24 @@ const NotificationRow = ({ notification }: { notification: Notification }) => {
                 <div className="flex-1">
                     <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-3">
-                            <h3 className={`text-lg font-medium ${notification.isRead ? 'text-white/80' : 'text-white'}`}>
+                            <h3 className={`text-lg font-bold ${notification.isRead ? 'text-slate-700 dark:text-white/80' : 'text-slate-900 dark:text-white'}`}>
                                 {notification.title}
                             </h3>
                             {!notification.isRead && (
-                                <span className="px-2 py-0.5 bg-gold-500 text-navy-900 text-[10px] font-medium rounded uppercase">New</span>
+                                <span className="px-2 py-0.5 bg-yellow-400 text-slate-900 text-[10px] font-bold rounded uppercase">New</span>
                             )}
                         </div>
-                        <span className="text-sm text-white/40 font-medium">
+                        <span className="text-sm text-slate-400 dark:text-white/40 font-medium">
                             {formatTime(notification.timestamp)}
                         </span>
                     </div>
-                    <p className="text-white/60 leading-relaxed max-w-4xl">
+                    <p className="text-slate-600 dark:text-white/60 leading-relaxed max-w-4xl text-sm">
                         {notification.message}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider ${colors[notification.type]}`}>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${colors[notification.type]}`}>
                         {notification.type}
                     </span>
                 </div>

@@ -1,11 +1,24 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import TransitionLink from "@/components/TransitionLink";
 
 
 export default function ABTestB() {
+  const router = useRouter();
+  const [trackingNumber, setTrackingNumber] = useState("");
+
+  const handleTrack = () => {
+    if (trackingNumber.trim()) {
+      router.push(`/track?id=${trackingNumber.trim()}`);
+    }
+  };
+
+  const handleBook = () => {
+    router.push("/dashboard/new-booking");
+  };
   return (
     <div className="bg-background-light dark:bg-background-dark text-navy-900 dark:text-slate-100 font-display min-h-screen selection:bg-gold-500/30">
       <div className="relative flex h-auto min-screen w-full flex-col overflow-x-hidden">
@@ -56,9 +69,19 @@ export default function ABTestB() {
                 <div className="flex flex-col md:flex-row items-stretch gap-2">
                   <div className="flex flex-1 items-center px-4 py-3 bg-slate-50 dark:bg-white/5 rounded-xl border border-transparent focus-within:border-navy-900/50 transition-all">
                     <span className="material-symbols-outlined text-slate-400 mr-3">search</span>
-                    <input className="w-full bg-transparent border-none focus:ring-0 text-navy-900 dark:text-white placeholder:text-slate-400 font-medium text-sm" placeholder="Enter Tracking Number (e.g., AWB-123456)" type="text" />
+                    <input
+                      className="w-full bg-transparent border-none focus:ring-0 text-navy-900 dark:text-white placeholder:text-slate-400 font-medium text-sm"
+                      placeholder="Enter Tracking Number (e.g., AWB-123456)"
+                      type="text"
+                      value={trackingNumber}
+                      onChange={(e) => setTrackingNumber(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
+                    />
                   </div>
-                  <button className="bg-navy-900 text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-navy-800 transition-colors shadow-lg shadow-navy-900/20 flex items-center justify-center gap-2">
+                  <button
+                    onClick={handleTrack}
+                    className="bg-navy-900 text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-navy-800 transition-colors shadow-lg shadow-navy-900/20 flex items-center justify-center gap-2"
+                  >
                     <span className="material-symbols-outlined text-xl">location_on</span>
                     Track Shipment
                   </button>
@@ -66,7 +89,10 @@ export default function ABTestB() {
               </div>
 
               <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 min-w-[180px] justify-center rounded-xl h-14 px-6 bg-gold-500 text-navy-900 text-base font-bold transition-all hover:bg-gold-400 active:scale-95 shadow-lg shadow-gold-500/20">
+                <button
+                  onClick={handleBook}
+                  className="flex items-center gap-2 min-w-[180px] justify-center rounded-xl h-14 px-6 bg-gold-500 text-navy-900 text-base font-bold transition-all hover:bg-gold-400 active:scale-95 shadow-lg shadow-gold-500/20"
+                >
                   <span className="material-symbols-outlined">request_quote</span>
                   Request a Quote
                 </button>
