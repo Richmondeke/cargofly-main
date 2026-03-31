@@ -56,7 +56,8 @@ export default function Newsletter() {
 
                     <div className="relative z-10 max-w-2xl mx-auto">
                         {/* Featured Image */}
-                        <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden mb-12 border border-white/20 shadow-2xl">
+                        <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden mb-12 border border-white/20 shadow-none group-hover:shadow-2xl transition-all duration-700">
+
                             <img
                                 src="/images/hero-plane.jpg"
                                 alt="Cargofly Logistics"
