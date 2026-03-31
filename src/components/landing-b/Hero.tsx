@@ -99,91 +99,33 @@ export default function Hero() {
                     >
                         <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-gold-500/20 rounded-[40px] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
                         <div className="relative bg-navy-950/40 backdrop-blur-3xl rounded-[36px] border border-white/10 p-4 md:p-8 shadow-2xl">
-                            <div className="flex bg-white/5 backdrop-blur-md rounded-2xl p-1.5 relative overflow-hidden w-full md:w-fit mx-auto border border-white/10 mb-8">
-                                <button
-                                    className={`flex-1 md:px-12 py-3.5 text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 rounded-xl flex items-center justify-center gap-2.5 ${activeTab === 'track' ? 'bg-navy-900 text-white shadow-xl border border-blue-600/30' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-                                    onClick={() => setActiveTab('track')}
-                                >
-                                    <Search className="w-4 h-4" strokeWidth={3} />
-                                    <span>Track Shipment</span>
-                                </button>
-                                <button
-                                    className={`flex-1 md:px-12 py-3.5 text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 rounded-xl flex items-center justify-center gap-2.5 ${activeTab === 'book' ? 'bg-navy-900 text-white shadow-xl border border-blue-600/30' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
-                                    onClick={() => setActiveTab('book')}
-                                >
-                                    <Plane className="w-4 h-4" strokeWidth={3} />
-                                    <span>Book Flight</span>
-                                </button>
-                            </div>
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.98, filter: "blur(10px)" }}
+                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                                transition={smoothTransition}
+                                className="px-2"
+                            >
+                                <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-5 p-2 bg-white/5 rounded-[28px] border border-white/10">
+                                    <div className="flex-grow relative flex items-center group/input">
+                                        <Search className="absolute left-6 text-white/20 group-focus-within/input:text-blue-500 transition-colors w-6 h-6" strokeWidth={2.5} />
+                                        <input
+                                            className="w-full pl-16 pr-6 py-5 rounded-[22px] bg-transparent border-0 focus:ring-0 text-white text-xl placeholder:text-white/20 outline-none font-medium"
+                                            placeholder="Enter AWB or Tracking Number"
+                                            type="text"
+                                            value={trackingNumber}
+                                            onChange={(e) => setTrackingNumber(e.target.value)}
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="bg-blue-600 text-white px-12 py-5 rounded-[22px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_50px_rgba(37,99,235,0.5)] active:scale-95 duration-300"
+                                    >
+                                        Track Shipment
+                                        <ArrowRight className="w-5 h-5" strokeWidth={3} />
+                                    </button>
+                                </form>
+                            </motion.div>
 
-                            <AnimatePresence mode="wait">
-                                {activeTab === 'track' ? (
-                                    <motion.div
-                                        key="track"
-                                        initial={{ opacity: 0, scale: 0.98, filter: "blur(10px)" }}
-                                        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                                        exit={{ opacity: 0, scale: 0.98, filter: "blur(10px)" }}
-                                        transition={smoothTransition}
-                                        className="px-2"
-                                    >
-                                        <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-5 p-2 bg-white/5 rounded-[28px] border border-white/10">
-                                            <div className="flex-grow relative flex items-center group/input">
-                                                <Search className="absolute left-6 text-white/20 group-focus-within/input:text-blue-500 transition-colors w-6 h-6" strokeWidth={2.5} />
-                                                <input
-                                                    className="w-full pl-16 pr-6 py-5 rounded-[22px] bg-transparent border-0 focus:ring-0 text-white text-xl placeholder:text-white/20 outline-none font-medium"
-                                                    placeholder="Enter AWB or Tracking Number"
-                                                    type="text"
-                                                    value={trackingNumber}
-                                                    onChange={(e) => setTrackingNumber(e.target.value)}
-                                                />
-                                            </div>
-                                            <button
-                                                type="submit"
-                                                className="bg-blue-600 text-white px-12 py-5 rounded-[22px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_50px_rgba(37,99,235,0.5)] active:scale-95 duration-300"
-                                            >
-                                                Track
-                                                <ArrowRight className="w-5 h-5" strokeWidth={3} />
-                                            </button>
-                                        </form>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div
-                                        key="book"
-                                        initial={{ opacity: 0, scale: 0.98, filter: "blur(10px)" }}
-                                        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                                        exit={{ opacity: 0, scale: 0.98, filter: "blur(10px)" }}
-                                        transition={smoothTransition}
-                                        className="grid grid-cols-1 md:grid-cols-3 gap-5"
-                                    >
-                                        <div className="relative group/field">
-                                            <input
-                                                className="w-full p-5 pl-14 rounded-[22px] bg-white/5 text-white border border-white/5 focus:border-blue-500/50 outline-none transition-all text-lg font-medium placeholder:text-white/20"
-                                                placeholder="Origin City"
-                                                type="text"
-                                                value={bookingData.origin}
-                                                onChange={(e) => setBookingData(p => ({ ...p, origin: e.target.value }))}
-                                            />
-                                            <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within/field:text-blue-500 transition-colors" />
-                                        </div>
-                                        <div className="relative group/field">
-                                            <input
-                                                className="w-full p-5 pl-14 rounded-[22px] bg-white/5 text-white border border-white/5 focus:border-blue-500/50 outline-none transition-all text-lg font-medium placeholder:text-white/20"
-                                                placeholder="Destination City"
-                                                type="text"
-                                                value={bookingData.destination}
-                                                onChange={(e) => setBookingData(p => ({ ...p, destination: e.target.value }))}
-                                            />
-                                            <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within/field:text-blue-500 transition-colors" />
-                                        </div>
-                                        <button
-                                            onClick={handleBook}
-                                            className="bg-white text-navy-950 p-5 rounded-[22px] font-black uppercase tracking-widest hover:bg-gold-400 hover:text-navy-950 transition-all shadow-xl active:scale-95 duration-300"
-                                        >
-                                            Get Quote
-                                        </button>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
                         </div>
                     </motion.div>
                 </div>

@@ -38,9 +38,7 @@ export default function Process() {
                     transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
                     className="mb-24"
                 >
-                    <div className="inline-block px-4 py-1.5 rounded-full bg-blue-600/10 border border-blue-600/20 text-blue-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-8">
-                        The Workflow
-                    </div>
+
                     <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 max-w-4xl text-navy-900">
                         Logistics <span className="text-blue-600 font-black">Engineered</span> for Scale
                     </h2>
