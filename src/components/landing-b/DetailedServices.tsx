@@ -58,7 +58,8 @@ export default function DetailedServices() {
                     className="mb-20 text-center md:text-left"
                 >
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/10 text-blue-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-8 border border-blue-600/20">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+
                         Logistics Intelligence
                     </div>
 
@@ -103,9 +104,10 @@ export default function DetailedServices() {
                                         {category.icon}
                                     </div>
                                     <h3 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight text-navy-900">{category.title}</h3>
-                                    <p className="text-xl text-gray-500 leading-relaxed font-medium mb-8">
+                                    <p className="text-xl text-navy-900/60 leading-relaxed font-medium mb-8">
                                         {category.description}
                                     </p>
+
                                     <div className="flex items-center gap-3 text-blue-600 font-bold text-sm uppercase tracking-widest group-hover:gap-5 transition-all">
                                         Learn More
                                         <ArrowRight className="w-4 h-4" />

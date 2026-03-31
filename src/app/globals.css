@@ -8,10 +8,26 @@
   --color-navy-700: #000066;
   --color-navy-800: #000099;
   --color-navy-900: #000080;
+  --color-blue: #4196FF;
+  --color-blue-50: #EBF4FF;
+  --color-blue-100: #D6E9FF;
+  --color-blue-200: #ADD3FF;
+  --color-blue-300: #85BDFF;
+  --color-blue-400: #5CA7FF;
+  --color-blue-500: #4196FF;
+  /* Official Blue */
+  --color-blue-600: #3A87E6;
+  --color-blue-700: #2D69B3;
+  --color-blue-800: #214C80;
+  --color-blue-900: #142E4D;
+  --color-blue-950: #0A1726;
+
+  /* Legacy sky tokens for compatibility */
   --color-sky: #4196FF;
   --color-sky-400: #81B7FF;
   --color-sky-500: #4196FF;
   --color-sky-600: #016FFF;
+
   --color-gold-50: #FFFBEB;
   --color-gold-100: #FFF3C4;
   --color-gold-400: #FFD541;
