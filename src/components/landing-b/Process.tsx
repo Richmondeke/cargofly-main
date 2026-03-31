@@ -28,7 +28,16 @@ export default function Process() {
 
             {/* Background Accent */}
 
-            <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-600/5 -skew-x-12 translate-x-1/4" />
+            {/* Background Image Accent */}
+            <div className="absolute top-0 right-0 w-full md:w-[60%] h-full opacity-10 pointer-events-none overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/50 to-transparent z-10" />
+                <img
+                    src="/Cargofly.jpg"
+                    alt="Cargofly Logistics"
+                    className="w-full h-full object-cover -skew-x-12 translate-x-1/4"
+                />
+            </div>
+
 
             <div className="max-w-7xl mx-auto relative z-10">
                 <motion.div
