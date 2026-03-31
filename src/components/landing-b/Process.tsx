@@ -21,8 +21,12 @@ const steps = [
 
 export default function Process() {
     return (
-        <section className="py-32 bg-navy-900 text-white px-6 relative overflow-hidden">
+        <section className="py-32 bg-navy-950 text-white px-6 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-pattern opacity-10 pointer-events-none" />
+
             {/* Background Accent */}
+
             <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-600/5 -skew-x-12 translate-x-1/4" />
 
             <div className="max-w-7xl mx-auto relative z-10">

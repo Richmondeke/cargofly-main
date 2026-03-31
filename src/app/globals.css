@@ -186,3 +186,9 @@
   background-repeat: repeat;
   background-size: 400px;
 }
+
+.bg-pattern {
+  background-image: url('/images/sidebar-pattern.png');
+  background-repeat: repeat;
+  background-size: 600px;
+}

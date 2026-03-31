@@ -43,12 +43,15 @@ export default function Newsletter() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-                    className="relative bg-navy-900 rounded-[3rem] overflow-hidden p-12 md:p-20 text-center"
+                    className="relative bg-navy-950 rounded-[3rem] overflow-hidden p-12 md:p-20 text-center border border-white/5 shadow-premium-2xl"
                 >
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 bg-pattern opacity-[0.08] pointer-events-none" />
+
                     {/* Decorative Elements */}
                     <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 blur-[100px] -mr-48 -mt-48" />
                     <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-400/10 blur-[100px] -ml-48 -mb-48" />
-                    <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('/images/pattern-dots.svg')] bg-[size:20px_20px]" />
+
 
                     <div className="relative z-10 max-w-2xl mx-auto">
                         <motion.div
