@@ -43,10 +43,11 @@ export default function Newsletter() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-                    className="relative bg-navy-950 rounded-[3rem] overflow-hidden p-12 md:p-20 text-center border border-white/5 shadow-premium-2xl"
+                    className="relative bg-blue-900 rounded-[3rem] overflow-hidden p-12 md:p-20 text-center border border-white/10 shadow-2xl shadow-blue-900/20"
                 >
                     {/* Background Pattern */}
-                    <div className="absolute inset-0 bg-pattern opacity-[0.08] pointer-events-none" />
+                    <div className="absolute inset-0 bg-pattern-dark opacity-[0.4] pointer-events-none" />
+
 
                     {/* Decorative Elements */}
                     <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 blur-[100px] -mr-48 -mt-48" />

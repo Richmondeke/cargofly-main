@@ -43,9 +43,10 @@ const topTags = [
 
 export default function DetailedServices() {
     return (
-        <section id="detailed-services" className="bg-navy-950 text-white py-32 px-6 overflow-hidden relative">
+        <section id="detailed-services" className="bg-white text-navy-900 py-32 px-6 overflow-hidden relative">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-pattern opacity-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-pattern-light opacity-[0.15] pointer-events-none" />
+
 
 
             <div className="max-w-7xl mx-auto relative z-10">
@@ -56,15 +57,16 @@ export default function DetailedServices() {
                     transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
                     className="mb-20 text-center md:text-left"
                 >
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-8 border border-blue-600/30">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" />
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/10 text-blue-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-8 border border-blue-600/20">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                         Logistics Intelligence
                     </div>
 
-                    <h2 className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter leading-[0.9]">
-                        Operational <span className="text-blue-500 italic">Precision</span>
+                    <h2 className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter leading-[0.9] text-navy-900">
+                        Operational <span className="text-blue-600 italic">Precision</span>
                     </h2>
-                    <p className="text-xl md:text-2xl text-white/50 max-w-3xl mb-12 font-medium leading-relaxed">
+                    <p className="text-xl md:text-2xl text-navy-900/60 max-w-3xl mb-12 font-medium leading-relaxed">
+
                         We use advanced technology and a global network to deliver your cargo reliably and on time.
                     </p>
 

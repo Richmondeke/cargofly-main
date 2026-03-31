@@ -44,11 +44,12 @@ export default function Footer({ isLanding }: { isLanding?: boolean }) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className={cn("relative border-t border-white/5 py-16 md:py-40", isLanding ? "bg-transparent" : "bg-navy-950")}
+            className={cn("relative border-t border-white/5 py-16 md:py-40", isLanding ? "bg-transparent" : "bg-blue-950")}
         >
             {/* Background Effects */}
-            <div className="absolute inset-0 bg-navy-950 pointer-events-none transition-opacity duration-300" />
-            <div className="absolute inset-0 bg-pattern opacity-[0.05] pointer-events-none" />
+            <div className="absolute inset-0 bg-blue-950 pointer-events-none transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-pattern-dark opacity-[0.3] pointer-events-none" />
+
 
 
             <div className="container mx-auto px-6 relative z-10">
