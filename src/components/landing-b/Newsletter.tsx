@@ -55,7 +55,18 @@ export default function Newsletter() {
 
 
                     <div className="relative z-10 max-w-2xl mx-auto">
+                        {/* Featured Image */}
+                        <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden mb-12 border border-white/20 shadow-2xl">
+                            <img
+                                src="/images/hero-plane.jpg"
+                                alt="Cargofly Logistics"
+                                className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-blue-600/20 mix-blend-overlay" />
+                        </div>
+
                         <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tighter mb-8 leading-[0.9]">
+
                             Subscribe to our <span className="text-white">newsletter</span>
                         </h2>
 
