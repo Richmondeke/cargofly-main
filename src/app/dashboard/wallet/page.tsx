@@ -6,6 +6,7 @@ import SuccessModal from "@/components/ui/SuccessModal";
 import PaymentModal from "@/components/dashboard/PaymentModal";
 import WithdrawModal from "@/components/dashboard/WithdrawModal";
 import BankDetailsModal from "@/components/dashboard/BankDetailsModal";
+import FXConversionModal from "@/components/dashboard/FXConversionModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { subscribeToWallet, getTransactions, initializeWallet, Wallet, WalletTransaction } from "@/lib/wallet-service";
 import { getPendingCustomsDuties, Shipment } from "@/lib/firestore";
@@ -20,6 +21,7 @@ export default function WalletPage() {
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
     const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
     const [bankModalOpen, setBankModalOpen] = useState(false);
+    const [fxModalOpen, setFXModalOpen] = useState(false);
     const [paymentDetails, setPaymentDetails] = useState({ amount: 0, description: '', shipmentId: undefined as string | undefined });
     const [infoBannerVisible, setInfoBannerVisible] = useState(true);
 
@@ -74,9 +76,9 @@ export default function WalletPage() {
     };
 
     /* ─── Derived values ─────────────────────────────────── */
-    const ngnBalance = wallet ? (wallet.balanceUSD * 1650) : 0; // rough conversion for display
+    const ngnBalance = wallet?.balanceNGN ?? 0;
     const usdBalance = wallet?.balanceUSD ?? 0;
-    const eurBalance = wallet?.balanceGBP ?? 0; // repurpose field until EUR added
+    const ngnBalanceRaw = wallet?.balanceNGN ?? 0;
 
     const txnIcon = (txn: WalletTransaction) => {
         if (txn.type === 'deposit') return 'account_balance';
@@ -265,9 +267,7 @@ export default function WalletPage() {
                 {/* ── Quick Actions Grid ───────────────────────────────────────────── */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {[
-                        { icon: 'send', label: 'Settlements', sub: 'Vendor & Global Payouts', action: () => handleAction('Settlements') },
-                        { icon: 'receipt_long', label: 'E-Invoices', sub: 'Digital Billing & Records', action: () => handleAction('E-Invoices') },
-                        { icon: 'swap_horiz', label: 'FX Conversion', sub: 'Live Mid-Market Rates', action: () => handleAction('FX Conversion') },
+                        { icon: 'swap_horiz', label: 'FX Conversion', sub: 'Live Mid-Market Rates', action: () => setFXModalOpen(true) },
                         { icon: 'outbound', label: 'Withdraw', sub: 'Cash out to Local Bank', action: () => setWithdrawModalOpen(true) },
                     ].map((item) => (
                         <div
@@ -328,6 +328,17 @@ export default function WalletPage() {
                 title={modalContent.title}
                 message={modalContent.message}
             />
+            {user?.uid && (
+                <>
+                    <FXConversionModal
+                        isOpen={fxModalOpen}
+                        onClose={() => setFXModalOpen(false)}
+                        userId={user.uid}
+                        wallet={wallet}
+                        onSuccess={fetchTransactions}
+                    />
+                </>
+            )}
         </div>
     );
 }

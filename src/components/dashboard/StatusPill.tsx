@@ -27,36 +27,33 @@ export type StatusType =
 interface StatusOption {
     value: string;
     label: string;
-    variant: 'amber' | 'blue' | 'indigo' | 'sky' | 'purple' | 'teal' | 'emerald' | 'red' | 'slate';
+    variant: 'gold' | 'sky' | 'teal' | 'emerald' | 'red' | 'slate';
 }
 
 const statusOptions: StatusOption[] = [
-    { value: 'pending', label: 'Pending', variant: 'amber' },
-    { value: 'confirmed', label: 'Confirmed', variant: 'blue' },
-    { value: 'picked_up', label: 'Picked Up', variant: 'indigo' },
+    { value: 'pending', label: 'Pending', variant: 'gold' },
+    { value: 'confirmed', label: 'Confirmed', variant: 'sky' },
+    { value: 'picked_up', label: 'Picked Up', variant: 'sky' },
     { value: 'in_transit', label: 'In Transit', variant: 'sky' },
-    { value: 'at_hub', label: 'At Hub', variant: 'purple' },
+    { value: 'at_hub', label: 'At Hub', variant: 'sky' },
     { value: 'out_for_delivery', label: 'Out for Delivery', variant: 'teal' },
     { value: 'delivered', label: 'Delivered', variant: 'emerald' },
     { value: 'cancelled', label: 'Cancelled', variant: 'red' },
     { value: 'returned', label: 'Returned', variant: 'slate' },
-    { value: 'customs_hold', label: 'Customs Hold', variant: 'amber' },
+    { value: 'customs_hold', label: 'Customs Hold', variant: 'gold' },
     { value: 'resolved', label: 'Resolved', variant: 'emerald' },
     { value: 'approved', label: 'Approved', variant: 'emerald' },
     { value: 'rejected', label: 'Rejected', variant: 'red' },
-    { value: 'under_review', label: 'Under Review', variant: 'amber' },
+    { value: 'under_review', label: 'Under Review', variant: 'gold' },
     { value: 'success', label: 'Success', variant: 'emerald' },
     { value: 'failed', label: 'Failed', variant: 'red' },
-    { value: 'pending_info', label: 'Pending Info', variant: 'indigo' },
+    { value: 'pending_info', label: 'Pending Info', variant: 'sky' },
     { value: 'closed', label: 'Closed', variant: 'slate' },
 ];
 
 const variantStyles: Record<string, string> = {
-    amber: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800",
-    blue: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800",
-    indigo: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800",
+    gold: "bg-gold-50 text-gold-600 border-gold-200 dark:bg-gold-500/10 dark:text-gold-400 dark:border-gold-800/50",
     sky: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-800",
-    purple: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800",
     teal: "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-800",
     emerald: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800",
     red: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800",
@@ -64,11 +61,8 @@ const variantStyles: Record<string, string> = {
 };
 
 const dotStyles: Record<string, string> = {
-    amber: "bg-amber-600 dark:bg-amber-500",
-    blue: "bg-blue-600 dark:bg-blue-500",
-    indigo: "bg-indigo-600 dark:bg-indigo-500",
+    gold: "bg-gold-500 dark:bg-gold-400",
     sky: "bg-sky-600 dark:bg-sky-500",
-    purple: "bg-purple-600 dark:bg-purple-500",
     teal: "bg-teal-600 dark:bg-teal-500",
     emerald: "bg-emerald-600 dark:bg-emerald-500",
     red: "bg-red-600 dark:bg-red-500",
@@ -93,7 +87,7 @@ export const StatusPill: React.FC<StatusPillProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    let normalizedStatus = status.toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
+    let normalizedStatus = (status || '').toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
     if (normalizedStatus === 'pending_customer') normalizedStatus = 'pending_info';
 
     const currentOption = statusOptions.find(opt => opt.value === normalizedStatus) || {

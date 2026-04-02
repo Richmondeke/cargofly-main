@@ -7,7 +7,8 @@ import {
     updateAnnouncement,
     deleteAnnouncement,
     Announcement,
-    CreateAnnouncementData
+    CreateAnnouncementData,
+    uploadAnnouncementImage
 } from "@/lib/announcement-service";
 import { useAuth } from "@/contexts/AuthContext";
 import { Plus, Trash2, Edit, AlertCircle, RefreshCw, Megaphone, Bell, Info, AlertTriangle, CheckCircle } from "lucide-react";
@@ -26,6 +27,7 @@ const ANNOUNCEMENT_TYPES = [
     { value: 'warning', label: 'Warning', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
     { value: 'urgent', label: 'Urgent', icon: <AlertCircle className="w-4 h-4 text-red-500" /> },
     { value: 'success', label: 'Success', icon: <CheckCircle className="w-4 h-4 text-emerald-500" /> },
+    { value: 'banner', label: 'Banner / Slideshow', icon: <Megaphone className="w-4 h-4 text-navy-600" /> },
 ];
 
 export default function AdminAnnouncementsPage() {
@@ -39,6 +41,37 @@ export default function AdminAnnouncementsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentAnnouncement, setCurrentAnnouncement] = useState<Partial<Announcement> | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !currentAnnouncement) return;
+
+        // Basic validation
+        if (!file.type.startsWith('image/')) {
+            toast.error("Please upload an image file");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image size should be less than 5MB");
+            return;
+        }
+
+        setIsUploading(true);
+        const toastId = toast.loading("Uploading image...");
+
+        try {
+            const url = await uploadAnnouncementImage(file);
+            setCurrentAnnouncement({ ...currentAnnouncement, bgImage: url });
+            toast.success("Image uploaded successfully!", { id: toastId });
+        } catch (error) {
+            console.error("Upload error:", error);
+            toast.error("Failed to upload image", { id: toastId });
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     const [successModal, setSuccessModal] = useState<{
         isOpen: boolean;
@@ -103,7 +136,13 @@ export default function AdminAnnouncementsPage() {
                 content: currentAnnouncement.content,
                 type: currentAnnouncement.type as Announcement['type'],
                 active: currentAnnouncement.active ?? true,
-                link: currentAnnouncement.link,
+                link: currentAnnouncement.link || '',
+                tag: currentAnnouncement.tag || '',
+                ctaText: currentAnnouncement.ctaText || '',
+                secondaryLink: currentAnnouncement.secondaryLink || '',
+                secondaryCtaText: currentAnnouncement.secondaryCtaText || '',
+                bgImage: currentAnnouncement.bgImage || '',
+                order: Number(currentAnnouncement.order) || 0,
                 expiresAt: currentAnnouncement.expiresAt ? new Date(currentAnnouncement.expiresAt) : undefined
             };
 
@@ -310,14 +349,99 @@ export default function AdminAnnouncementsPage() {
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Call to Action Link (Optional)</Label>
-                                        <Input
-                                            value={currentAnnouncement.link || ''}
-                                            onChange={(e) => setCurrentAnnouncement({ ...currentAnnouncement, link: e.target.value })}
-                                            placeholder="https://..."
-                                        />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label>Tag (e.g. Route Expansion)</Label>
+                                            <Input
+                                                value={currentAnnouncement.tag || ''}
+                                                onChange={(e) => setCurrentAnnouncement({ ...currentAnnouncement, tag: e.target.value })}
+                                                placeholder="Route Expansion"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Display Order</Label>
+                                            <Input
+                                                type="number"
+                                                value={currentAnnouncement.order || 0}
+                                                onChange={(e) => setCurrentAnnouncement({ ...currentAnnouncement, order: parseInt(e.target.value) })}
+                                            />
+                                        </div>
                                     </div>
+
+                                    {(currentAnnouncement.type === 'banner' || currentAnnouncement.ctaText) && (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 space-y-4 sm:space-y-0">
+                                            <div className="space-y-2 sm:col-span-2">
+                                                <Label className="text-[10px] uppercase tracking-widest text-slate-500">Banner Actions</Label>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Primary CTA Text</Label>
+                                                <Input
+                                                    value={currentAnnouncement.ctaText || ''}
+                                                    onChange={(e) => setCurrentAnnouncement({ ...currentAnnouncement, ctaText: e.target.value })}
+                                                    placeholder="Book Now"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Primary Link</Label>
+                                                <Input
+                                                    value={currentAnnouncement.link || ''}
+                                                    onChange={(e) => setCurrentAnnouncement({ ...currentAnnouncement, link: e.target.value })}
+                                                    placeholder="/dashboard/new-booking"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Secondary CTA Text</Label>
+                                                <Input
+                                                    value={currentAnnouncement.secondaryCtaText || ''}
+                                                    onChange={(e) => setCurrentAnnouncement({ ...currentAnnouncement, secondaryCtaText: e.target.value })}
+                                                    placeholder="Learn More"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Secondary Link</Label>
+                                                <Input
+                                                    value={currentAnnouncement.secondaryLink || ''}
+                                                    onChange={(e) => setCurrentAnnouncement({ ...currentAnnouncement, secondaryLink: e.target.value })}
+                                                    placeholder="/services"
+                                                />
+                                            </div>
+                                            <div className="space-y-2 sm:col-span-2">
+                                                <Label>Background Image URL</Label>
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        className="flex-1"
+                                                        value={currentAnnouncement?.bgImage || ''}
+                                                        onChange={(e) => setCurrentAnnouncement({ ...currentAnnouncement!, bgImage: e.target.value })}
+                                                        placeholder="/Cargofly.jpg"
+                                                    />
+                                                    <div className="relative">
+                                                        <input
+                                                            type="file"
+                                                            id="banner-image-upload"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            onChange={handleFileUpload}
+                                                            disabled={isUploading}
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            className="h-11 px-4 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary/50"
+                                                            onClick={() => document.getElementById('banner-image-upload')?.click()}
+                                                            disabled={isUploading}
+                                                        >
+                                                            {isUploading ? (
+                                                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                                            ) : (
+                                                                <Edit className="w-4 h-4 mr-2" />
+                                                            )}
+                                                            {isUploading ? "..." : "Upload"}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="flex items-center gap-2 pt-2">
                                         <input

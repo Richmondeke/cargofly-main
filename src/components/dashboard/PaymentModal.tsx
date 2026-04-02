@@ -9,7 +9,7 @@ interface PaymentModalProps {
     amount: number;
     userId: string;
     shipmentId?: string;
-    wallet?: { balanceUSD: number; balanceGBP: number } | null;
+    wallet?: { balanceUSD: number; balanceNGN: number } | null;
     currency?: string;
     description?: string;
     onSuccess?: () => void;
@@ -17,7 +17,7 @@ interface PaymentModalProps {
 
 export default function PaymentModal({ isOpen, onClose, amount, userId, shipmentId, wallet, currency = 'USD', description = 'Payment', onSuccess }: PaymentModalProps) {
     const { user } = useAuth();
-    const [selectedMethod, setSelectedMethod] = useState<'wallet_usd' | 'wallet_gbp' | 'card' | 'bank' | null>(null);
+    const [selectedMethod, setSelectedMethod] = useState<'wallet_usd' | 'wallet_ngn' | 'card' | 'bank' | null>(null);
     const [loading, setLoading] = useState(false);
     const [redirecting, setRedirecting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,14 +37,14 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
 
         try {
             // --- Wallet balance deductions (internal) ---
-            if (selectedMethod === 'wallet_usd' || selectedMethod === 'wallet_gbp') {
+            if (selectedMethod === 'wallet_usd' || selectedMethod === 'wallet_ngn') {
                 const response = await fetch('/api/payments/graph', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         userId,
                         amount,
-                        currency: selectedMethod.includes('gbp') ? 'GBP' : 'USD',
+                        currency: selectedMethod.includes('ngn') ? 'NGN' : 'USD',
                         method: selectedMethod,
                         description,
                         shipmentId
@@ -128,7 +128,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                 <div className="p-6 bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center border-b border-slate-200 dark:border-slate-700">
                     <p className="text-sm font-medium text-slate-500 mb-1">Total to Pay</p>
                     <p className="text-4xl font-medium text-slate-900 dark:text-white tracking-tight">
-                        {currency === 'USD' ? '$' : '£'}{amount.toFixed(2)}
+                        {currency === 'USD' ? '$' : '₦'}{amount.toFixed(2)}
                     </p>
                 </div>
 
@@ -148,7 +148,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                                     name="payment_method"
                                     value="wallet_usd"
                                     checked={selectedMethod === 'wallet_usd'}
-                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_gbp' | 'card' | 'bank')}
+                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_ngn' | 'card' | 'bank')}
                                     className="w-4 h-4 text-primary accent-primary"
                                 />
                             </div>
@@ -158,14 +158,14 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                                         <span className="material-symbols-outlined text-green-600 text-sm">payments</span>
                                         USD Wallet
                                     </span>
-                                    <span className="text-sm text-slate-500">Balance: ${wallet?.balanceUSD.toFixed(2) || '0.00'}</span>
+                                    <span className="text-sm text-slate-500">Balance: ${(wallet?.balanceUSD ?? 0).toFixed(2)}</span>
                                 </div>
                                 <p className="text-xs text-slate-500">Instant deduction from your virtual USD account.</p>
                             </div>
                         </label>
 
-                        {/* Wallet GBP */}
-                        <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMethod === 'wallet_gbp'
+                        {/* Wallet NGN */}
+                        <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMethod === 'wallet_ngn'
                             ? 'border-primary bg-primary/5'
                             : 'border-slate-200 dark:border-slate-700 hover:border-primary/50'
                             }`}>
@@ -173,21 +173,21 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                                 <input
                                     type="radio"
                                     name="payment_method"
-                                    value="wallet_gbp"
-                                    checked={selectedMethod === 'wallet_gbp'}
-                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_gbp' | 'card' | 'bank')}
+                                    value="wallet_ngn"
+                                    checked={selectedMethod === 'wallet_ngn'}
+                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_ngn' | 'card' | 'bank')}
                                     className="w-4 h-4 text-primary accent-primary"
                                 />
                             </div>
                             <div className="flex-1">
                                 <div className="flex justify-between items-center mb-1">
                                     <span className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-indigo-600 text-sm">euro</span>
-                                        GBP Wallet
+                                        <span className="material-symbols-outlined text-sky-600 text-sm">payments</span>
+                                        NGN Wallet
                                     </span>
-                                    <span className="text-sm text-slate-500">Balance: £{wallet?.balanceGBP.toFixed(2) || '0.00'}</span>
+                                    <span className="text-sm text-slate-500">Balance: ₦{(wallet?.balanceNGN ?? 0).toFixed(2)}</span>
                                 </div>
-                                <p className="text-xs text-slate-500">Instant deduction from your virtual GBP account.</p>
+                                <p className="text-xs text-slate-500">Instant deduction from your virtual NGN account.</p>
                             </div>
                         </label>
 
@@ -202,7 +202,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                                     name="payment_method"
                                     value="card"
                                     checked={selectedMethod === 'card'}
-                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_gbp' | 'card' | 'bank')}
+                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_ngn' | 'card' | 'bank')}
                                     className="w-4 h-4 text-primary accent-primary"
                                 />
                             </div>
@@ -228,7 +228,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                                     name="payment_method"
                                     value="bank"
                                     checked={selectedMethod === 'bank'}
-                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_gbp' | 'card' | 'bank')}
+                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_ngn' | 'card' | 'bank')}
                                     className="w-4 h-4 text-primary accent-primary"
                                 />
                             </div>
@@ -281,7 +281,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                                 Pay with {selectedMethod === 'card' ? 'Card' : 'Bank Transfer'}
                             </>
                         ) : (
-                            `Pay ${currency === 'USD' ? '$' : '£'}${amount.toFixed(2)}`
+                            `Pay ${currency === 'USD' ? '$' : '₦'}${amount.toFixed(2)}`
                         )}
                     </button>
                 </div>

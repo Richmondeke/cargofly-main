@@ -13,7 +13,8 @@ import {
     formatTimestamp,
 } from '@/lib/dashboard-service';
 import { ShipmentDetailsDrawer } from '@/components/dashboard/ShipmentDetailsDrawer';
-import { Eye } from 'lucide-react';
+import { Eye, Bell } from 'lucide-react';
+import { AnnouncementBanner } from '@/components/dashboard/AnnouncementBanner';
 
 // Modals
 import QuoteModal from '@/components/dashboard/QuoteModal';
@@ -27,7 +28,8 @@ function getStatusIcon(status: string) {
     if (s.includes('processing') || s.includes('pending')) return { icon: 'box_edit', bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600' };
     if (s.includes('delivered') || s.includes('arrived')) return { icon: 'warehouse', bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600' };
     if (s.includes('customs') || s.includes('hold')) return { icon: 'security', bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600' };
-    return { icon: 'local_shipping', bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-600' };
+    return { icon: 'flight', bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-600' };
+
 }
 
 export default function DashboardPage() {
@@ -82,52 +84,7 @@ export default function DashboardPage() {
             <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
 
                 {/* Announcement Banner */}
-                <section className="relative overflow-hidden rounded-2xl bg-[#003399] p-10 sm:p-14 flex items-center justify-between group min-h-[340px]">
-                    {/* Motif Background Overlay */}
-                    <div
-                        className="absolute inset-0 z-0 pointer-events-none bg-repeat opacity-100"
-                        style={{
-                            backgroundImage: "url('/Cargofly motif_transparent.png')",
-                            backgroundSize: '300px'
-                        }}
-                    />
-
-                    <div className="z-10 relative space-y-6 w-full sm:w-auto">
-                        <span className="inline-block px-3 py-1 bg-gold-500 text-navy-900 text-[10px] font-bold uppercase tracking-[0.2em] rounded">
-                            Route Expansion
-                        </span>
-                        <h2 className="text-white text-4xl sm:text-5xl font-display font-medium leading-[1.1] tracking-tight">
-                            New Route to Ghana <br className="hidden sm:block" />
-                            Starting Next Month
-                        </h2>
-                        <p className="text-white/80 max-w-md text-lg leading-relaxed">
-                            Book your cargo space early to take advantage of introductory low rates for our new daily service.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                            <Link href="/dashboard/new-booking" className="w-full sm:w-auto">
-                                <button className="w-full bg-gold-500 text-navy-900 px-10 py-4.5 rounded-2xl font-bold text-sm hover:brightness-110 transition-all shadow-2xl shadow-gold-500/30 active:scale-95 cursor-pointer">
-                                    Book This Route
-                                </button>
-                            </Link>
-                            <button className="w-full sm:w-auto bg-white/10 backdrop-blur-xl text-white border border-white/20 px-10 py-4.5 rounded-2xl font-bold text-sm hover:bg-white/20 transition-all active:scale-95 cursor-pointer">
-                                Learn More
-                            </button>
-                        </div>
-                    </div>
-                    <div
-                        className="absolute right-0 top-0 h-full w-1/3 sm:w-1/2 opacity-100 pointer-events-none transition-transform group-hover:scale-105 duration-700 z-10"
-                        style={{
-                            backgroundImage: "url('/Cargofly.jpg')",
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            maskImage: 'linear-gradient(to left, black 60%, transparent 100%)',
-                            WebkitMaskImage: 'linear-gradient(to left, black 60%, transparent 100%)'
-                        }}
-                    >
-                        {/* Shadow overlay to blend with the blue side */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#003399]/40 to-transparent" />
-                    </div>
-                </section>
+                <AnnouncementBanner />
 
                 {/* Quick Action Bar */}
                 <section className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between border-b border-navy/5 dark:border-white/5 pb-8">
@@ -207,7 +164,7 @@ export default function DashboardPage() {
                                     {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : `$${(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`}
                                 </h3>
                             </div>
-                            <div className="size-14 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                            <div className="size-14 bg-sky-50 dark:bg-sky-900/20 rounded-2xl flex items-center justify-center text-sky-600 group-hover:scale-110 transition-transform">
                                 <span className="material-symbols-outlined text-3xl">account_balance_wallet</span>
                             </div>
                         </div>
@@ -272,7 +229,7 @@ export default function DashboardPage() {
                                 </div>
                             ) : (
                                 <div className="p-10 flex flex-col items-center justify-center text-slate-400 text-sm bg-slate-50/50 dark:bg-navy-800/20 rounded-xl border border-dashed border-slate-200 dark:border-navy-700">
-                                    <span className="material-symbols-outlined text-4xl mb-3 opacity-20">local_shipping</span>
+                                    <span className="material-symbols-outlined text-4xl mb-3 opacity-20">flight</span>
                                     <p>No active shipments at the moment.</p>
                                 </div>
                             )}

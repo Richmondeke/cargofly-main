@@ -8,7 +8,7 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {
-    const normalizedStatus = status.toLowerCase();
+    const normalizedStatus = (status || '').toLowerCase();
 
     // Mapping status to colors
     let variant: 'success' | 'amber' | 'info' | 'destructive' | 'neutral' = 'neutral';

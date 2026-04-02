@@ -20,8 +20,8 @@ const NotificationRow = ({ notification }: { notification: Notification }) => {
     const { markAsRead } = useNotifications();
 
     const icons = {
-        shipment: 'local_shipping',
-        system: 'settings',
+        shipment: 'flight',
+                system: 'settings',
         alert: 'warning'
     };
 

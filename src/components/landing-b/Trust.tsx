@@ -32,8 +32,8 @@ export default function Trust() {
                                     viewport={{ once: true }}
                                     transition={{ delay: i * 0.1 }}
                                     className={`px-6 py-2 rounded-full text-sm font-bold border ${i === 0
-                                            ? "bg-purple-100 text-purple-600 border-purple-200"
-                                            : "bg-gray-100 text-navy-900/60 border-gray-200"
+                                        ? "bg-sky-100 text-sky-600 border-sky-200"
+                                        : "bg-gray-100 text-navy-900/60 border-gray-200"
                                         }`}
                                 >
                                     {loc}

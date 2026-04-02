@@ -134,7 +134,7 @@ export default function WalletPage() {
                         <div className="relative overflow-hidden rounded-2xl bg-slate-900 text-white shadow-2xl p-8 h-full">
                             {/* Background Glows */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none" />
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none" />
 
                             <div className="relative z-10 flex flex-col justify-between h-full min-h-[220px]">
                                 <div>

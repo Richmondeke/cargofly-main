@@ -7,13 +7,13 @@ interface WithdrawModalProps {
     isOpen: boolean;
     onClose: () => void;
     userId: string;
-    wallet?: { balanceUSD: number; balanceGBP: number } | null;
+    wallet?: { balanceUSD: number; balanceNGN: number } | null;
     onSuccess?: () => void;
 }
 
 export default function WithdrawModal({ isOpen, onClose, userId, wallet, onSuccess }: WithdrawModalProps) {
     const [amount, setAmount] = useState('');
-    const [currency, setCurrency] = useState<'USD' | 'GBP'>('USD');
+    const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD');
     const [bankName, setBankName] = useState('');
     const [accountNumber, setAccountNumber] = useState('');
     const [sortCode, setSortCode] = useState('');
@@ -31,7 +31,7 @@ export default function WithdrawModal({ isOpen, onClose, userId, wallet, onSucce
             return;
         }
 
-        const balance = currency === 'USD' ? wallet?.balanceUSD : wallet?.balanceGBP;
+        const balance = currency === 'USD' ? wallet?.balanceUSD : wallet?.balanceNGN;
         if (!balance || withdrawAmount > balance) {
             setError(`Insufficient ${currency} balance`);
             return;
@@ -96,19 +96,19 @@ export default function WithdrawModal({ isOpen, onClose, userId, wallet, onSucce
                         </button>
                         <button
                             type="button"
-                            onClick={() => setCurrency('GBP')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${currency === 'GBP'
+                            onClick={() => setCurrency('NGN')}
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${currency === 'NGN'
                                 ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
                                 : 'text-slate-500'}`}
                         >
-                            GBP Account
+                            NGN Account
                         </button>
                     </div>
 
                     <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 text-center">
                         <p className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-1">Available Balance</p>
                         <p className="text-2xl font-medium text-slate-900 dark:text-white">
-                            {currency === 'USD' ? '$' : '£'}{currency === 'USD' ? wallet?.balanceUSD.toFixed(2) : wallet?.balanceGBP.toFixed(2)}
+                            {currency === 'USD' ? '$' : '₦'}{(currency === 'USD' ? wallet?.balanceUSD ?? 0 : wallet?.balanceNGN ?? 0).toFixed(2)}
                         </p>
                     </div>
 
@@ -116,7 +116,7 @@ export default function WithdrawModal({ isOpen, onClose, userId, wallet, onSucce
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Amount to Withdraw</label>
                         <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                                {currency === 'USD' ? '$' : '£'}
+                                {currency === 'USD' ? '$' : '₦'}
                             </span>
                             <input
                                 type="number"

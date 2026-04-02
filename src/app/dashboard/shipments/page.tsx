@@ -27,8 +27,8 @@ function StatusPill({ status }: { status: string }) {
         </span>
     );
     if (s.includes('customs') || s.includes('hold')) return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-            <span className="size-1.5 rounded-full bg-amber-500" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-gold-50 text-gold-600 dark:bg-gold-500/10 dark:text-gold-400 border border-transparent dark:border-gold-800/50">
+            <span className="size-1.5 rounded-full bg-gold-500" />
             Pending Customs
         </span>
     );
@@ -36,11 +36,11 @@ function StatusPill({ status }: { status: string }) {
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
             <span className="size-1.5 rounded-full bg-red-500" />
             Delayed
-        </span>
+        </span >
     );
     if (s.includes('pending') || s.includes('processing')) return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-            <span className="size-1.5 rounded-full bg-orange-500 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-gold-50 text-gold-600 dark:bg-gold-500/10 dark:text-gold-400 border border-transparent dark:border-gold-800/50">
+            <span className="size-1.5 rounded-full bg-gold-500 animate-pulse" />
             Processing
         </span>
     );
@@ -70,8 +70,8 @@ export default function ShipmentsPage() {
     const router = useRouter();
 
     const userIdFilter = searchParams.get('userId');
-
     const [statusFilter, setStatusFilter] = useState<FilterStatus>('All');
+    const [dateRange, setDateRange] = useState('Last 30 Days');
     const [searchQuery, setSearchQuery] = useState('');
     const [shipments, setShipments] = useState<DashboardShipment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -104,7 +104,7 @@ export default function ShipmentsPage() {
                     const result = await res.json();
                     if (result.status) {
                         const targetUserId = userProfile?.uid;
-                        const data = await getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter);
+                        const data = await getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter, dateRange);
                         setShipments(data);
                         router.replace('/dashboard/shipments');
                     }
@@ -126,7 +126,7 @@ export default function ShipmentsPage() {
                 if (userProfile?.role === 'admin') {
                     targetUserId = userIdFilter || undefined;
                 }
-                const data = await getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter);
+                const data = await getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter, dateRange);
                 setShipments(data);
                 setCurrentPage(1);
             } catch (error) {
@@ -136,7 +136,7 @@ export default function ShipmentsPage() {
             }
         }
         if (userProfile) loadShipments();
-    }, [statusFilter, userProfile, userIdFilter]);
+    }, [statusFilter, userProfile, userIdFilter, dateRange]);
 
     const clearUserFilter = () => router.push('/dashboard/shipments');
 
@@ -229,15 +229,20 @@ export default function ShipmentsPage() {
                             <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
                         </div>
 
-                        {/* Date Range (decorative for now) */}
+                        {/* Date Range */}
                         <div className="relative min-w-[180px]">
                             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">calendar_month</span>
-                            <input
-                                type="text"
-                                readOnly
-                                defaultValue="Last 30 Days"
-                                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30"
-                            />
+                            <select
+                                value={dateRange}
+                                onChange={e => setDateRange(e.target.value)}
+                                className="w-full pl-9 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/30 appearance-none"
+                            >
+                                <option value="Last 7 Days">Last 7 Days</option>
+                                <option value="Last 30 Days">Last 30 Days</option>
+                                <option value="Last 3 Months">Last 3 Months</option>
+                                <option value="All Time">All Time</option>
+                            </select>
+                            <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">expand_more</span>
                         </div>
 
                         {/* Refresh */}
@@ -246,7 +251,7 @@ export default function ShipmentsPage() {
                                 if (!userProfile) return;
                                 setLoading(true);
                                 const targetUserId = userProfile?.role === 'admin' ? (userIdFilter || undefined) : userProfile?.uid;
-                                getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter)
+                                getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter, dateRange)
                                     .then(data => { setShipments(data); setLoading(false); })
                                     .catch(() => setLoading(false));
                             }}
@@ -307,7 +312,7 @@ export default function ShipmentsPage() {
                                             <td className="px-6 py-5">
                                                 <div className="text-slate-700 dark:text-slate-300 font-medium">{s.eta || 'TBD'}</div>
                                                 {s.paymentStatus && (
-                                                    <div className={`text-[11px] mt-0.5 font-medium ${s.paymentStatus === 'paid' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                                    <div className={`text-[11px] mt-0.5 font-medium ${s.paymentStatus === 'paid' ? 'text-emerald-500' : 'text-gold-600 dark:text-gold-400'}`}>
                                                         {s.paymentStatus === 'paid' ? 'Scheduled' : 'Awaiting clearance'}
                                                     </div>
                                                 )}
@@ -391,7 +396,7 @@ export default function ShipmentsPage() {
                 shipment={selectedShipment}
                 onRefresh={async () => {
                     const targetUserId = userProfile?.role === 'admin' ? (userIdFilter || undefined) : userProfile?.uid;
-                    const data = await getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter);
+                    const data = await getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter, dateRange);
                     setShipments(data);
                     const updated = data.find(s => s.id === selectedShipment?.id);
                     if (updated) setSelectedShipment(updated);

@@ -63,7 +63,7 @@ export default function TagMarquee() {
                                 color: "rgb(0, 51, 153)", // Navy Blue
                             }}
                             transition={{ duration: 0.2 }}
-                            className="whitespace-nowrap px-6 py-3 bg-indigo-100 border border-navy-900/10 text-navy-900 text-xs font-bold uppercase tracking-tight rounded-md shadow-sm cursor-pointer"
+                            className="whitespace-nowrap px-6 py-3 bg-sky-100 border border-navy-900/10 text-navy-900 text-xs font-bold uppercase tracking-tight rounded-md shadow-sm cursor-pointer"
                         >
                             {tag}
                         </motion.div>

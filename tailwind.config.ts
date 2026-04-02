@@ -12,9 +12,9 @@ const config: Config = {
             colors: {
                 // Cargofly Official Brand Colors
                 primary: {
-                    DEFAULT: "#000080", // Navy Blue - Primary
-                    dark: "#000066",    // Navy Blue - Dark
-                    light: "#4196FF",   // Sky Blue - Light
+                    DEFAULT: "#016FFF", // Cargofly Sky Blue II - Primary
+                    dark: "#0055CC",    // Darker variant for hover
+                    light: "#4196FF",   // Cargofly Sky Blue - Light
                 },
                 // Navy Blue Palette
                 navy: {
@@ -28,7 +28,7 @@ const config: Config = {
                     DEFAULT: "#4196FF", // Cargofly Sky Blue
                     500: "#4196FF",     // Primary Sky Blue
                     400: "#81B7FF",     // Sky Blue 10 (lighter)
-                    600: "#007FFF",     // Sky Blue 11 (darker)
+                    600: "#016FFF",     // Sky Blue II (brand)
                 },
                 // Cargofly Yellow Palette
                 gold: {

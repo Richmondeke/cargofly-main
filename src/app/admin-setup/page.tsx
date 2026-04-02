@@ -89,7 +89,7 @@ export default function AdminSetupPage() {
             >
                 <div className="p-8">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                        <div className="w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-600 dark:text-sky-400">
                             <ShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
@@ -109,7 +109,7 @@ export default function AdminSetupPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Enter registered email..."
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-600 bg-slate-50 dark:bg-navy-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-600 bg-slate-50 dark:bg-navy-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:outline-none transition-all"
                             />
                         </div>
 
@@ -126,7 +126,7 @@ export default function AdminSetupPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-sky-500/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

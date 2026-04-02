@@ -20,7 +20,7 @@ import { db } from "./firebase";
 
 export interface Wallet {
     balanceUSD: number;
-    balanceGBP: number;
+    balanceNGN: number;
     updatedAt: Timestamp;
 }
 
@@ -28,11 +28,23 @@ export interface WalletTransaction {
     id?: string;
     type: 'deposit' | 'withdrawal' | 'payment' | 'transfer';
     amount: number;
-    currency: 'USD' | 'GBP';
+    currency: 'USD' | 'NGN';
     description: string;
     shipmentId?: string;
     status: 'success' | 'pending' | 'failed';
     method: 'wallet' | 'card' | 'bank';
+    createdAt: Timestamp;
+}
+
+export interface EInvoice {
+    id: string;
+    userId: string;
+    amount: number;
+    currency: 'USD' | 'NGN' | 'NGN';
+    vendor: string;
+    description: string;
+    status: 'paid' | 'pending' | 'overdue';
+    dueDate: Timestamp;
     createdAt: Timestamp;
 }
 
@@ -75,7 +87,7 @@ export async function initializeWallet(userId: string) {
     if (!snapshot.exists()) {
         await setDoc(walletRef, {
             balanceUSD: 0,
-            balanceGBP: 0,
+            balanceNGN: 0,
             updatedAt: serverTimestamp()
         });
     }
@@ -89,7 +101,7 @@ import { pushNotification } from "./notification-service";
 export async function executeWalletPayment(
     userId: string,
     amount: number,
-    currency: 'USD' | 'GBP',
+    currency: 'USD' | 'NGN',
     description: string,
     shipmentId?: string
 ) {
@@ -103,7 +115,7 @@ export async function executeWalletPayment(
         }
 
         const data = walletDoc.data() as Wallet;
-        const balanceField = currency === 'USD' ? 'balanceUSD' : 'balanceGBP';
+        const balanceField = currency === 'USD' ? 'balanceUSD' : 'balanceNGN';
         const currentBalance = data[balanceField] || 0;
 
         if (currentBalance < amount) {
@@ -135,7 +147,7 @@ export async function executeWalletPayment(
     // Notify user of payment success
     await pushNotification(userId, {
         title: 'Payment Successful',
-        message: `Your payment of ${currency === 'USD' ? '$' : '£'}${amount.toLocaleString()} for ${description} was successful.`,
+        message: `Your payment of ${currency === 'USD' ? '$' : '₦'}${amount.toLocaleString()} for ${description} was successful.`,
         type: 'alert'
     });
 
@@ -149,7 +161,7 @@ export async function executeWalletPayment(
 export async function withdrawFunds(
     userId: string,
     amount: number,
-    currency: 'USD' | 'GBP',
+    currency: 'USD' | 'NGN',
     description: string = 'Withdrawal'
 ) {
     const walletRef = doc(db, "wallets", userId);
@@ -162,7 +174,7 @@ export async function withdrawFunds(
         }
 
         const data = walletDoc.data() as Wallet;
-        const balanceField = currency === 'USD' ? 'balanceUSD' : 'balanceGBP';
+        const balanceField = currency === 'USD' ? 'balanceUSD' : 'balanceNGN';
         const currentBalance = data[balanceField] || 0;
 
         if (currentBalance < amount) {
@@ -193,9 +205,164 @@ export async function withdrawFunds(
     // Notify user of withdrawal
     await pushNotification(userId, {
         title: 'Withdrawal Processed',
-        message: `Your withdrawal of ${currency === 'USD' ? '$' : '£'}${amount.toLocaleString()} has been processed.`,
+        message: `Your withdrawal of ${currency === 'USD' ? '$' : '₦'}${amount.toLocaleString()} has been processed.`,
         type: 'alert'
     });
 
     return result;
+}
+
+/**
+ * Processes a settlement payout to a vendor
+ */
+export async function processSettlement(
+    userId: string,
+    amount: number,
+    currency: 'USD' | 'NGN',
+    vendor: string,
+    description: string = 'Vendor Settlement'
+) {
+    const walletRef = doc(db, "wallets", userId);
+    const txnRef = collection(db, "wallets", userId, "transactions");
+
+    return await runTransaction(db, async (transaction) => {
+        const walletDoc = await transaction.get(walletRef);
+        if (!walletDoc.exists()) throw new Error("Wallet not found");
+
+        const data = walletDoc.data() as Wallet;
+        const balanceField = currency === 'USD' ? 'balanceUSD' : 'balanceNGN';
+        const currentBalance = data[balanceField] || 0;
+
+        if (currentBalance < amount) {
+            throw new Error(`Insufficient ${currency} balance for settlement`);
+        }
+
+        transaction.update(walletRef, {
+            [balanceField]: currentBalance - amount,
+            updatedAt: serverTimestamp()
+        });
+
+        const newTxnDoc = doc(txnRef);
+        transaction.set(newTxnDoc, {
+            type: 'transfer',
+            amount: -amount,
+            currency,
+            description: `Settlement: ${vendor} - ${description}`,
+            status: 'success',
+            method: 'bank',
+            createdAt: serverTimestamp()
+        });
+
+        await pushNotification(userId, {
+            title: 'Settlement Processed',
+            message: `Your settlement of ${currency === 'USD' ? '$' : '₦'}${amount.toLocaleString()} to ${vendor} was successful.`,
+            type: 'system'
+        });
+
+        return newTxnDoc.id;
+    });
+}
+
+/**
+ * Generates a mock E-Invoice (persisted in Firestore)
+ */
+export async function generateEInvoice(
+    userId: string,
+    amount: number,
+    currency: 'USD' | 'NGN' | 'NGN',
+    vendor: string,
+    description: string
+) {
+    const invoiceRef = collection(db, "wallets", userId, "invoices");
+    const newInvoiceDoc = doc(invoiceRef);
+
+    const invoiceData: EInvoice = {
+        id: newInvoiceDoc.id,
+        userId,
+        amount,
+        currency,
+        vendor,
+        description,
+        status: 'pending',
+        dueDate: Timestamp.fromDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)), // 7 days from now
+        createdAt: Timestamp.now()
+    };
+
+    await setDoc(newInvoiceDoc, invoiceData);
+
+    await pushNotification(userId, {
+        title: 'New E-Invoice Generated',
+        message: `A new invoice for ${currency} ${amount} from ${vendor} has been created.`,
+        type: 'shipment'
+    });
+
+    return newInvoiceDoc.id;
+}
+
+/**
+ * Gets a user's digital invoices
+ */
+export async function getEInvoices(userId: string): Promise<EInvoice[]> {
+    const invoiceRef = collection(db, "wallets", userId, "invoices");
+    const q = query(invoiceRef, orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ ...doc.data() })) as EInvoice[];
+}
+
+/**
+ * Converts currency within the wallet (USD <-> NGN)
+ */
+export async function convertCurrency(
+    userId: string,
+    fromAmount: number,
+    fromCurrency: 'USD' | 'NGN',
+    toCurrency: 'USD' | 'NGN',
+    rate: number
+) {
+    const walletRef = doc(db, "wallets", userId);
+    const txnRef = collection(db, "wallets", userId, "transactions");
+
+    return await runTransaction(db, async (transaction) => {
+        const walletDoc = await transaction.get(walletRef);
+        if (!walletDoc.exists()) throw new Error("Wallet not found");
+
+        const data = walletDoc.data() as Wallet;
+        const fromField = fromCurrency === 'USD' ? 'balanceUSD' : 'balanceNGN';
+        const toField = toCurrency === 'USD' ? 'balanceUSD' : 'balanceNGN';
+
+        const currentFromBalance = data[fromField] || 0;
+        const currentToBalance = data[toField] || 0;
+
+        if (currentFromBalance < fromAmount) {
+            throw new Error(`Insufficient ${fromCurrency} balance for conversion`);
+        }
+
+        const toAmount = fromAmount * rate;
+
+        transaction.update(walletRef, {
+            [fromField]: currentFromBalance - fromAmount,
+            [toField]: currentToBalance + toAmount,
+            updatedAt: serverTimestamp()
+        });
+
+        // Record two transaction legs or one summary
+        const txnDoc = doc(txnRef);
+        transaction.set(txnDoc, {
+            type: 'transfer',
+            amount: toAmount,
+            currency: toCurrency,
+            description: `FX Swap: ${fromCurrency} to ${toCurrency} @ ${rate}`,
+            status: 'success',
+            method: 'wallet',
+            createdAt: serverTimestamp()
+        });
+
+        await pushNotification(userId, {
+            title: 'FX Conversion Success',
+            message: `Converted ${fromCurrency} ${fromAmount} to ${toCurrency} ${toAmount.toFixed(2)}.`,
+            type: 'system'
+        });
+
+        return txnDoc.id;
+    });
 }

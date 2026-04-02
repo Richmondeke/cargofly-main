@@ -218,10 +218,10 @@ export default function Home() {
                     whileHover={{ y: -5, backgroundColor: "rgba(255, 255, 255, 0.12)", borderColor: "rgba(255, 202, 0, 0.3)" }}
                     className="bg-slate-50 dark:bg-white/5 backdrop-blur-md p-6 rounded-[24px] border border-slate-200 dark:border-white/10 transition-all duration-300 shadow-sm"
                   >
-                    <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-500 mb-4">
+                    <div className="w-12 h-12 bg-sky-500/10 rounded-xl flex items-center justify-center text-sky-500 mb-4">
                       <Users className="w-6 h-6" />
                     </div>
-                    <div className="text-4xl font-bold text-navy-900 dark:text-white mb-2">50k+</div>
+                                        <div className="text-4xl font-bold text-navy-900 dark:text-white mb-2">50k+</div>
                     <div className="text-navy-900/60 dark:text-white/60 font-medium text-sm">Active Partners</div>
                   </motion.div>
                   <motion.div

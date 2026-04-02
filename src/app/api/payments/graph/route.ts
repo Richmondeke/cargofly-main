@@ -40,8 +40,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Payment method is required' }, { status: 400 });
         }
 
-        // --- Wallet Payment (USD or GBP) ---
-        if (method === 'wallet_usd' || method === 'wallet_gbp') {
+        // --- Wallet Payment (USD or NGN) ---
+        if (method === 'wallet_usd' || method === 'wallet_ngn') {
             const walletRef = doc(db, "wallets", userId);
             const txnRef = collection(db, "wallets", userId, "transactions");
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
                 if (!walletDoc.exists()) throw new Error("Wallet not initialized");
 
                 const data = walletDoc.data();
-                const balanceField = method.includes('gbp') ? 'balanceGBP' : 'balanceUSD';
+                const balanceField = method.includes('ngn') ? 'balanceNGN' : 'balanceUSD';
                 const currentBalance = data[balanceField] || 0;
 
                 if (currentBalance < amount) throw new Error("Insufficient balance");
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
                 transaction.set(newTxnDoc, {
                     type: 'payment',
                     amount: -amount,
-                    currency: method.includes('gbp') ? 'GBP' : 'USD',
+                    currency: method.includes('ngn') ? 'NGN' : 'USD',
                     description,
                     shipmentId: shipmentId || null,
                     status: 'success',

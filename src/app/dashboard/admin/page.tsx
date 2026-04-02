@@ -98,10 +98,10 @@ export default function AdminPage() {
                 {/* ── 4-Metric Stats ────────────────────────────────────────────── */}
                 <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
                     {[
-                        { label: 'Global Shipments', value: stats.totalShipments.toLocaleString(), icon: 'local_shipping', color: 'blue', path: '/dashboard/admin/shipments' },
+                        { label: 'Global Shipments', value: stats.totalShipments.toLocaleString(), icon: 'flight', color: 'blue', path: '/dashboard/admin/shipments' },
                         { label: 'In Transit', value: stats.inTransit.toLocaleString(), icon: 'explore', color: 'emerald', path: '/dashboard/admin/shipments?filter=in_transit' },
-                        { label: 'Pending Action', value: stats.pending.toLocaleString(), icon: 'history', color: 'amber', path: '/dashboard/admin/shipments?filter=pending' },
-                        { label: 'Total Revenue', value: stats.totalRevenue ? `$${(stats.totalRevenue).toLocaleString()}` : '$0', icon: 'payments', color: 'indigo', path: '/dashboard/financial' }
+                        { label: 'Pending Action', value: stats.pending.toLocaleString(), icon: 'history', color: 'gold', path: '/dashboard/admin/shipments?filter=pending' },
+                        { label: 'Total Revenue', value: stats.totalRevenue ? `$${(stats.totalRevenue).toLocaleString()}` : '$0', icon: 'payments', color: 'sky', path: '/dashboard/financial' }
                     ].map((stat, idx) => (
                         <div
                             key={idx}
@@ -307,7 +307,7 @@ export default function AdminPage() {
                             </div>
                         </section>
 
-                        <section className="relative group cursor-pointer overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-white/5 bg-navy-900 flex flex-col" onClick={() => router.push('/dashboard/admin/shipments')}>
+                        <section className="relative group cursor-pointer overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-white/5 bg-navy-900 flex flex-col" onClick={() => router.push('/dashboard/admin/announcements')}>
                             <div className="h-48 overflow-hidden relative">
                                 <img
                                     src="/images/hero-plane.png"
@@ -337,8 +337,11 @@ export default function AdminPage() {
                                         </div>
                                     </div>
 
-                                    <Button className="w-full bg-white text-navy-900 font-bold text-xs uppercase tracking-wider h-12 rounded-xl hover:bg-primary hover:text-white transition-all shadow-xl">
-                                        Manage Shipments
+                                    <Button
+                                        onClick={(e) => { e.stopPropagation(); router.push('/dashboard/admin/announcements'); }}
+                                        className="w-full bg-white text-navy-900 font-bold text-xs uppercase tracking-wider h-12 rounded-xl hover:bg-primary hover:text-white transition-all shadow-xl"
+                                    >
+                                        Manage Announcements
                                     </Button>
                                 </div>
                             </div>

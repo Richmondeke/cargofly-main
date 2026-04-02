@@ -118,16 +118,15 @@ function mapGraphAccount(a: GraphVirtualAccount): BankDetailsPayload {
 }
 
 function getMockBankDetails(currency: string): BankDetailsPayload {
-    if (currency === 'GBP') {
+    if (currency === 'NGN') {
         return {
             accountName: 'Cargofly / Caverton Cargo Ltd',
-            bankName: 'Barclays Bank UK',
-            accountNumber: '12345678',
-            sortCode: '20-00-00',
-            iban: 'GB29BARC20000012345678',
-            swiftCode: 'BARCGB22',
-            currency: 'GBP',
-            bankAddress: '1 Churchill Place, London E14 5HP, United Kingdom',
+            bankName: 'Access Bank PLC',
+            accountNumber: '0123456789',
+            sortCode: '044-15024',
+            swiftCode: 'ACCENGLA',
+            currency: 'NGN',
+            bankAddress: 'Plot 999, Adetokunbo Ademola Street, Victoria Island, Lagos, Nigeria',
             status: 'active',
         };
     }

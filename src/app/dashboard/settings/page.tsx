@@ -359,7 +359,7 @@ export default function SettingsPage() {
                         {/* Profile Card */}
                         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 mb-4">
                             <div className="flex flex-col items-center text-center">
-                                <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center text-primary font-medium text-2xl mb-3">
+                                <div className="w-16 h-16 rounded-full bg-sky-500/10 border-2 border-sky-500/30 flex items-center justify-center text-sky-600 font-medium text-2xl mb-3">
                                     {userInitials}
                                 </div>
                                 <p className="font-medium text-slate-900 dark:text-white text-sm leading-tight">
@@ -369,7 +369,7 @@ export default function SettingsPage() {
                                     {formData.email}
                                 </p>
                                 <span className={`mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${userProfile?.role === 'admin'
-                                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                                    ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
                                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                                     }`}>
                                     <span className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -386,7 +386,7 @@ export default function SettingsPage() {
                                     onClick={() => setActiveSection(item.id)}
                                     className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-colors text-left ${idx !== navItems.length - 1 ? 'border-b border-slate-100 dark:border-slate-700' : ''
                                         } ${activeSection === item.id
-                                            ? 'bg-primary/5 text-primary border-l-4 border-l-primary pl-3'
+                                            ? 'bg-sky-500/5 text-sky-600 border-l-4 border-l-sky-600 pl-3'
                                             : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                                         }`}
                                 >
@@ -405,7 +405,7 @@ export default function SettingsPage() {
                             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                                 <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700">
                                     <h2 className="text-lg font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-primary text-xl">person</span>
+                                        <span className="material-symbols-outlined text-sky-600 text-xl">person</span>
                                         Personal Information
                                     </h2>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Update your name and contact details</p>
@@ -631,7 +631,7 @@ export default function SettingsPage() {
                                         <button
                                             onClick={handleSave}
                                             disabled={saving}
-                                            className="px-6 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 text-sm"
+                                            className="px-6 py-2.5 bg-sky-600 text-white rounded-xl font-medium hover:bg-sky-700 transition-all shadow-sm shadow-sky-600/20 disabled:opacity-50 flex items-center gap-2 text-sm"
                                         >
                                             {saving ? (
                                                 <><span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>Saving...</>
@@ -743,7 +743,7 @@ export default function SettingsPage() {
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${member.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${member.role === 'admin' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
                                                                 : member.role === 'manager' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                                                                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
                                                                 }`}>
@@ -828,53 +828,55 @@ export default function SettingsPage() {
                         )}
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* ── PASSWORD MODAL ── */}
-            {showPasswordModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-                        <h3 className="text-xl font-medium text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">lock</span>
-                            Change Password
-                        </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">Enter your current password to set a new one.</p>
-                        <div className="space-y-4">
-                            <div>
-                                <Label htmlFor="currentPassword">Current Password</Label>
-                                <Input id="currentPassword" type="password" value={passwordForm.current} onChange={(e) => setPasswordForm(prev => ({ ...prev, current: e.target.value }))} placeholder="Enter current password" />
+            {
+                showPasswordModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                            <h3 className="text-xl font-medium text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-primary">lock</span>
+                                Change Password
+                            </h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">Enter your current password to set a new one.</p>
+                            <div className="space-y-4">
+                                <div>
+                                    <Label htmlFor="currentPassword">Current Password</Label>
+                                    <Input id="currentPassword" type="password" value={passwordForm.current} onChange={(e) => setPasswordForm(prev => ({ ...prev, current: e.target.value }))} placeholder="Enter current password" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="newPassword">New Password</Label>
+                                    <Input id="newPassword" type="password" value={passwordForm.new} onChange={(e) => setPasswordForm(prev => ({ ...prev, new: e.target.value }))} placeholder="Enter new password" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                    <Input id="confirmPassword" type="password" value={passwordForm.confirm} onChange={(e) => setPasswordForm(prev => ({ ...prev, confirm: e.target.value }))} placeholder="Confirm new password" />
+                                </div>
+                                {passwordError && (
+                                    <p className="text-red-500 text-sm flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-sm">error</span> {passwordError}
+                                    </p>
+                                )}
                             </div>
-                            <div>
-                                <Label htmlFor="newPassword">New Password</Label>
-                                <Input id="newPassword" type="password" value={passwordForm.new} onChange={(e) => setPasswordForm(prev => ({ ...prev, new: e.target.value }))} placeholder="Enter new password" />
+                            <div className="flex gap-3 mt-6">
+                                <button onClick={() => { setShowPasswordModal(false); setPasswordForm({ current: '', new: '', confirm: '' }); setPasswordError(''); }}
+                                    className="flex-1 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl font-medium transition-colors">
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handlePasswordChange}
+                                    disabled={passwordLoading || !passwordForm.current || !passwordForm.new}
+                                    className="flex-1 px-4 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                    {passwordLoading ? (
+                                        <><span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>Updating...</>
+                                    ) : 'Update Password'}
+                                </button>
                             </div>
-                            <div>
-                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                                <Input id="confirmPassword" type="password" value={passwordForm.confirm} onChange={(e) => setPasswordForm(prev => ({ ...prev, confirm: e.target.value }))} placeholder="Confirm new password" />
-                            </div>
-                            {passwordError && (
-                                <p className="text-red-500 text-sm flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-sm">error</span> {passwordError}
-                                </p>
-                            )}
-                        </div>
-                        <div className="flex gap-3 mt-6">
-                            <button onClick={() => { setShowPasswordModal(false); setPasswordForm({ current: '', new: '', confirm: '' }); setPasswordError(''); }}
-                                className="flex-1 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl font-medium transition-colors">
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handlePasswordChange}
-                                disabled={passwordLoading || !passwordForm.current || !passwordForm.new}
-                                className="flex-1 px-4 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                                {passwordLoading ? (
-                                    <><span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>Updating...</>
-                                ) : 'Update Password'}
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
 
             <SuccessModal
@@ -884,6 +886,6 @@ export default function SettingsPage() {
                 message={successModal.message}
                 type={successModal.type}
             />
-        </div>
+        </div >
     );
 }

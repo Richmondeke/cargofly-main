@@ -59,7 +59,7 @@ export default function BankDetailsModal({ isOpen, onClose }: BankDetailsModalPr
                 onClick={onClose}
             ></div>
 
-            <div className="relative bg-white dark:bg-[#1e293b] w-full max-w-lg rounded-[2.5rem] shadow-2xl shadow-indigo-500/10 border border-slate-100 dark:border-white/5 overflow-hidden transform transition-all">
+            <div className="relative bg-white dark:bg-[#1e293b] w-full max-w-lg rounded-[2.5rem] shadow-2xl shadow-sky-500/10 border border-slate-100 dark:border-white/5 overflow-hidden transform transition-all">
                 {/* Header Decoration */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full transform translate-x-8 -translate-y-8"></div>
 
@@ -160,12 +160,12 @@ export default function BankDetailsModal({ isOpen, onClose }: BankDetailsModalPr
                                 )}
                             </div>
 
-                            <div className="p-4 bg-indigo-50/50 dark:bg-primary/5 rounded-2xl border border-indigo-100/50 dark:border-primary/10 flex gap-3 items-start">
+                            <div className="p-4 bg-sky-50/50 dark:bg-primary/5 rounded-2xl border border-sky-100/50 dark:border-primary/10 flex gap-3 items-start">
                                 <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm shrink-0">
                                     <ShieldCheck className="w-4 h-4" />
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-[10px] font-medium text-indigo-900 dark:text-primary uppercase tracking-widest">Secured Infrastructure</p>
+                                    <p className="text-[10px] font-medium text-sky-900 dark:text-primary uppercase tracking-widest">Secured Infrastructure</p>
                                     <p className="text-[10px] font-medium text-slate-500 leading-relaxed uppercase tracking-tighter">
                                         This account is unique to you. Funds deposited will be automatically reconciled to your wallet.
                                     </p>
@@ -181,7 +181,7 @@ export default function BankDetailsModal({ isOpen, onClose }: BankDetailsModalPr
                     <div className="mt-8">
                         <button
                             onClick={onClose}
-                            className="w-full py-4 bg-[#1b1c1c] dark:bg-indigo-600 text-white rounded-2xl font-display font-medium text-[10px] uppercase tracking-widest hover:opacity-90 transition-all shadow-xl shadow-navy-900/10"
+                            className="w-full py-4 bg-[#1b1c1c] dark:bg-sky-600 text-white rounded-2xl font-display font-medium text-[10px] uppercase tracking-widest hover:opacity-90 transition-all shadow-xl shadow-navy-900/10"
                         >
                             Return to Wallet
                         </button>

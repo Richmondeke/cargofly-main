@@ -13,7 +13,7 @@ interface StatusDropdownProps {
 const statusOptions = [
     { value: 'pending', label: 'Pending', color: 'text-amber-600 bg-amber-50 hover:bg-amber-100' },
     { value: 'confirmed', label: 'Confirmed', color: 'text-blue-600 bg-blue-50 hover:bg-blue-100' },
-    { value: 'picked_up', label: 'Picked Up', color: 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100' },
+    { value: 'picked_up', label: 'Picked Up', color: 'text-sky-600 bg-sky-50 hover:bg-sky-100' },
     { value: 'in_transit', label: 'In Transit', color: 'text-sky-600 bg-sky-50 hover:bg-sky-100' },
     { value: 'at_hub', label: 'At Hub', color: 'text-purple-600 bg-purple-50 hover:bg-purple-100' },
     { value: 'out_for_delivery', label: 'Out for Delivery', color: 'text-teal-600 bg-teal-50 hover:bg-teal-100' },

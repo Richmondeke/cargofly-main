@@ -92,8 +92,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                     <>
                         <SidebarSection label="Administration" />
                         <SidebarLink to="/dashboard/admin" icon="admin_panel_settings" label="Admin Panel" active={pathname === '/dashboard/admin'} onClick={onClose} />
-                        <SidebarLink to="/dashboard/admin/shipments" icon="local_shipping" label="All Shipments" active={pathname === '/dashboard/admin/shipments'} onClick={onClose} />
-                        <SidebarLink to="/dashboard/admin/rates" icon="currency_exchange" label="Rates Management" active={pathname === '/dashboard/admin/rates'} onClick={onClose} />
+                        <SidebarLink to="/dashboard/admin/shipments" icon="flight" label="All Shipments" active={pathname === '/dashboard/admin/shipments'} onClick={onClose} />
+                                                <SidebarLink to="/dashboard/admin/rates" icon="currency_exchange" label="Rates Management" active={pathname === '/dashboard/admin/rates'} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/support" icon="support_agent" label="Support Console" active={pathname?.startsWith('/dashboard/admin/support')} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/blog" icon="rss_feed" label="Blog Manager" active={pathname === '/dashboard/admin/blog'} onClick={onClose} />
                     </>

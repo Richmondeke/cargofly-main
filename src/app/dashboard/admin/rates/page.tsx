@@ -327,9 +327,9 @@ export default function AdminRatesPage() {
                                     <span className={cn(
                                         "px-3 py-1 rounded-full text-[9px] font-medium uppercase tracking-[0.15em]",
                                         route.type === 'international'
-                                            ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+                                            ? "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400"
                                             : route.type === 'regional'
-                                                ? "bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400"
+                                                ? "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400"
                                                 : "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
                                     )}>
                                         {route.type}

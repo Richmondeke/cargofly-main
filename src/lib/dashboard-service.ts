@@ -248,7 +248,7 @@ export function formatActivityTime(timestamp: Timestamp): string {
 }
 
 
-export async function getActiveShipments(userId?: string, role?: string, statusFilter?: string): Promise<DashboardShipment[]> {
+export async function getActiveShipments(userId?: string, role?: string, statusFilter?: string, dateRange?: string): Promise<DashboardShipment[]> {
     const shipmentsRef = collection(db, "shipments");
     const constraints: QueryConstraint[] = [];
 
@@ -276,11 +276,21 @@ export async function getActiveShipments(userId?: string, role?: string, statusF
         }
     }
 
-    if (!hasAnyFilter) {
+    if (dateRange && dateRange.toLowerCase() !== "all time") {
+        const now = new Date();
+        const past = new Date();
+        if (dateRange.includes("7")) past.setDate(now.getDate() - 7);
+        else if (dateRange.includes("30")) past.setDate(now.getDate() - 30);
+        else if (dateRange.includes("3")) past.setMonth(now.getMonth() - 3);
+
+        constraints.push(where("createdAt", ">=", Timestamp.fromDate(past)));
+    }
+
+    if (!hasAnyFilter && (!dateRange || dateRange.toLowerCase() === "all time")) {
         constraints.push(orderBy("createdAt", "desc"));
     }
 
-    constraints.push(limit(50));
+    constraints.push(limit(100));
 
     const q = query(shipmentsRef, ...constraints);
     const snapshot = await getDocs(q);

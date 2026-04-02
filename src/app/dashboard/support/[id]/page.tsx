@@ -24,7 +24,7 @@ function StatusBadge({ status }: { status: Ticket['status'] }) {
     const map: Record<string, { label: string; cls: string; icon: string }> = {
         open: { label: 'Open', cls: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400', icon: 'radio_button_checked' },
         'in-progress': { label: 'In Progress', cls: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400', icon: 'autorenew' },
-        resolved: { label: 'Resolved', cls: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400', icon: 'check_circle' },
+        resolved: { label: 'Resolved', cls: 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400', icon: 'check_circle' },
         closed: { label: 'Closed', cls: 'bg-slate-50 text-slate-500 dark:bg-slate-500/10 dark:text-slate-400', icon: 'lock' },
     };
     const { label, cls, icon } = map[status] ?? map['open'];
@@ -61,7 +61,7 @@ function Avatar({ name, role }: { name: string; role: 'customer' | 'admin' | 'su
     return (
         <div className={cn(
             "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-xs shadow-sm",
-            isAgent ? "bg-navy-900 dark:bg-indigo-600" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+            isAgent ? "bg-navy-900 dark:bg-sky-600" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
         )}>
             {isAgent ? (
                 <span className="material-symbols-outlined text-base">support_agent</span>
@@ -92,7 +92,7 @@ function MessageBubble({ msg }: { msg: Message }) {
                 <div className={cn(
                     'p-5 rounded-2xl border shadow-[0_2px_10px_-3px_rgba(0,0,0,0.04)] transition-all',
                     isAgent
-                        ? 'bg-blue-50/50 dark:bg-indigo-500/5 border-blue-100 dark:border-indigo-500/20'
+                        ? 'bg-blue-50/50 dark:bg-sky-500/5 border-blue-100 dark:border-sky-500/20'
                         : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
                 )}>
                     <div className="flex justify-between items-center mb-3">
@@ -101,7 +101,7 @@ function MessageBubble({ msg }: { msg: Message }) {
                                 {msg.senderName}
                             </span>
                             {isAgent && (
-                                <span className="text-[9px] bg-navy-900 dark:bg-indigo-600 text-white px-1.5 py-0.5 rounded-md uppercase font-medium tracking-widest leading-none">
+                                <span className="text-[9px] bg-navy-900 dark:bg-sky-600 text-white px-1.5 py-0.5 rounded-md uppercase font-medium tracking-widest leading-none">
                                     Support
                                 </span>
                             )}
@@ -293,7 +293,7 @@ export default function TicketDetailPage() {
                                 {ticket.status !== 'closed' && (
                                     <button
                                         onClick={handleCloseTicket}
-                                        className="bg-navy-900 dark:bg-indigo-600 text-white hover:opacity-90 px-6 py-2.5 rounded-xl font-medium text-xs uppercase tracking-widest transition-all shadow-lg shadow-navy-900/10"
+                                        className="bg-navy-900 dark:bg-sky-600 text-white hover:opacity-90 px-6 py-2.5 rounded-xl font-medium text-xs uppercase tracking-widest transition-all shadow-lg shadow-navy-900/10"
                                     >
                                         Close Ticket
                                     </button>
@@ -495,7 +495,7 @@ export default function TicketDetailPage() {
                                                     className={cn(
                                                         'px-2 py-2 rounded-xl text-[9px] font-medium uppercase tracking-widest transition-all',
                                                         ticket.status === s
-                                                            ? 'bg-primary text-white shadow-md shadow-primary/20'
+                                                            ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
                                                             : 'bg-slate-50 dark:bg-white/5 text-slate-400 hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20'
                                                     )}
                                                 >
@@ -534,7 +534,7 @@ export default function TicketDetailPage() {
                                     </div>
                                     {/* Support Agent */}
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-navy-900 dark:bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20">
+                                        <div className="w-8 h-8 rounded-full bg-navy-900 dark:bg-sky-600 flex items-center justify-center text-white shadow-md shadow-sky-600/20">
                                             <span className="material-symbols-outlined text-xs">support_agent</span>
                                         </div>
                                         <div className="flex flex-col">
@@ -577,6 +577,6 @@ export default function TicketDetailPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
