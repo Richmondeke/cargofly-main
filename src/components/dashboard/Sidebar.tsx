@@ -10,9 +10,9 @@ const SidebarLink: React.FC<{ to: string; icon: string; label: string; active?: 
     <Link
         href={to}
         onClick={onClick}
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active
-            ? 'bg-navy-700 text-white shadow-inner'
-            : 'text-white/40 hover:text-white hover:bg-white/5'
+        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${active
+            ? 'bg-navy-700 text-white shadow-inner translate-x-1'
+            : 'text-white/40 hover:text-white hover:bg-white/5 hover:translate-x-1'
             }`}
     >
         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
             <div className="relative z-10 mt-auto space-y-4 px-2 pt-4 border-t border-white/10">
                 <button
                     onClick={() => router.push('/dashboard/new-booking')}
-                    className="w-full bg-gold-500 text-black py-3.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-xl shadow-gold-500/10 hover:brightness-110 transition-all active:scale-95 cursor-pointer"
+                    className="w-full bg-gold-500 text-black py-3.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-xl shadow-gold-500/10 hover:brightness-110 hover:scale-[1.02] transition-all active:scale-95 cursor-pointer"
                 >
                     <span className="material-symbols-outlined text-[20px]">add</span>
                     New Shipment

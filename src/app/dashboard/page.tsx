@@ -97,7 +97,7 @@ export default function DashboardPage() {
                         </Link>
                         <button
                             onClick={() => setIsTrackModalOpen(true)}
-                            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-navy-800 text-navy dark:text-white border border-navy/10 dark:border-navy-600 h-14 px-8 rounded-2xl font-medium hover:bg-navy/5 dark:hover:bg-navy-700 transition-all text-sm active:scale-[0.98] cursor-pointer shadow-sm"
+                            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-navy-800 text-black dark:text-white border border-navy/10 dark:border-navy-600 h-14 px-8 rounded-2xl font-bold hover:bg-navy/5 dark:hover:bg-navy-700 hover:scale-[1.02] transition-all text-sm active:scale-[0.98] cursor-pointer shadow-sm"
                         >
                             <span className="material-symbols-outlined text-[20px]">track_changes</span>
                             Track Shipment
@@ -112,14 +112,14 @@ export default function DashboardPage() {
                 <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     {/* Global Shipments */}
                     <Link href="/dashboard/shipments" className="block">
-                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]">
+                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-navy/20 dark:hover:border-navy-500/50 transition-all duration-300 group cursor-pointer active:scale-[0.98]">
                             <div className="min-w-0">
-                                <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest truncate">Flight Operations</p>
-                                <h3 className="text-3xl font-display font-bold mt-1 text-black dark:text-white flex items-baseline gap-1">
+                                <p className="text-[10px] font-bold text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest truncate">Flight Operations</p>
+                                <h3 className="text-3xl font-display font-black mt-1 text-black dark:text-white flex items-baseline gap-1">
                                     {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : stats.totalShipments}
                                 </h3>
                             </div>
-                            <div className="size-14 bg-navy/5 dark:bg-navy-800 rounded-2xl flex-shrink-0 flex items-center justify-center text-navy dark:text-sky-400 group-hover:scale-110 transition-transform">
+                            <div className="size-14 bg-navy/5 dark:bg-navy-800 rounded-2xl flex-shrink-0 flex items-center justify-center text-navy dark:text-sky-400 group-hover:bg-navy/10 group-hover:scale-110 transition-all">
                                 <span className="material-symbols-outlined text-3xl">flight</span>
                             </div>
                         </div>
@@ -127,14 +127,14 @@ export default function DashboardPage() {
 
                     {/* In Transit */}
                     <Link href="/dashboard/shipments?status=in_transit" className="block">
-                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]">
+                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/20 transition-all duration-300 group cursor-pointer active:scale-[0.98]">
                             <div>
-                                <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">In Transit</p>
-                                <h3 className="text-3xl font-display font-bold mt-1 text-black dark:text-white">
+                                <p className="text-[10px] font-bold text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">In Transit</p>
+                                <h3 className="text-3xl font-display font-black mt-1 text-black dark:text-white">
                                     {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : stats.inTransit}
                                 </h3>
                             </div>
-                            <div className="size-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                            <div className="size-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-100 group-hover:scale-110 transition-all">
                                 <span className="material-symbols-outlined text-3xl">explore</span>
                             </div>
                         </div>
@@ -142,14 +142,14 @@ export default function DashboardPage() {
 
                     {/* Pending Action */}
                     <Link href="/dashboard/shipments?status=pending" className="block">
-                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]">
+                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-amber-500/20 transition-all duration-300 group cursor-pointer active:scale-[0.98]">
                             <div>
-                                <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Pending Action</p>
-                                <h3 className="text-3xl font-display font-bold mt-1 text-black dark:text-white">
+                                <p className="text-[10px] font-bold text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Pending Action</p>
+                                <h3 className="text-3xl font-display font-black mt-1 text-black dark:text-white">
                                     {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : ((stats as any).pending || 0)}
                                 </h3>
                             </div>
-                            <div className="size-14 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
+                            <div className="size-14 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-amber-600 group-hover:bg-amber-100 group-hover:scale-110 transition-all">
                                 <span className="material-symbols-outlined text-3xl">history</span>
                             </div>
                         </div>
@@ -157,14 +157,14 @@ export default function DashboardPage() {
 
                     {/* Total Spent */}
                     <Link href="/dashboard/wallet" className="block">
-                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]">
+                        <div className="bg-white dark:bg-navy-900 p-6 rounded-xl border border-navy/10 dark:border-navy-700 flex items-center justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-sky-500/20 transition-all duration-300 group cursor-pointer active:scale-[0.98]">
                             <div>
-                                <p className="text-[10px] font-medium text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Total Spent</p>
-                                <h3 className="text-3xl font-display font-bold mt-1 text-black dark:text-white">
+                                <p className="text-[10px] font-bold text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Total Spent</p>
+                                <h3 className="text-3xl font-display font-black mt-1 text-black dark:text-white">
                                     {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : `$${(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`}
                                 </h3>
                             </div>
-                            <div className="size-14 bg-sky-50 dark:bg-sky-900/20 rounded-2xl flex items-center justify-center text-sky-600 group-hover:scale-110 transition-transform">
+                            <div className="size-14 bg-sky-50 dark:bg-sky-900/20 rounded-2xl flex items-center justify-center text-sky-600 group-hover:bg-sky-100 group-hover:scale-110 transition-all">
                                 <span className="material-symbols-outlined text-3xl">account_balance_wallet</span>
                             </div>
                         </div>
@@ -202,10 +202,10 @@ export default function DashboardPage() {
                                         return (
                                             <div
                                                 key={s.id}
-                                                className="p-5 flex items-center gap-4 hover:bg-navy/5 dark:hover:bg-navy-800/50 transition-colors cursor-pointer"
+                                                className="p-5 flex items-center gap-4 hover:bg-navy/5 dark:hover:bg-navy-800/50 hover:pl-8 transition-all duration-300 cursor-pointer group"
                                                 onClick={() => { setSelectedShipment(s); setIsDrawerOpen(true); }}
                                             >
-                                                <div className={`size-10 ${statusStyle.bg} ${statusStyle.text} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                                                <div className={`size-10 ${statusStyle.bg} ${statusStyle.text} rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
                                                     <span className="material-symbols-outlined text-[20px]">{statusStyle.icon}</span>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
