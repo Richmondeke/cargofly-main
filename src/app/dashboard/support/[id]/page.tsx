@@ -467,18 +467,6 @@ export default function TicketDetailPage() {
                                     </div>
                                 </div>
 
-                                {isAdmin && (
-                                    <div className="flex flex-col gap-2 pt-4 border-t border-slate-50 dark:border-white/5">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[9px] text-slate-400 uppercase font-medium tracking-widest">Resolution Performance</span>
-                                            <span className="text-[9px] font-medium text-emerald-500 uppercase tracking-widest">Active</span>
-                                        </div>
-                                        <div className="w-full bg-slate-100 dark:bg-white/5 h-2 rounded-full overflow-hidden">
-                                            <div className="bg-primary h-full w-[85%] rounded-full shadow-[0_0_10px_rgba(37,99,235,0.3)]" />
-                                        </div>
-                                        <span className="text-[8px] font-medium text-slate-400 uppercase tracking-widest text-center">Response due in 2h 15m</span>
-                                    </div>
-                                )}
 
                                 {/* Admin: Status Control */}
                                 {isAdmin && ticket.status !== 'closed' && (
