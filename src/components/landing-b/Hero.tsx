@@ -64,14 +64,14 @@ export default function Hero() {
 
 
                     <motion.h1
-                        className="text-5xl md:text-7xl lg:text-[100px] font-bold tracking-tight mb-6 leading-[0.9] lg:leading-[0.85]"
+                        className="text-4xl md:text-7xl lg:text-[100px] font-bold tracking-tight mb-6 leading-[0.9] lg:leading-[0.85]"
                         initial={{ opacity: 0, y: 80 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={smoothTransition}
                     >
-                        Global Logistics, <br className="hidden md:block" />
+                        Welcome to the Future of <br className="hidden md:block" />
                         <span className="text-blue-500 relative inline-block italic">
-                            Redefined.
+                            Air Logistics...
                             <motion.span
                                 initial={{ scaleX: 0 }}
                                 animate={{ scaleX: 1 }}
@@ -87,7 +87,7 @@ export default function Hero() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ ...smoothTransition, delay: 0.2 }}
                     >
-                        Precision-engineered cargo flight operations for the world's most demanding enterprises. West Africa's premium gateway to global commerce.
+                        Fast, Efficient Air Cargo Shipping for when it matters most.
                     </motion.p>
 
                     {/* Tracking & Booking Widget */}

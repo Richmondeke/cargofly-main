@@ -27,7 +27,10 @@ import {
     ArrowRight,
     RefreshCcw,
     ChevronRight,
-    Loader2
+    Loader2,
+    ArrowUpDown,
+    ChevronUp,
+    ChevronDown
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from 'react-hot-toast';
@@ -46,6 +49,10 @@ export default function AdminShipmentsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState(initialSearch);
     const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({
+        key: 'createdAt',
+        direction: 'desc'
+    });
 
     // Duty Modal State
     const [dutyModalOpen, setDutyModalOpen] = useState(false);
@@ -154,16 +161,51 @@ export default function AdminShipmentsPage() {
         }
     };
 
-    const filteredShipments = shipments.filter(shipment => {
-        const matchesSearch =
-            shipment.trackingNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            shipment.sender.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            shipment.recipient.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const filteredShipments = shipments
+        .filter(shipment => {
+            const matchesSearch =
+                shipment.trackingNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                shipment.sender.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                shipment.recipient.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesStatus = statusFilter === "all" || shipment.status === statusFilter;
+            const matchesStatus = statusFilter === "all" || shipment.status === statusFilter;
 
-        return matchesSearch && matchesStatus;
-    });
+            return matchesSearch && matchesStatus;
+        })
+        .sort((a, b) => {
+            const { key, direction } = sortConfig;
+
+            let valA: any = a[key as keyof Shipment];
+            let valB: any = b[key as keyof Shipment];
+
+            // Handle nested objects or specific formatting
+            if (key === 'sender') valA = a.sender.name;
+            if (key === 'sender') valB = b.sender.name;
+            if (key === 'recipient') valA = a.recipient.name;
+            if (key === 'recipient') valB = b.recipient.name;
+
+            // Handle Timestamps
+            if (valA?.toMillis) valA = valA.toMillis();
+            if (valB?.toMillis) valB = valB.toMillis();
+
+            if (valA < valB) return direction === 'asc' ? -1 : 1;
+            if (valA > valB) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+    const handleSort = (key: string) => {
+        setSortConfig(prev => ({
+            key,
+            direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
+        }));
+    };
+
+    const SortIcon = ({ column }: { column: string }) => {
+        if (sortConfig.key !== column) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-20" />;
+        return sortConfig.direction === 'asc'
+            ? <ChevronUp className="w-3 h-3 ml-1 text-primary" />
+            : <ChevronDown className="w-3 h-3 ml-1 text-primary" />;
+    };
 
     return (
         <div className="flex-1 overflow-y-auto p-8 bg-slate-50 dark:bg-background-dark h-full">
@@ -216,16 +258,28 @@ export default function AdminShipmentsPage() {
                     </div>
                 </Card>
 
-                {/* Shipments Table */}
+                {/* Shipments Table/Cards */}
                 <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-                    <div className="overflow-x-auto">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left text-sm border-collapse">
                             <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-medium border-b border-slate-200 dark:border-slate-700">
                                 <tr>
-                                    <th className="px-6 py-4">Shipment / Tracking</th>
-                                    <th className="px-6 py-4">Sender & Recipient</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4">Duty & Payment</th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onClick={() => handleSort('trackingNumber')}>
+                                        <div className="flex items-center">Shipment <SortIcon column="trackingNumber" /></div>
+                                    </th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onClick={() => handleSort('createdAt')}>
+                                        <div className="flex items-center">Date <SortIcon column="createdAt" /></div>
+                                    </th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onClick={() => handleSort('sender')}>
+                                        <div className="flex items-center">Sender & Recipient <SortIcon column="sender" /></div>
+                                    </th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onClick={() => handleSort('status')}>
+                                        <div className="flex items-center">Status <SortIcon column="status" /></div>
+                                    </th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onClick={() => handleSort('paymentStatus')}>
+                                        <div className="flex items-center">Duty & Payment <SortIcon column="paymentStatus" /></div>
+                                    </th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -254,12 +308,13 @@ export default function AdminShipmentsPage() {
                                                 </div>
                                                 <div>
                                                     <div className="font-medium text-slate-900 dark:text-white uppercase tracking-tight">{shipment.trackingNumber}</div>
-                                                    <div className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                                                        <span className="capitalize">{shipment.service}</span>
-                                                        <span>•</span>
-                                                        <span>{formatTimestamp(shipment.createdAt)}</span>
-                                                    </div>
+                                                    <div className="text-xs text-slate-500 mt-0.5 capitalize">{shipment.service}</div>
                                                 </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                                                {formatTimestamp(shipment.createdAt)}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -338,6 +393,108 @@ export default function AdminShipmentsPage() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                        {loading ? (
+                            Array(3).fill(0).map((_, i) => (
+                                <div key={i} className="p-6 animate-pulse">
+                                    <div className="flex justify-between mb-4">
+                                        <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded w-1/3"></div>
+                                        <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded w-1/4"></div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="h-3 bg-slate-50 dark:bg-slate-800/50 rounded w-full"></div>
+                                        <div className="h-3 bg-slate-50 dark:bg-slate-800/50 rounded w-2/3"></div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : filteredShipments.length === 0 ? (
+                            <div className="p-12 text-center text-slate-500">
+                                No shipments found matching your filters.
+                            </div>
+                        ) : (
+                            filteredShipments.map((shipment) => (
+                                <div key={shipment.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                                <Package className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-slate-900 dark:text-white uppercase tracking-tight">{shipment.trackingNumber}</div>
+                                                <div className="text-[10px] text-slate-500 font-medium uppercase">{shipment.service} • {formatTimestamp(shipment.createdAt)}</div>
+                                            </div>
+                                        </div>
+                                        <StatusPill
+                                            status={shipment.status || 'pending'}
+                                            interactive={true}
+                                            onStatusChange={(status: string) => shipment.id && handleStatusChange(shipment.id, status)}
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase">Sender</p>
+                                            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">{shipment.sender.name}</p>
+                                            <p className="text-[10px] text-slate-500 italic">{shipment.sender.city}</p>
+                                        </div>
+                                        <div className="space-y-1 text-right">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase">Recipient</p>
+                                            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">{shipment.recipient.name}</p>
+                                            <p className="text-[10px] text-slate-500 italic">{shipment.recipient.city}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                                        <div className="space-y-1">
+                                            {shipment.customsDuty ? (
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${shipment.customsDutyStatus === 'paid'
+                                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                    }`}>
+                                                    Duty: ${shipment.customsDuty.toFixed(2)}
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] text-slate-400 italic">No duty</span>
+                                            )}
+                                            <div className="text-[10px] text-slate-500 flex items-center gap-1 uppercase font-bold">
+                                                <span>Shipment:</span>
+                                                <span className={shipment.paymentStatus === 'paid' ? 'text-emerald-600' : 'text-amber-600'}>
+                                                    {shipment.paymentStatus}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setSelectedShipment(shipment);
+                                                    setDutyAmount(shipment.customsDuty?.toString() || "");
+                                                    setDutyModalOpen(true);
+                                                }}
+                                                className="h-8 px-3 text-[10px] font-bold border-amber-200 text-amber-600 hover:bg-amber-50"
+                                            >
+                                                Apply Duty
+                                            </Button>
+                                            <Button
+                                                variant="premium"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setDrawerShipment(shipment as any);
+                                                    setIsDrawerOpen(true);
+                                                }}
+                                                className="h-8 px-3 text-[10px] font-bold"
+                                            >
+                                                Details
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

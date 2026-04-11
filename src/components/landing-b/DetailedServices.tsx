@@ -59,7 +59,7 @@ export default function DetailedServices() {
                 >
 
 
-                    <h2 className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter leading-[0.9] text-navy-900">
+                    <h2 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-8 tracking-tighter leading-[0.9] text-navy-900">
                         Operational <span className="text-blue-600 italic">Precision</span>
                     </h2>
                     <p className="text-xl md:text-2xl text-navy-900/60 max-w-3xl mb-12 font-medium leading-relaxed">
@@ -89,7 +89,7 @@ export default function DetailedServices() {
                                     duration: 0.8,
                                     ease: [0.23, 1, 0.32, 1]
                                 }}
-                                className="group p-10 md:p-14 rounded-[3rem] bg-gray-50 border border-gray-100 hover:border-blue-600/30 transition-all duration-700 hover:shadow-premium-xl relative overflow-hidden h-full"
+                                className="group p-6 sm:p-14 rounded-[2.5rem] sm:rounded-[3rem] bg-gray-50 border border-gray-100 hover:border-blue-600/30 transition-all duration-700 hover:shadow-premium-xl relative overflow-hidden h-full"
                             >
                                 <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                                     <category.icon.type {...category.icon.props} className="w-32 h-32" />

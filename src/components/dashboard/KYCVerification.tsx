@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { updateKYCStatus } from '@/lib/wallet-service';
 import toast from 'react-hot-toast';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 interface KYCVerificationProps {
     userId: string;
@@ -30,6 +31,7 @@ export default function KYCVerification({ userId, onComplete }: KYCVerificationP
     const [step, setStep] = useState<VerificationStep>('selection');
     const [idType, setIdType] = useState<'passport' | 'id_card' | 'drivers_license' | null>(null);
     const [idNumber, setIdNumber] = useState('');
+    const [expiryDate, setExpiryDate] = useState<Date | undefined>(undefined);
     const [loading, setLoading] = useState(false);
 
     const handleIdTypeSelect = (type: 'passport' | 'id_card' | 'drivers_license') => {
@@ -141,14 +143,12 @@ export default function KYCVerification({ userId, onComplete }: KYCVerificationP
                                         autoFocus
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="expiryDate">Expiry Date</Label>
-                                    <Input
-                                        id="expiryDate"
-                                        type="date"
-                                        required
-                                    />
-                                </div>
+                                <DatePicker
+                                    label="Expiry Date"
+                                    value={expiryDate}
+                                    onChange={setExpiryDate}
+                                    required
+                                />
                                 <Button type="submit" className="w-full h-12 rounded-xl text-lg font-semibold mt-4">
                                     Next Step
                                 </Button>

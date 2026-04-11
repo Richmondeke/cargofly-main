@@ -128,8 +128,8 @@ export async function updateAnnouncement(id: string, data: Partial<CreateAnnounc
         updatedAt: Timestamp.now(),
     };
 
-    if (data.expiresAt) {
-        updates.expiresAt = Timestamp.fromDate(data.expiresAt);
+    if (data.expiresAt !== undefined) {
+        updates.expiresAt = data.expiresAt ? Timestamp.fromDate(data.expiresAt) : null;
     }
 
     await updateDoc(announcementRef, updates);

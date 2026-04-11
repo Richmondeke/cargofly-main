@@ -15,6 +15,8 @@ import {
     signOut as firebaseSignOut,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     updateProfile,
     sendPasswordResetEmail,
 } from "firebase/auth";
@@ -141,6 +143,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const profile = await createUserProfile(user);
                 setUserProfile(profile);
 
+                // Handle redirect result
+                getRedirectResult(auth).then(async (result) => {
+                    if (result?.user) {
+                        const profile = await createUserProfile(result.user);
+                        setUserProfile(profile);
+                    }
+                }).catch(err => console.error("Redirect auth error:", err));
+
                 // Initial balance fetch
                 fetchAndSyncBalance(user.uid);
 
@@ -189,8 +199,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Sign in with Google
     async function signInWithGoogle() {
         const provider = new GoogleAuthProvider();
-        const { user } = await signInWithPopup(auth, provider);
-        await createUserProfile(user);
+        // Use redirect for better reliability on all devices/browsers
+        await signInWithRedirect(auth, provider);
     }
 
     // Sign out

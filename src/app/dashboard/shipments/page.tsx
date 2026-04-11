@@ -122,8 +122,9 @@ export default function ShipmentsPage() {
         async function loadShipments() {
             setLoading(true);
             try {
+                const isAdmin = userProfile?.role === 'admin' || userProfile?.role === 'staff';
                 let targetUserId = userProfile?.uid;
-                if (userProfile?.role === 'admin') {
+                if (isAdmin) {
                     targetUserId = userIdFilter || undefined;
                 }
                 const data = await getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter, dateRange);
@@ -249,8 +250,8 @@ export default function ShipmentsPage() {
                         <button
                             onClick={() => {
                                 if (!userProfile) return;
-                                setLoading(true);
-                                const targetUserId = userProfile?.role === 'admin' ? (userIdFilter || undefined) : userProfile?.uid;
+                                const isAdmin = userProfile?.role === 'admin' || userProfile?.role === 'staff';
+                                const targetUserId = isAdmin ? (userIdFilter || undefined) : userProfile?.uid;
                                 getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter, dateRange)
                                     .then(data => { setShipments(data); setLoading(false); })
                                     .catch(() => setLoading(false));
@@ -395,7 +396,8 @@ export default function ShipmentsPage() {
                 onClose={() => setIsDrawerOpen(false)}
                 shipment={selectedShipment}
                 onRefresh={async () => {
-                    const targetUserId = userProfile?.role === 'admin' ? (userIdFilter || undefined) : userProfile?.uid;
+                    const isAdmin = userProfile?.role === 'admin' || userProfile?.role === 'staff';
+                    const targetUserId = isAdmin ? (userIdFilter || undefined) : userProfile?.uid;
                     const data = await getActiveShipments(targetUserId, userProfile?.role, statusFilter === 'All' ? undefined : statusFilter, dateRange);
                     setShipments(data);
                     const updated = data.find(s => s.id === selectedShipment?.id);

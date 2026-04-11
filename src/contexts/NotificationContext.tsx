@@ -44,11 +44,14 @@ interface NotificationContextType {
     notifications: Notification[];
     isSidebarOpen: boolean;
     unreadCount: number;
+    activeToast: Notification | null;
     toggleSidebar: () => void;
     closeSidebar: () => void;
     markAsRead: (id: string) => void;
     markAllAsRead: () => void;
     clearAll: () => void;
+    clearActiveToast: () => void;
+    requestBrowserPermission: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -68,9 +71,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [activeToast, setActiveToast] = useState<Notification | null>(null);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [browserPermission, setBrowserPermission] = useState<NotificationPermission>('default');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            setBrowserPermission(window.Notification.permission);
+        }
+    }, []);
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
     const closeSidebar = () => setIsSidebarOpen(false);
+    const clearActiveToast = () => setActiveToast(null);
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -78,6 +91,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (!user?.uid) {
             setNotifications([]);
+            setIsInitialLoad(true);
             return;
         }
 
@@ -88,14 +102,43 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             q,
             (snapshot) => {
                 if (snapshot.empty) {
+                    setIsInitialLoad(false);
                     // Seed a welcome notification on first visit
                     seedWelcomeNotification(user.uid);
                     return;
                 }
+
                 const fetched = snapshot.docs.map(d =>
                     firestoreToNotification(d.data() as FirestoreNotification, d.id)
                 );
+
+                // Detect new notifications for toast (excluding initial load and existing ones)
+                if (!isInitialLoad) {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            const newNotif = firestoreToNotification(change.doc.data() as FirestoreNotification, change.doc.id);
+                            // Only toast if it's unread and recent (not from some old state)
+                            const now = new Date().getTime();
+                            const notifTime = newNotif.timestamp.getTime();
+                            if (!newNotif.isRead && (now - notifTime < 10000)) { // within 10 seconds
+                                setActiveToast(newNotif);
+
+                                // Trigger native notification if permitted
+                                if (window.Notification.permission === 'granted') {
+                                    new window.Notification(newNotif.title, {
+                                        body: newNotif.message,
+                                        icon: '/favicon.ico' // Or a specific app icon
+                                    });
+                                }
+
+                                console.log('New notification toast triggered:', newNotif.title);
+                            }
+                        }
+                    });
+                }
+
                 setNotifications(fetched);
+                setIsInitialLoad(false);
             },
             (error) => {
                 console.error('Notification listener error:', error);
@@ -103,7 +146,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         );
 
         return () => unsub();
-    }, [user?.uid]);
+    }, [user?.uid, isInitialLoad]);
 
     async function seedWelcomeNotification(uid: string) {
         try {
@@ -164,16 +207,26 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }
     }, [user?.uid]);
 
+    const requestBrowserPermission = async () => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            const permission = await window.Notification.requestPermission();
+            setBrowserPermission(permission);
+        }
+    };
+
     return (
         <NotificationContext.Provider value={{
             notifications,
             isSidebarOpen,
             unreadCount,
+            activeToast,
             toggleSidebar,
             closeSidebar,
             markAsRead,
             markAllAsRead,
-            clearAll
+            clearAll,
+            clearActiveToast,
+            requestBrowserPermission
         }}>
             {children}
         </NotificationContext.Provider>

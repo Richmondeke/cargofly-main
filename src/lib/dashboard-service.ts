@@ -160,6 +160,13 @@ export interface TeamMember {
     joinedAt: Timestamp;
 }
 
+export interface CapacityCheckResult {
+    available: boolean;
+    currentWeight: number;
+    remainingCapacity: number;
+    limit: number;
+}
+
 // ============== DASHBOARD STATS ==============
 
 // ============== DASHBOARD STATS ==============
@@ -170,7 +177,8 @@ export async function getDashboardStats(userId?: string, role?: string) {
         const shipmentsRef = collection(db, "shipments");
         let q = query(shipmentsRef);
 
-        if (role !== 'admin' && userId) {
+        const isAdmin = role === 'admin' || role === 'staff';
+        if (!isAdmin && userId) {
             q = query(shipmentsRef, where("userId", "==", userId));
         }
 
@@ -219,6 +227,54 @@ export async function getDashboardStats(userId?: string, role?: string) {
     }
 }
 
+// ============== CAPACITY CHECK ==============
+
+export async function checkDailyCapacity(date: Date, additionalWeight: number = 0): Promise<CapacityCheckResult> {
+    const CAPACITY_LIMIT = 1400; // 1400kg per day
+
+    try {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const shipmentsRef = collection(db, "shipments");
+        const q = query(
+            shipmentsRef,
+            where("departureDate", ">=", Timestamp.fromDate(startOfDay)),
+            where("departureDate", "<=", Timestamp.fromDate(endOfDay)),
+            where("status", "!=", "cancelled")
+        );
+
+        const snapshot = await getDocs(q);
+        let currentWeight = 0;
+
+        snapshot.docs.forEach(doc => {
+            const data = doc.data() as Shipment;
+            if (data.packages) {
+                currentWeight += data.packages.reduce((sum, pkg) => sum + (pkg.weight || 0), 0);
+            }
+        });
+
+        const totalProjected = currentWeight + additionalWeight;
+        const remaining = CAPACITY_LIMIT - currentWeight;
+
+        return {
+            available: totalProjected <= CAPACITY_LIMIT,
+            currentWeight,
+            remainingCapacity: Math.max(0, remaining),
+            limit: CAPACITY_LIMIT
+        };
+    } catch (error) {
+        console.error("Error checking capacity:", error);
+        // Default to true on error to not block users if Firestore fails, 
+        // but log it. Or default to false for safety.
+        // Let's default to a safe-ish result but log the error.
+        return { available: true, currentWeight: 0, remainingCapacity: CAPACITY_LIMIT, limit: CAPACITY_LIMIT };
+    }
+}
+
 // ============== SHIPMENTS ==============
 
 // ============== SHIPMENTS ==============
@@ -256,7 +312,8 @@ export async function getActiveShipments(userId?: string, role?: string, statusF
     // we only use orderBy when NO filters are applied. Otherwise we sort in memory.
     const hasUserId = !!userId;
     const hasStatusFilter = !!(statusFilter && statusFilter.toLowerCase() !== "all");
-    const hasAnyFilter = hasUserId || hasStatusFilter;
+    const hasDateRange = !!(dateRange && dateRange.toLowerCase() !== "all time");
+    const hasAnyFilter = hasUserId || hasStatusFilter || hasDateRange;
 
     if (hasUserId) {
         constraints.push(where("userId", "==", userId));
@@ -450,7 +507,8 @@ export async function getMonthlyVolume(userId?: string, role?: string): Promise<
         orderBy("createdAt", "asc")
     ];
 
-    if (role !== 'admin' && userId) {
+    const isAdmin = role === 'admin' || role === 'staff';
+    if (!isAdmin && userId) {
         constraints.unshift(where("userId", "==", userId));
     }
 
@@ -493,11 +551,13 @@ export async function getRecentActivities(userId?: string, role?: string, limitC
     // So we'll fetch filtered by userId, then sort in memory.
     const constraints: QueryConstraint[] = [limit(limitCount)]; // Removed orderBy from here
 
-    if (role !== 'admin' && userId) {
-        constraints.unshift(where("userId", "==", userId));
-    } else {
-        // If NO userId filter (admin view all), we CAN use orderBy timestamp (single field index exists by default)
+    const isAdmin = role === 'admin' || role === 'staff';
+
+    if (isAdmin) {
+        // If administrative view (admin or staff), we CAN use orderBy timestamp
         constraints.unshift(orderBy("timestamp", "desc"));
+    } else if (userId) {
+        constraints.unshift(where("userId", "==", userId));
     }
 
     const q = query(activitiesRef, ...constraints);
@@ -509,7 +569,7 @@ export async function getRecentActivities(userId?: string, role?: string, limitC
     })) as Activity[];
 
     // Sort in memory if we couldn't use the index
-    if (role !== 'admin' && userId) {
+    if (!isAdmin && userId) {
         activities.sort((a, b) => {
             const tA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
             const tB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;
@@ -549,7 +609,8 @@ export async function getInvoices(userId?: string, role?: string, statusFilter?:
     const invoicesRef = collection(db, "invoices");
     const constraints: QueryConstraint[] = [orderBy("issuedAt", "desc"), limit(50)];
 
-    if (role !== 'admin' && userId) {
+    const isAdmin = role === 'admin' || role === 'staff';
+    if (!isAdmin && userId) {
         constraints.unshift(where("customerId", "==", userId));
     }
 
@@ -570,7 +631,8 @@ export async function getFinancialStats(userId?: string, role?: string) {
     const invoicesRef = collection(db, "invoices");
     let q = query(invoicesRef);
 
-    if (role !== 'admin' && userId) {
+    const isAdmin = role === 'admin' || role === 'staff';
+    if (!isAdmin && userId) {
         q = query(invoicesRef, where("customerId", "==", userId));
     }
 
@@ -868,6 +930,7 @@ export async function createBooking(
             total: number;
             currency: string;
         };
+        departureDate?: Date;
     },
     paymentStatus: Shipment['paymentStatus'] = "pending",
     userName: string = "User"
@@ -916,8 +979,9 @@ export async function createBooking(
         })),
         service: bookingData.serviceType as "express" | "standard" | "economy",
         estimatedDelivery: Timestamp.fromDate(
-            new Date(Date.now() + (bookingData.serviceType === "express" ? 3 : 7) * 24 * 60 * 60 * 1000)
+            new Date((bookingData.departureDate?.getTime() || Date.now()) + (bookingData.serviceType === "express" ? 3 : 7) * 24 * 60 * 60 * 1000)
         ),
+        departureDate: bookingData.departureDate ? Timestamp.fromDate(bookingData.departureDate) : null,
         price: bookingData.price,
         paymentStatus,
         createdAt: serverTimestamp(),

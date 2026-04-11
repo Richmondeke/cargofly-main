@@ -7,8 +7,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { getBlogPostBySlug, BlogPost } from "@/lib/blog-service";
 import { Calendar, User, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 
 export default function BlogPostDetail() {
     const params = useParams();
@@ -52,7 +50,6 @@ export default function BlogPostDetail() {
     if (loading) {
         return (
             <main className="min-h-screen bg-white dark:bg-[#001A4D] transition-colors duration-300 flex items-center justify-center">
-                <Navbar />
                 <Loader2 className="w-12 h-12 text-gold-500 animate-spin" />
             </main>
         );
@@ -61,7 +58,6 @@ export default function BlogPostDetail() {
     if (!post) {
         return (
             <main className="min-h-screen bg-white dark:bg-[#001A4D] transition-colors duration-300 flex flex-col pt-32 pb-20 px-4">
-                <Navbar />
                 <div className="max-w-2xl mx-auto text-center mt-20">
                     <AlertCircle className="w-20 h-20 text-slate-300 dark:text-slate-600 mx-auto mb-6" />
                     <h1 className="text-4xl font-bold text-navy-900 dark:text-white mb-4">Post Not Found</h1>
@@ -82,8 +78,6 @@ export default function BlogPostDetail() {
 
     return (
         <main className="min-h-screen bg-white dark:bg-[#001A4D] transition-colors duration-300">
-            <Navbar />
-
             <article className="pt-32 pb-20">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Back Button */}
@@ -126,6 +120,7 @@ export default function BlogPostDetail() {
                                 src={post.image}
                                 alt={post.title}
                                 fill
+                                unoptimized={true}
                                 className="object-cover"
                                 priority
                             />
@@ -133,14 +128,11 @@ export default function BlogPostDetail() {
                     )}
 
                     {/* Content */}
-                    <div
-                        className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-display prose-headings:font-bold prose-a:text-gold-500 hover:prose-a:text-gold-600 font-body text-slate-600 dark:text-gray-300 leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
-                    />
+                    <div className="blog-content whitespace-pre-wrap text-slate-600 dark:text-gray-300 leading-relaxed text-lg">
+                        {post.content}
+                    </div>
                 </div>
             </article>
-
-            <Footer />
         </main>
     );
 }

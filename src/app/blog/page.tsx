@@ -6,8 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { getBlogPosts, BlogPost } from "@/lib/blog-service";
 import { Calendar, User, ArrowRight } from "lucide-react";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
 
 const DUMMY_POSTS: BlogPost[] = [
     {
@@ -89,7 +87,6 @@ export default function BlogIndex() {
 
     return (
         <main className="min-h-screen bg-white dark:bg-[#001A4D] transition-colors duration-300">
-            <Navbar />
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 overflow-hidden">
@@ -145,6 +142,7 @@ export default function BlogIndex() {
                                                     src={post.image}
                                                     alt={post.title}
                                                     fill
+                                                    unoptimized={true}
                                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                                 />
                                             ) : (
@@ -190,7 +188,6 @@ export default function BlogIndex() {
                     )}
                 </div>
             </section>
-            <Footer />
         </main>
     );
 }

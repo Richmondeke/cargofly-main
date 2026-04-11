@@ -16,7 +16,24 @@ export async function GET(req: NextRequest) {
         }
 
         const provider = new KorapayProvider(process.env.KORAPAY_SECRET_KEY || "");
-        const verificationData = await provider.verify(reference);
+        let verificationData = await provider.verify(reference);
+
+        // EXTRA ROBUSTNESS: If direct verification fails by reference,
+        // IT MIGHT BE a tracking number being passed instead of a KPY- reference.
+        if (!verificationData && reference.startsWith('CF-')) {
+            console.log(`Reference ${reference} looks like a tracking number. Looking up stored payment reference...`);
+            const shipmentsRef = collection(db, "shipments");
+            const q = query(shipmentsRef, where("trackingNumber", "==", reference));
+            const querySnap = await getDocs(q);
+
+            if (!querySnap.empty) {
+                const shipmentData = querySnap.docs[0].data();
+                if (shipmentData.lastPaymentReference) {
+                    console.log(`Found stored reference ${shipmentData.lastPaymentReference} for ${reference}. Verifying...`);
+                    verificationData = await provider.verify(shipmentData.lastPaymentReference);
+                }
+            }
+        }
 
         if (verificationData) {
             // Get tracking number from metadata if available, otherwise assume reference is tracking number

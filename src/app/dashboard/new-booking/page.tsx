@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { createBooking, getRoutes, Route } from '@/lib/dashboard-service';
+import { createBooking, getRoutes, Route, checkDailyCapacity } from '@/lib/dashboard-service';
 import LottieAnimation from '@/components/ui/LottieAnimation';
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from "@/lib/utils";
 import {
@@ -59,6 +60,9 @@ export default function NewBookingPage() {
         isFragile: searchParams.get('cargoType')?.toLowerCase() === 'fragile',
     }]);
 
+    const [capacityError, setCapacityError] = useState<string | null>(null);
+    const [isCheckingCapacity, setIsCheckingCapacity] = useState(false);
+
     const [formData, setFormData] = useState({
         origin: searchParams.get('origin') || '',
         destination: searchParams.get('destination') || '',
@@ -71,6 +75,7 @@ export default function NewBookingPage() {
         recipientName: '',
         recipientPhone: '',
         recipientEmail: '',
+        departureDate: undefined as Date | undefined,
         // Payment
         paymentMethod: 'card' as 'card' | 'wallet',
     });
@@ -127,6 +132,54 @@ export default function NewBookingPage() {
             ...prev,
             [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
         }));
+        if (name === 'departureDate') {
+            setCapacityError(null);
+        }
+    };
+
+    const validateCapacity = async () => {
+        if (!formData.departureDate) return true;
+
+        setIsCheckingCapacity(true);
+        setCapacityError(null);
+
+        try {
+            const totalWeight = packages.reduce((sum, p) => sum + (parseFloat(p.weight) || 0), 0);
+            const result = await checkDailyCapacity(formData.departureDate, totalWeight);
+
+            if (!result.available) {
+                setCapacityError(`Capacity reached for this day (${result.limit}kg limit). Only ${result.remainingCapacity}kg remaining. Please select another day.`);
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error('Capacity check failed:', error);
+            return true; // Don't block on error
+        } finally {
+            setIsCheckingCapacity(false);
+        }
+    };
+
+    const handleNextStep = async () => {
+        if (currentStep === 1) {
+            if (!formData.departureDate) {
+                setNotification({
+                    isOpen: true,
+                    title: 'Missing Date',
+                    message: 'Please select a departure date.',
+                    type: 'error'
+                });
+                return;
+            }
+            setCurrentStep(2);
+        } else if (currentStep === 2) {
+            const isValid = await validateCapacity();
+            if (isValid) {
+                setCurrentStep(3);
+            }
+        } else {
+            setCurrentStep(currentStep + 1 as Step);
+        }
     };
 
     const handlePaymentAndSubmit = async () => {
@@ -178,6 +231,7 @@ export default function NewBookingPage() {
                     total: totalPrice,
                     currency: currency,
                 },
+                departureDate: formData.departureDate
             }, "pending", user.displayName || userProfile?.displayName || 'User');
 
             setTrackingNumber(tracking);
@@ -377,14 +431,12 @@ export default function NewBookingPage() {
 
                                             {/* Departure Date */}
                                             <div className="flex flex-col gap-2">
-                                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Preferred Departure Date</label>
-                                                <div className="relative">
-                                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">calendar_month</span>
-                                                    <input
-                                                        type="date"
-                                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm"
-                                                    />
-                                                </div>
+                                                <DatePicker
+                                                    label="Preferred Departure Date"
+                                                    value={formData.departureDate}
+                                                    onChange={(date) => setFormData(prev => ({ ...prev, departureDate: date }))}
+                                                    placeholder="Select date"
+                                                />
                                             </div>
 
                                             {/* Service Level dropdown */}
@@ -446,7 +498,7 @@ export default function NewBookingPage() {
                                                 Cancel
                                             </button>
                                             <button
-                                                onClick={() => setCurrentStep(2)}
+                                                onClick={handleNextStep}
                                                 className="px-10 py-2.5 rounded-xl bg-primary text-white font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
                                             >
                                                 Next Step
@@ -950,7 +1002,7 @@ export default function NewBookingPage() {
                             )}
                         </motion.div>
                     </AnimatePresence>
-                </div>
+                </div >
 
                 <SuccessModal
                     isOpen={notification.isOpen}
@@ -959,7 +1011,7 @@ export default function NewBookingPage() {
                     message={notification.message}
                     type={notification.type}
                 />
-            </div>
+            </div >
         </div >
     );
 }

@@ -48,7 +48,7 @@ export default function Process() {
                     className="mb-24"
                 >
 
-                    <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 max-w-4xl text-navy-900">
+                    <h2 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter mb-8 max-w-4xl text-navy-900">
                         Logistics <span className="text-blue-600 font-black">Engineered</span> for Scale
                     </h2>
                     <p className="text-xl md:text-2xl text-navy-900/60 max-w-3xl font-medium leading-relaxed">

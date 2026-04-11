@@ -88,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                 <SidebarLink to="/dashboard/tickets" icon="confirmation_number" label="Support Tickets" active={pathname?.startsWith('/dashboard/tickets')} onClick={onClose} />
                 <SidebarLink to="/dashboard/settings" icon="settings" label="Account Settings" active={pathname === '/dashboard/settings'} onClick={onClose} />
 
-                {userProfile?.role === 'admin' && (
+                {(userProfile?.role === 'admin' || userProfile?.role === 'staff') && (
                     <>
                         <SidebarSection label="Administration" />
                         <SidebarLink to="/dashboard/admin" icon="admin_panel_settings" label="Admin Panel" active={pathname === '/dashboard/admin'} onClick={onClose} />
@@ -96,6 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                         <SidebarLink to="/dashboard/admin/rates" icon="currency_exchange" label="Rates Management" active={pathname === '/dashboard/admin/rates'} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/support" icon="support_agent" label="Support Console" active={pathname?.startsWith('/dashboard/admin/support')} onClick={onClose} />
                         <SidebarLink to="/dashboard/admin/blog" icon="rss_feed" label="Blog Manager" active={pathname === '/dashboard/admin/blog'} onClick={onClose} />
+                        <SidebarLink to="/dashboard/admin/announcements" icon="campaign" label="Announcements" active={pathname === '/dashboard/admin/announcements'} onClick={onClose} />
                     </>
                 )}
             </nav>

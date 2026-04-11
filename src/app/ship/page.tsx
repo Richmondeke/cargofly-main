@@ -16,6 +16,7 @@ import {
     Trash2,
     Calendar,
     Search,
+    AlertCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import dynamicImport from "next/dynamic";
@@ -39,6 +40,7 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { Select } from "@/components/ui/Select";
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 type ViewMode = "quote" | "book";
 type PaymentMethod = "card" | "wallet";
@@ -85,7 +87,7 @@ export default function ShipPage() {
 
     const [shippingInstructions, setShippingInstructions] = useState({
         poNumber: "",
-        departureDate: "",
+        departureDate: undefined as Date | undefined,
         bookingComments: "",
         isDangerousGoods: false,
         cargoType: "general",
@@ -99,6 +101,9 @@ export default function ShipPage() {
 
     // State for MSDS file when hazardous cargo is selected
     const [msdsFile, setMsdsFile] = useState<File | null>(null);
+
+    const [capacityError, setCapacityError] = useState<string | null>(null);
+    const [isCheckingCapacity, setIsCheckingCapacity] = useState(false);
 
     const [sender, setSender] = useState({
         name: "",
@@ -238,6 +243,38 @@ export default function ShipPage() {
 
     const priceData = calculatePrices();
     const { base: basePrice, total: totalPrice, currency } = priceData;
+
+    const validateCapacity = async () => {
+        if (!shippingInstructions.departureDate) return true;
+
+        const { checkDailyCapacity } = await import("@/lib/dashboard-service");
+        setIsCheckingCapacity(true);
+        setCapacityError(null);
+
+        try {
+            const totalWeight = packages.reduce((sum, p) => sum + (parseFloat(p.weight) || 0), 0);
+            const result = await checkDailyCapacity(shippingInstructions.departureDate, totalWeight);
+
+            if (!result.available) {
+                setCapacityError(`Capacity reached for this day (${result.limit}kg limit). Only ${result.remainingCapacity}kg remaining. Please select another day.`);
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error('Capacity check failed:', error);
+            return true;
+        } finally {
+            setIsCheckingCapacity(false);
+        }
+    };
+
+    const handleNextStep = async () => {
+        if (currentStep === 3) {
+            const isValid = await validateCapacity();
+            if (!isValid) return;
+        }
+        setCurrentStep(prev => prev + 1);
+    };
 
     const handleBookShipment = async () => {
         if (!user) {
@@ -683,16 +720,12 @@ export default function ShipPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <Label>Desired Departure Date</Label>
-                                                    <div className="relative">
-                                                        <Input
-                                                            type="date"
-                                                            value={shippingInstructions.departureDate}
-                                                            onChange={(e) => setShippingInstructions({ ...shippingInstructions, departureDate: e.target.value })}
-                                                            className="pl-10"
-                                                        />
-                                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-900/40 dark:text-white/40" />
-                                                    </div>
+                                                    <DatePicker
+                                                        value={shippingInstructions.departureDate}
+                                                        onChange={(date) => setShippingInstructions({ ...shippingInstructions, departureDate: date })}
+                                                        placeholder="Select date"
+                                                        className="font-body"
+                                                    />
                                                 </div>
                                             </div>
                                             <div>
@@ -717,6 +750,13 @@ export default function ShipPage() {
                                                     ))}
                                                 </Select>
                                             </div>
+
+                                            {capacityError && (
+                                                <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-in fade-in slide-in-from-top-2">
+                                                    <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+                                                    <p className="text-sm font-medium text-red-500">{capacityError}</p>
+                                                </div>
+                                            )}
                                         </motion.div>
                                     )}
 
@@ -1070,13 +1110,13 @@ export default function ShipPage() {
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() =>
                                             currentStep < 5
-                                                ? setCurrentStep((prev) => prev + 1)
+                                                ? handleNextStep()
                                                 : handleBookShipment()
                                         }
-                                        disabled={isBooking}
-                                        className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all text-sm md:text-base w-full sm:w-auto"
+                                        disabled={isBooking || isCheckingCapacity}
+                                        className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gold-500 text-navy-900 font-bold uppercase tracking-wider hover:shadow-[0_0_30px_rgba(202,138,4,0.3)] transition-all text-sm md:text-base w-full sm:w-auto disabled:opacity-50"
                                     >
-                                        {isBooking ? (
+                                        {isBooking || isCheckingCapacity ? (
                                             <div className="w-5 h-5 border-2 border-navy-900/30 border-t-navy-900 rounded-full animate-spin" />
                                         ) : (
                                             <>

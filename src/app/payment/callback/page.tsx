@@ -19,7 +19,7 @@ function PaymentCallbackInner() {
     const router = useRouter();
     const params = useSearchParams();
     const reference = params.get('reference');
-    const returnPath = params.get('returnPath') || '/dashboard/wallet';
+    const returnPath = params.get('returnPath') || '/dashboard/shipments';
 
     const [status, setStatus] = useState<'verifying' | 'success' | 'failed'>('verifying');
     const [message, setMessage] = useState('');

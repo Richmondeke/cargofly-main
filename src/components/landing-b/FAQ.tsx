@@ -48,7 +48,7 @@ export default function FAQ() {
                         <HelpCircle className="w-3.5 h-3.5" />
                         FAQs
                     </div>
-                    <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 leading-[0.9] text-navy-900">
+                    <h2 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter mb-8 leading-[0.9] text-navy-900">
                         Frequently Asked <span className="text-blue-600 italic">Questions</span>
                     </h2>
                     <p className="text-xl md:text-2xl text-navy-900/60 max-w-2xl mx-auto font-medium leading-relaxed">

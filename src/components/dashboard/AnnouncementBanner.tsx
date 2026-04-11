@@ -65,7 +65,7 @@ export function AnnouncementBanner({ fallback }: AnnouncementBannerProps) {
                     <span className="inline-block px-3 py-1 bg-gold-500 text-navy-900 text-[10px] font-bold uppercase tracking-[0.2em] rounded">
                         Welcome
                     </span>
-                    <h2 className="text-white text-4xl sm:text-5xl font-display font-medium leading-[1.1] tracking-tight">
+                    <h2 className="text-white text-3xl sm:text-5xl font-display font-medium leading-[1.1] tracking-tight">
                         Global Logistics, <br className="hidden sm:block" />
                         Redefined.
                     </h2>
@@ -129,7 +129,7 @@ export function AnnouncementBanner({ fallback }: AnnouncementBannerProps) {
                             </span>
                         )}
                         <div className="space-y-1">
-                            <h2 className="text-white text-4xl sm:text-5xl font-display font-medium leading-[1.1] tracking-tight">
+                            <h2 className="text-white text-3xl sm:text-5xl font-display font-medium leading-[1.1] tracking-tight">
                                 {current.title}
                             </h2>
                             <p className="text-white/80 max-w-lg text-lg leading-relaxed line-clamp-2 sm:line-clamp-none">
@@ -185,7 +185,7 @@ export function AnnouncementBanner({ fallback }: AnnouncementBannerProps) {
                         ))}
                     </div>
 
-                    <div className="absolute bottom-8 right-10 sm:right-14 z-30 flex gap-3">
+                    <div className="absolute bottom-6 sm:bottom-8 right-6 sm:right-14 z-30 flex gap-3">
                         <button
                             onClick={() => setCurrentIndex((prev) => (prev - 1 + announcements.length) % announcements.length)}
                             className="size-9 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-white hover:bg-white/20 transition-all"

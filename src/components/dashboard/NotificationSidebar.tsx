@@ -23,7 +23,7 @@ const NotificationItem = ({ notification }: { notification: Notification }) => {
 
     const icons = {
         shipment: 'flight',
-                system: 'settings',
+        system: 'settings',
         alert: 'warning'
     };
 
@@ -71,7 +71,7 @@ const NotificationItem = ({ notification }: { notification: Notification }) => {
 };
 
 export default function NotificationSidebar() {
-    const { isSidebarOpen, closeSidebar, notifications, unreadCount, markAllAsRead, clearAll } = useNotifications();
+    const { isSidebarOpen, closeSidebar, notifications, unreadCount, markAllAsRead, clearAll, requestBrowserPermission } = useNotifications();
 
     return (
         <AnimatePresence>
@@ -148,6 +148,27 @@ export default function NotificationSidebar() {
                             </AnimatePresence>
                         </div>
 
+                        {/* Browser Notification Permission */}
+                        {(typeof window !== 'undefined' && 'Notification' in window && window.Notification.permission !== 'granted') && (
+                            <div className="px-6 py-4 bg-primary/5 border-t border-white/5 space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <span className="material-symbols-outlined text-primary text-[20px] mt-0.5">notifications_active</span>
+                                    <div>
+                                        <p className="text-[11px] font-bold text-white uppercase tracking-wider mb-1">Desktop Notifications</p>
+                                        <p className="text-[11px] text-white/50 leading-relaxed">
+                                            Enable browser alerts to stay updated on your shipment even when you're in other tabs.
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => requestBrowserPermission()}
+                                    className="w-full py-2 bg-primary text-white text-[11px] font-bold uppercase tracking-widest rounded-lg hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+                                >
+                                    Enable Notifications
+                                </button>
+                            </div>
+                        )}
+
                         {/* Footer */}
                         <div className="p-6 border-t border-white/10 bg-navy-950/50">
                             <Link
@@ -161,7 +182,8 @@ export default function NotificationSidebar() {
                         </div>
                     </motion.div>
                 </>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     );
 }

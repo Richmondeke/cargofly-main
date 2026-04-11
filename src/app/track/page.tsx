@@ -82,7 +82,7 @@ function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: 
     if (!mounted) return null;
 
     return (
-        <div className="min-h-screen pt-32 pb-24 bg-[#F8FAFC] dark:bg-slate-950 font-sans">
+        <div className="min-h-screen pt-32 pb-24 bg-white dark:bg-white font-sans transition-colors duration-500">
             <div className="container mx-auto px-6 max-w-5xl">
                 {/* Title Section */}
                 <div className="mb-8">
@@ -90,13 +90,14 @@ function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: 
                         <StatusBadge status={shipment.status} className="h-6 px-3 rounded-full text-[10px] bg-green-100 text-green-700 border-none" />
                         <span className="text-[10px] text-slate-400 font-medium">Updated 4 mins ago</span>
                     </div>
-                    <h1 className="text-4xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <h1 className="text-4xl font-black text-slate-900 dark:text-slate-900 flex items-center gap-3 tracking-tighter">
                         AWB {shipment.trackingNumber}
                     </h1>
                 </div>
 
                 {/* Progress Card */}
-                <Card className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl p-8 mb-6 shadow-sm">
+                <Card className="bg-white dark:bg-white border border-slate-200 dark:border-slate-200 rounded-2xl p-8 mb-6 shadow-xl shadow-slate-200/50 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500" />
                     <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-8">
                         <div className="flex-1">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Origin</span>
@@ -108,14 +109,14 @@ function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: 
                         </div>
                         <div className="flex-1 text-right">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Destination</span>
-                            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{shipment.recipient.city.substring(0, 3).toUpperCase()}</h2>
+                            <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-900">{shipment.recipient.city.substring(0, 3).toUpperCase()}</h2>
                             <p className="text-xs text-slate-500">{shipment.recipient.city}</p>
                         </div>
                     </div>
 
                     {/* Progress Bar */}
                     <div className="relative pt-4 pb-8">
-                        <div className="absolute top-[2.15rem] left-0 right-0 h-[2px] bg-slate-100 dark:bg-white/5 mx-8" />
+                        <div className="absolute top-[2.15rem] left-0 right-0 h-[2px] bg-slate-100 dark:bg-slate-100 mx-8" />
                         <div
                             className="absolute top-[2.15rem] left-0 h-[2px] bg-primary transition-all duration-1000 ease-out mx-8"
                             style={{ width: `${Math.max(0, currentStage) * 25}%` }}
@@ -127,7 +128,7 @@ function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: 
                                         w-6 h-6 rounded-full flex items-center justify-center transition-all duration-500 border-2
                                         ${idx <= currentStage
                                             ? 'bg-primary border-primary text-white'
-                                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-300'}
+                                            : 'bg-white dark:bg-white border-slate-200 dark:border-slate-200 text-slate-300'}
                                     `}>
                                         <span className="material-symbols-outlined text-xs">{idx < currentStage ? 'check' : stage.icon === 'check_circle' ? '' : stage.icon}</span>
                                     </div>
@@ -144,56 +145,57 @@ function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: 
 
                 {/* Info Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <Card className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl p-8 shadow-sm">
+                    <Card className="bg-white dark:bg-white border border-slate-200 dark:border-slate-200 rounded-2xl p-8 shadow-xl shadow-slate-200/50">
                         <div className="flex items-center gap-2 mb-8">
-                            <span className="material-symbols-outlined text-primary">info</span>
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cargo Details</h3>
+                            <span className="material-symbols-outlined text-primary">package_2</span>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-900">Cargo Details</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-8">
                             <div>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Pieces / Weight</span>
-                                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                                <p className="text-sm font-bold text-slate-900 dark:text-slate-900">
                                     {shipment.packages.reduce((sum, p) => sum + p.pieces, 0)} pcs / {shipment.packages.reduce((sum, p) => sum + p.weight, 0).toFixed(2)} kg
                                 </p>
                             </div>
                             <div>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Service Level</span>
-                                <p className="text-sm font-bold text-slate-900 dark:text-white">{shipment.service.toUpperCase()}</p>
+                                <p className="text-sm font-bold text-slate-900 dark:text-slate-900">{shipment.service.toUpperCase()}</p>
                             </div>
                         </div>
                     </Card>
 
-                    <Card className="bg-primary/5 border border-primary/20 rounded-2xl p-8 shadow-sm flex flex-col justify-center">
-                        <span className="text-[10px] text-primary/60 font-bold uppercase tracking-widest block mb-2">Estimated Arrival</span>
-                        <h4 className="text-2xl font-bold text-primary mb-1">
+                    <Card className="bg-primary/5 dark:bg-primary/5 border border-primary/10 dark:border-primary/10 rounded-2xl p-8 shadow-xl shadow-primary/5 flex flex-col justify-center relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12" />
+                        <span className="text-[10px] text-primary/80 font-bold uppercase tracking-widest block mb-1 relative z-10">Estimated Arrival</span>
+                        <h4 className="text-2xl font-black text-primary mb-1 relative z-10">
                             {formatDate(shipment.estimatedDelivery)}
                         </h4>
-                        <p className="text-[10px] text-slate-400 italic">Subject to local conditions.</p>
+                        <p className="text-[10px] text-slate-400 italic relative z-10">Subject to local conditions.</p>
                     </Card>
                 </div>
 
                 {/* History */}
-                <Card className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl p-8 mb-10 shadow-sm">
+                <Card className="bg-white dark:bg-white border border-slate-200 dark:border-slate-200 rounded-2xl p-8 mb-10 shadow-xl shadow-slate-200/50">
                     <div className="flex items-center gap-2 mb-10">
                         <span className="material-symbols-outlined text-primary">history</span>
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Tracking History</h3>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-900">Tracking History</h3>
                     </div>
                     <div className="relative">
-                        <div className="absolute left-[26px] top-6 bottom-6 w-[2px] bg-slate-100 dark:bg-white/5" />
+                        <div className="absolute left-[26px] top-6 bottom-6 w-[2px] bg-slate-100 dark:bg-slate-100" />
                         <div className="space-y-12">
                             {events.map((event, idx) => (
                                 <div key={event.id} className="relative flex items-start gap-12 group">
                                     <div className={`
-                                        relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white dark:border-slate-900 shadow-sm
-                                        ${idx === 0 ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}
+                                        relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white dark:border-white shadow-sm
+                                        ${idx === 0 ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-100 text-slate-400'}
                                     `}>
                                         <span className="material-symbols-outlined text-[14px]">
                                             {idx === 0 ? 'flight_takeoff' : 'check'}
                                         </span>
                                     </div>
-                                    <div className={`flex-1 p-5 rounded-xl border transition-all duration-300 ${idx === 0 ? 'bg-white dark:bg-slate-800 border-primary/20 shadow-md' : 'bg-slate-50/50 dark:bg-slate-800/30 border-transparent'}`}>
+                                    <div className={`flex-1 p-5 rounded-xl border transition-all duration-300 ${idx === 0 ? 'bg-white dark:bg-white border-primary/20 shadow-md' : 'bg-slate-50/50 dark:bg-slate-50/50 border-transparent'}`}>
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
-                                            <h4 className={`font-bold ${idx === 0 ? 'text-primary' : 'text-slate-700 dark:text-slate-300'}`}>
+                                            <h4 className={`font-bold ${idx === 0 ? 'text-primary' : 'text-slate-700 dark:text-slate-700'}`}>
                                                 {event.description}
                                             </h4>
                                             <span className="text-[10px] font-medium text-primary uppercase">{event.timestamp.split(', ').slice(-2).join(', ')}</span>
@@ -215,14 +217,14 @@ function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: 
                                 toast.success('Master AWB Downloaded', { id: toastId });
                             }, 1500);
                         }}
-                        className="flex items-center justify-between p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                        className="flex items-center justify-between p-6 bg-white dark:bg-white border border-slate-200 dark:border-slate-200 rounded-2xl shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all group"
                     >
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <span className="material-symbols-outlined">description</span>
                             </div>
                             <div className="text-left">
-                                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Download Master AWB</h4>
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-slate-900">Download Master AWB</h4>
                                 <p className="text-[10px] text-slate-500">Official Shipping Document (PDF)</p>
                             </div>
                         </div>
@@ -231,14 +233,14 @@ function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: 
 
                     <button
                         onClick={() => router.push('/dashboard/support')}
-                        className="flex items-center justify-between p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                        className="flex items-center justify-between p-6 bg-white dark:bg-white border border-slate-200 dark:border-slate-200 rounded-2xl shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all group"
                     >
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 <span className="material-symbols-outlined">headset_mic</span>
                             </div>
                             <div className="text-left">
-                                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Contact Support</h4>
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-slate-900">Contact Support</h4>
                                 <p className="text-[10px] text-slate-500">24/7 Priority Assistance</p>
                             </div>
                         </div>
@@ -261,7 +263,7 @@ function TrackResults({ shipment, firestoreEvents, setTrackingId }: { shipment: 
                             name="trackingId"
                             type="text"
                             placeholder="Enter Tracking ID"
-                            className="flex-1 px-6 py-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-slate-900 dark:text-white"
+                            className="flex-1 px-6 py-4 rounded-xl bg-white dark:bg-white border border-slate-200 dark:border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-slate-900 dark:text-slate-900"
                         />
                         <button type="submit" className="bg-primary text-white font-bold px-8 py-4 rounded-xl shadow-lg active:scale-95">
                             Track
@@ -315,7 +317,7 @@ function TrackPageContent() {
 
     if (loading) {
         return (
-            <div className="min-h-screen pt-32 pb-24 bg-white dark:bg-slate-950 flex flex-col items-center justify-center font-sans text-slate-500">
+            <div className="min-h-screen pt-32 pb-24 bg-white dark:bg-white flex flex-col items-center justify-center font-sans text-slate-500">
                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
                 <p>Locating shipment...</p>
             </div>
@@ -324,10 +326,10 @@ function TrackPageContent() {
 
     if (error || !shipment) {
         return (
-            <div className="min-h-screen pt-32 pb-24 bg-[#f8f6f6] dark:bg-slate-950 font-sans">
+            <div className="min-h-screen pt-32 pb-24 bg-white dark:bg-white font-sans">
                 <div className="container mx-auto px-6 max-w-4xl text-center">
-                    <Card className="bg-white dark:bg-slate-900 rounded-3xl p-12 shadow-sm border border-slate-100 dark:border-white/5">
-                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">No Shipment Found</h2>
+                    <Card className="bg-white dark:bg-white rounded-3xl p-12 shadow-xl shadow-slate-200/50 border border-slate-200 dark:border-slate-200">
+                        <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-900 mb-4">No Shipment Found</h2>
                         <p className="text-slate-500 mb-8">{error || "Check your tracking ID and try again."}</p>
                         <form
                             onSubmit={(e) => {
@@ -341,7 +343,7 @@ function TrackPageContent() {
                                 name="trackingId"
                                 type="text"
                                 placeholder="Enter Tracking ID"
-                                className="flex-1 px-6 py-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/5 focus:outline-none"
+                                className="flex-1 px-6 py-4 rounded-xl bg-slate-50 dark:bg-slate-50 border border-slate-200 dark:border-slate-200 focus:outline-none"
                             />
                             <button type="submit" className="bg-primary text-white font-bold px-8 py-4 rounded-xl">
                                 Track

@@ -29,6 +29,7 @@ export function ShipmentDetailsDrawer({
     const [uploading, setUploading] = useState(false);
     const [verifying, setVerifying] = useState(false);
     const [paying, setPaying] = useState(false);
+    const lastAutoVerify = React.useRef<string | null>(null);
 
     const handleInitializePayment = async () => {
         if (!shipment || !user || paying) return;
@@ -52,7 +53,8 @@ export function ShipmentDetailsDrawer({
                     description: `Payment for Shipment #${shipment.trackingNumber}`,
                     metadata: {
                         trackingNumber: shipment.trackingNumber,
-                        userId: user.uid
+                        userId: user.uid,
+                        returnPath: '/dashboard/shipments'
                     }
                 })
             });
@@ -88,10 +90,21 @@ export function ShipmentDetailsDrawer({
 
     // Auto-verify if payment is pending or failed when drawer opens
     React.useEffect(() => {
-        if (isOpen && shipment && shipment.paymentStatus !== 'paid' && !verifying) {
-            handleVerifyPayment();
+        if (isOpen && shipment?.trackingNumber && shipment.paymentStatus !== 'paid' && !verifying) {
+            // Only auto-verify once per drawer open session for this specific tracking number
+            if (lastAutoVerify.current !== shipment.trackingNumber) {
+                lastAutoVerify.current = shipment.trackingNumber;
+                handleVerifyPayment();
+            }
         }
     }, [isOpen, shipment, verifying, handleVerifyPayment]);
+
+    // Reset auto-verify state when drawer closes
+    React.useEffect(() => {
+        if (!isOpen) {
+            lastAutoVerify.current = null;
+        }
+    }, [isOpen]);
 
     if (!shipment) return null;
 
@@ -238,7 +251,7 @@ export function ShipmentDetailsDrawer({
                                                         ? 'bg-red-500/10 text-red-600 border border-red-500/20'
                                                         : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
                                                     }`}>
-                                                    {verifying ? 'VERIFYING...' : (shipment.paymentStatus || 'pending')}
+                                                    {shipment.paymentStatus || 'pending'}
                                                 </span>
                                                 {shipment.paymentStatus !== 'paid' && !verifying && (
                                                     <button
