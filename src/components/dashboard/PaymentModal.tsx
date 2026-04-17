@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Wallet } from '@/lib/wallet-service';
+
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -9,16 +11,18 @@ interface PaymentModalProps {
     amount: number;
     userId: string;
     shipmentId?: string;
-    wallet?: { balanceNGN: number } | null;
+    wallet?: Wallet | null;
     currency?: string;
+
     description?: string;
     onSuccess?: () => void;
 }
 
 export default function PaymentModal({ isOpen, onClose, amount, userId, shipmentId, wallet, currency = 'NGN', description = 'Payment', onSuccess }: PaymentModalProps) {
     const { user } = useAuth();
-    const [selectedMethod, setSelectedMethod] = useState<'wallet_ngn' | 'card' | 'bank' | null>(null);
+    const [selectedMethod, setSelectedMethod] = useState<'wallet_ngn' | 'wallet_usd' | 'card' | 'bank' | null>(null);
     const [loading, setLoading] = useState(false);
+
     const [redirecting, setRedirecting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

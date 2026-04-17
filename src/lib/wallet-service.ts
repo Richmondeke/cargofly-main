@@ -21,9 +21,11 @@ import { db } from "./firebase";
 
 export interface Wallet {
     balanceNGN: number;
+    balanceUSD: number;
     kycStatus?: 'none' | 'pending' | 'verified';
     updatedAt: Timestamp;
 }
+
 
 export interface WalletTransaction {
     id?: string;
