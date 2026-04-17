@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 uid: user.uid,
                 email: user.email || "",
                 displayName: displayName || user.displayName || "User",
-                role: (["richmondeke@gmail.com", "godliverse@gmail.com", "admin_test_v1@cargofly.com"].includes(user.email || "")) ? "admin" : "customer",
+                role: (["richmondeke@gmail.com", "godliverse@gmail.com", "admin_test_v1@cargofly.com", "staff_test_v1@cargofly.com"].includes(user.email || "")) ? "admin" : "customer",
                 walletBalance: 0,
             };
 
@@ -81,8 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const data = userSnap.data() as UserProfile;
-        const adminEmails = ["richmondeke@gmail.com", "godliverse@gmail.com"];
-        if (adminEmails.includes(data.email) && data.role !== "admin") {
+        const privilegedEmails = ["richmondeke@gmail.com", "godliverse@gmail.com", "admin_test_v1@cargofly.com", "staff_test_v1@cargofly.com"];
+        if (privilegedEmails.includes(data.email) && data.role !== "admin") {
             // Auto-fix admin role in Firestore
             try {
                 await updateDoc(doc(db, "users", user.uid), {
@@ -101,6 +101,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Fetch balance from Graph.finance
     async function fetchAndSyncBalance(uid: string) {
+        // Disabling this for now as it causes 404 errors and we are standardizing on Naira in Firestore
+        /*
         try {
             const resp = await fetch('/api/payments/graph/balance');
             if (resp.ok) {
@@ -121,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error("Error fetching Graph.finance balance:", error);
         }
+        */
     }
 
     async function refreshBalance() {

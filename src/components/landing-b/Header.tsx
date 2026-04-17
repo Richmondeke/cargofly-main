@@ -104,7 +104,7 @@ export default function Header() {
                         <img
                             src="/logo-dark.png"
                             alt="Cargofly"
-                            className="h-8 w-auto object-contain"
+                            className="h-8 md:h-10 w-auto object-contain"
                         />
                     </Link>
 

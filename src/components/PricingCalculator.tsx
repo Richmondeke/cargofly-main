@@ -352,9 +352,9 @@ export default function PricingCalculator() {
                                     </div>
                                     <div className="flex items-baseline gap-2 mb-4">
                                         <span className="font-display text-5xl text-white">
-                                            ${quote.price.toFixed(2)}
+                                            ₦{quote.price.toLocaleString()}
                                         </span>
-                                        <span className="text-white/40 font-body">USD</span>
+                                        <span className="text-white/40 font-body">NGN</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-white/60 font-body">
                                         <Zap className="w-4 h-4 text-gold-400" />

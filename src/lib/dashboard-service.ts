@@ -376,7 +376,7 @@ export async function getActiveShipments(userId?: string, role?: string, statusF
             eta,
             price: data.price,
             paymentStatus: data.paymentStatus || 'pending',
-            totalPrice: data.price ? `${data.price.currency === 'NGN' ? '₦' : '$'}${data.price.total.toLocaleString()}` : 'N/A',
+            totalPrice: data.price ? `₦${data.price.total.toLocaleString()}` : 'N/A',
             packages: data.packages,
             category: data.service || "General",
             weight: data.packages?.length > 0

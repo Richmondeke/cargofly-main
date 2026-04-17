@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Info, AlertTriangle, CheckCircle, X, FlightTakeoff, Settings, Box } from 'lucide-react';
+import { Bell, Info, AlertTriangle, CheckCircle, X, Settings, Box } from 'lucide-react';
 import { NotificationType } from '@/contexts/NotificationContext';
 
 interface NotificationToastProps {

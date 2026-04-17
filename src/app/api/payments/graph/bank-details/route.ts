@@ -10,7 +10,7 @@ const GRAPH_API_KEY = process.env.GRAPH_API_KEY || '';
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
-        const currency = searchParams.get('currency') || 'USD';
+        const currency = searchParams.get('currency') || 'NGN';
 
         if (!GRAPH_API_KEY) {
             // Return mock bank details when no API key is configured (dev/preview)

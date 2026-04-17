@@ -9,15 +9,15 @@ interface PaymentModalProps {
     amount: number;
     userId: string;
     shipmentId?: string;
-    wallet?: { balanceUSD: number; balanceNGN: number } | null;
+    wallet?: { balanceNGN: number } | null;
     currency?: string;
     description?: string;
     onSuccess?: () => void;
 }
 
-export default function PaymentModal({ isOpen, onClose, amount, userId, shipmentId, wallet, currency = 'USD', description = 'Payment', onSuccess }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, amount, userId, shipmentId, wallet, currency = 'NGN', description = 'Payment', onSuccess }: PaymentModalProps) {
     const { user } = useAuth();
-    const [selectedMethod, setSelectedMethod] = useState<'wallet_usd' | 'wallet_ngn' | 'card' | 'bank' | null>(null);
+    const [selectedMethod, setSelectedMethod] = useState<'wallet_ngn' | 'card' | 'bank' | null>(null);
     const [loading, setLoading] = useState(false);
     const [redirecting, setRedirecting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                     body: JSON.stringify({
                         userId,
                         amount,
-                        currency: selectedMethod.includes('ngn') ? 'NGN' : 'USD',
+                        currency: 'NGN',
                         method: selectedMethod,
                         description,
                         shipmentId
@@ -71,7 +71,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     amount,
-                    currency: currency === 'NGN' ? 'NGN' : 'USD',
+                    currency: 'NGN',
                     description,
                     customer: {
                         email: user?.email || 'user@cargofly.app',
@@ -128,7 +128,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                 <div className="p-6 bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center border-b border-slate-200 dark:border-slate-700">
                     <p className="text-sm font-medium text-slate-500 mb-1">Total to Pay</p>
                     <p className="text-4xl font-medium text-slate-900 dark:text-white tracking-tight">
-                        {currency === 'USD' ? '$' : '₦'}{amount.toFixed(2)}
+                        ₦{amount.toFixed(2)}
                     </p>
                 </div>
 
@@ -137,32 +137,6 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                     <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-4 uppercase tracking-wider">Select Payment Method</h3>
 
                     <div className="space-y-3">
-                        {/* Wallet USD */}
-                        <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMethod === 'wallet_usd'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-slate-200 dark:border-slate-700 hover:border-primary/50'
-                            }`}>
-                            <div className="pt-0.5">
-                                <input
-                                    type="radio"
-                                    name="payment_method"
-                                    value="wallet_usd"
-                                    checked={selectedMethod === 'wallet_usd'}
-                                    onChange={(e) => setSelectedMethod(e.target.value as 'wallet_usd' | 'wallet_ngn' | 'card' | 'bank')}
-                                    className="w-4 h-4 text-primary accent-primary"
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-green-600 text-sm">payments</span>
-                                        USD Wallet
-                                    </span>
-                                    <span className="text-sm text-slate-500">Balance: ${(wallet?.balanceUSD ?? 0).toFixed(2)}</span>
-                                </div>
-                                <p className="text-xs text-slate-500">Instant deduction from your virtual USD account.</p>
-                            </div>
-                        </label>
 
                         {/* Wallet NGN */}
                         <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMethod === 'wallet_ngn'
@@ -281,7 +255,7 @@ export default function PaymentModal({ isOpen, onClose, amount, userId, shipment
                                 Pay with {selectedMethod === 'card' ? 'Card' : 'Bank Transfer'}
                             </>
                         ) : (
-                            `Pay ${currency === 'USD' ? '$' : '₦'}${amount.toFixed(2)}`
+                            `Pay ₦${amount.toFixed(2)}`
                         )}
                     </button>
                 </div>

@@ -295,7 +295,7 @@ export async function applyCustomsDutyWithStatus(
             const shipmentData = shipmentSnap.data();
             await pushNotification(shipmentData.userId, {
                 title: 'Customs Duty Required',
-                message: `Your shipment ${shipmentData.trackingNumber} has been placed on customs hold. A duty of $${amount.toFixed(2)} is required to proceed.`,
+                message: `Your shipment ${shipmentData.trackingNumber} has been placed on customs hold. A duty of ₦${amount.toFixed(2)} is required to proceed.`,
                 type: 'alert',
             });
         }
@@ -553,7 +553,7 @@ export async function fundWallet(userId: string, amount: number, reference?: str
     // Notify user of funding
     await pushNotification(userId, {
         title: 'Wallet Funded',
-        message: `Your wallet has been credited with $${amount.toLocaleString()}.`,
+        message: `Your wallet has been credited with ₦${amount.toLocaleString()}.`,
         type: 'alert',
     });
 }
@@ -588,7 +588,7 @@ export async function payWithWallet(userId: string, amount: number, shipmentId: 
     // Notify user of payment
     await pushNotification(userId, {
         title: 'Payment Successful',
-        message: `Your payment of $${amount.toLocaleString()} for shipment #${shipmentId} was successful.`,
+        message: `Your payment of ₦${amount.toLocaleString()} for shipment #${shipmentId} was successful.`,
         type: 'shipment',
     });
 }

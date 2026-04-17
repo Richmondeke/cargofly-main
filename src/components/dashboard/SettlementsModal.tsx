@@ -17,7 +17,7 @@ export default function SettlementsModal({ isOpen, onClose, userId, wallet, onSu
     const [amount, setAmount] = useState('');
     const [vendor, setVendor] = useState('');
     const [description, setDescription] = useState('');
-    const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD');
+    const currency = 'NGN';
 
     if (!isOpen) return null;
 
@@ -63,7 +63,7 @@ export default function SettlementsModal({ isOpen, onClose, userId, wallet, onSu
                     <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl flex justify-between items-center border border-slate-100 dark:border-slate-800">
                         <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Available Pool</span>
                         <span className="font-display font-medium text-[#1b1c1c] dark:text-white">
-                            {currency === 'USD' ? '$' : '₦'}{((currency === 'USD' ? wallet?.balanceUSD : wallet?.balanceNGN) || 0).toLocaleString()}
+                            ₦{(wallet?.balanceNGN || 0).toLocaleString()}
                         </span>
                     </div>
 
@@ -94,14 +94,10 @@ export default function SettlementsModal({ isOpen, onClose, userId, wallet, onSu
                             </div>
                             <div>
                                 <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Currency</label>
-                                <select
-                                    value={currency}
-                                    onChange={(e) => setCurrency(e.target.value as 'USD' | 'NGN')}
-                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#016FFF] focus:border-transparent transition-all outline-none cursor-pointer"
-                                >
-                                    <option value="USD">USD ($)</option>
-                                    <option value="NGN">NGN (₦)</option>
-                                </select>
+                                <div className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-500 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    NGN (₦)
+                                </div>
                             </div>
                         </div>
 

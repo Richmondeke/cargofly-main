@@ -45,7 +45,7 @@ export function ShipmentDetailsDrawer({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     amount: amount,
-                    currency: shipment.totalPrice?.toString().includes('₦') ? 'NGN' : 'USD',
+                    currency: 'NGN',
                     customer: {
                         name: user.displayName || 'Customer',
                         email: user.email
@@ -273,7 +273,7 @@ export function ShipmentDetailsDrawer({
                                             <span className="text-sm text-navy/60 dark:text-slate-400">Customs Duty</span>
                                         </div>
                                         <div className="text-sm font-medium text-navy dark:text-white">
-                                            {shipment.customsDuty ? `$${shipment.customsDuty.toFixed(2)}` : "None"}
+                                            {shipment.customsDuty ? `₦${shipment.customsDuty.toFixed(2)}` : "None"}
                                         </div>
                                     </div>
                                 </div>
@@ -347,7 +347,7 @@ export function ShipmentDetailsDrawer({
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                     ) : (
                                         <>
-                                            <DollarSign className="w-4 h-4" />
+                                            <Package className="w-4 h-4" />
                                             PAY NOW
                                         </>
                                     )}

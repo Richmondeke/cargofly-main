@@ -64,7 +64,7 @@ export default function Hero() {
 
 
                     <motion.h1
-                        className="text-4xl md:text-7xl lg:text-[100px] font-bold tracking-tight mb-6 leading-[0.9] lg:leading-[0.85]"
+                        className="text-3xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[0.9] lg:leading-[0.85]"
                         initial={{ opacity: 0, y: 80 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={smoothTransition}

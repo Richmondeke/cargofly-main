@@ -20,7 +20,6 @@ import { db } from "./firebase";
 // ============== TYPES ==============
 
 export interface Wallet {
-    balanceUSD: number;
     balanceNGN: number;
     kycStatus?: 'none' | 'pending' | 'verified';
     updatedAt: Timestamp;
@@ -88,7 +87,6 @@ export async function initializeWallet(userId: string) {
     const snapshot = await getDoc(walletRef);
     if (!snapshot.exists()) {
         await setDoc(walletRef, {
-            balanceUSD: 0,
             balanceNGN: 0,
             updatedAt: serverTimestamp()
         });
@@ -149,7 +147,7 @@ export async function executeWalletPayment(
     // Notify user of payment success
     await pushNotification(userId, {
         title: 'Payment Successful',
-        message: `Your payment of ${currency === 'USD' ? '$' : '₦'}${amount.toLocaleString()} for ${description} was successful.`,
+        message: `Your payment of ₦${amount.toLocaleString()} for ${description} was successful.`,
         type: 'alert'
     });
 
@@ -207,7 +205,7 @@ export async function withdrawFunds(
     // Notify user of withdrawal
     await pushNotification(userId, {
         title: 'Withdrawal Processed',
-        message: `Your withdrawal of ${currency === 'USD' ? '$' : '₦'}${amount.toLocaleString()} has been processed.`,
+        message: `Your withdrawal of ₦${amount.toLocaleString()} has been processed.`,
         type: 'alert'
     });
 
@@ -257,7 +255,7 @@ export async function processSettlement(
 
         await pushNotification(userId, {
             title: 'Settlement Processed',
-            message: `Your settlement of ${currency === 'USD' ? '$' : '₦'}${amount.toLocaleString()} to ${vendor} was successful.`,
+            message: `Your settlement of ₦${amount.toLocaleString()} to ${vendor} was successful.`,
             type: 'system'
         });
 
@@ -294,7 +292,7 @@ export async function generateEInvoice(
 
     await pushNotification(userId, {
         title: 'New E-Invoice Generated',
-        message: `A new invoice for ${currency} ${amount} from ${vendor} has been created.`,
+        message: `A new invoice for ₦${amount} from ${vendor} has been created.`,
         type: 'shipment'
     });
 

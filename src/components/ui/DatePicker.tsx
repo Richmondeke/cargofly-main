@@ -4,7 +4,6 @@ import * as React from "react";
 import { Calendar as CalendarIcon, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns"; // Check if date-fns is available, if not I'll use native
 
 interface DatePickerProps {
     value?: Date;

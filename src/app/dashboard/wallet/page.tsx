@@ -6,7 +6,6 @@ import SuccessModal from "@/components/ui/SuccessModal";
 import PaymentModal from "@/components/dashboard/PaymentModal";
 import WithdrawModal from "@/components/dashboard/WithdrawModal";
 import BankDetailsModal from "@/components/dashboard/BankDetailsModal";
-import FXConversionModal from "@/components/dashboard/FXConversionModal";
 import { KYCBanner } from "@/components/dashboard/KYCBanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { subscribeToWallet, getTransactions, initializeWallet, Wallet, WalletTransaction } from "@/lib/wallet-service";
@@ -78,8 +77,6 @@ export default function WalletPage() {
 
     /* ─── Derived values ─────────────────────────────────── */
     const ngnBalance = wallet?.balanceNGN ?? 0;
-    const usdBalance = wallet?.balanceUSD ?? 0;
-    const ngnBalanceRaw = wallet?.balanceNGN ?? 0;
 
     const txnIcon = (txn: WalletTransaction) => {
         if (txn.type === 'deposit') return 'account_balance';
@@ -126,7 +123,7 @@ export default function WalletPage() {
 
                 {/* ── Wallet Cards Grid ───────────────────────────────────────────── */}
                 {wallet?.kycStatus === 'verified' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
                         {/* ── NGN Wallet Card ── */}
                         <div className="bg-[#1b1c1c] text-white rounded-3xl p-8 flex flex-col relative overflow-hidden group hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 cursor-pointer">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full transform translate-x-8 -translate-y-8 group-hover:translate-x-4 transition-transform duration-500"></div>
@@ -148,43 +145,15 @@ export default function WalletPage() {
                             </div>
                             <div className="mt-auto pt-6 border-t border-white/10 flex justify-between items-center relative z-10">
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Exchange Lock</p>
-                                    <p className="text-sm font-bold opacity-80">1,650.00 / USD</p>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Local Account</p>
+                                    <p className="text-sm font-bold opacity-80">Domestic Nigerian Account</p>
                                 </div>
-                                <button className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors">
-                                    <span className="material-symbols-outlined text-sm">swap_vert</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* ── USD Card ── */}
-                        <div className="bg-white dark:bg-[#1e293b] border border-slate-100 dark:border-slate-800 rounded-3xl p-8 flex flex-col shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer">
-                            <div className="flex justify-between items-start mb-10">
-                                <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Foreign Reserve</p>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xl">🇺🇸</span>
-                                        <span className="font-bold text-lg text-black dark:text-white">USD</span>
-                                    </div>
-                                </div>
-                                <span className="material-symbols-outlined text-slate-300 group-hover:text-[#4397ff] transition-colors">public</span>
-                            </div>
-                            <div className="mb-10">
-                                <p className="text-4xl font-black text-black dark:text-white tracking-tight leading-none">
-                                    ${usdBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </p>
-                                <div className="mt-4 flex items-center gap-2">
-                                    <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                                    <p className="text-xs text-slate-500 font-bold tracking-tight">Active Domestic Account</p>
-                                </div>
-                            </div>
-                            <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
                                 <button
                                     onClick={() => setBankModalOpen(true)}
-                                    className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-[#005eb2] transition-colors"
+                                    className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"
                                 >
-                                    <span className="material-symbols-outlined text-sm">info</span>
-                                    View Bank Details
+                                    <span className="material-symbols-outlined text-xs">info</span>
+                                    Details
                                 </button>
                             </div>
                         </div>
@@ -358,17 +327,6 @@ export default function WalletPage() {
                 title={modalContent.title}
                 message={modalContent.message}
             />
-            {user?.uid && (
-                <>
-                    <FXConversionModal
-                        isOpen={fxModalOpen}
-                        onClose={() => setFXModalOpen(false)}
-                        userId={user.uid}
-                        wallet={wallet}
-                        onSuccess={fetchTransactions}
-                    />
-                </>
-            )}
         </div>
     );
 }

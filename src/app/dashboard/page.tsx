@@ -161,7 +161,7 @@ export default function DashboardPage() {
                             <div>
                                 <p className="text-[10px] font-bold text-navy-700/50 dark:text-sky-400/50 uppercase tracking-widest">Total Spent</p>
                                 <h3 className="text-3xl font-display font-black mt-1 text-black dark:text-white">
-                                    {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : `$${(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`}
+                                    {(!mounted || loading) ? <span className="animate-pulse text-navy-100">—</span> : `₦${(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`}
                                 </h3>
                             </div>
                             <div className="size-14 bg-sky-50 dark:bg-sky-900/20 rounded-2xl flex items-center justify-center text-sky-600 group-hover:bg-sky-100 group-hover:scale-110 transition-all">
