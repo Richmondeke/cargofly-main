@@ -54,18 +54,14 @@ export default function Newsletter() {
                     <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] -mr-48 -mt-48" />
                     <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 blur-[100px] -ml-48 -mb-48" />
 
+                    {/* Background Pattern */}
+                    <div
+                        className="absolute inset-0 z-0 opacity-100 pointer-events-none bg-repeat mix-blend-overlay"
+                        style={{ backgroundImage: "url('/Cargofly motif_transparent.png')", backgroundSize: '200px' }}
+                    />
+
 
                     <div className="relative z-10 max-w-2xl mx-auto">
-                        {/* Featured Image */}
-                        <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden mb-12 border border-white/20 shadow-none group-hover:shadow-2xl transition-all duration-700">
-
-                            <img
-                                src="/images/hero-plane.jpg"
-                                alt="Cargofly Logistics"
-                                className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-blue-600/20 mix-blend-overlay" />
-                        </div>
 
                         <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tighter mb-8 leading-[0.9]">
 

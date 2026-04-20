@@ -81,7 +81,7 @@ export default function DashboardPage() {
 
     return (
         <div className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark min-h-full">
-            <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
+            <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8">
 
                 {/* Announcement Banner */}
                 <AnnouncementBanner />

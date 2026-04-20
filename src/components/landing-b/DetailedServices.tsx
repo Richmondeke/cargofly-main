@@ -5,50 +5,49 @@ import { Plane, Activity, Thermometer, ShieldCheck, ArrowRight } from "lucide-re
 
 const serviceCategories = [
     {
-        title: "Global Air Freight",
-        slug: "global-air-freight",
-        description: "Priority handling and real-time monitoring for time-critical shipments across six continents. Our network ensures your cargo never stops moving.",
+        title: "Scheduled Cargo Consolidations",
+        slug: "scheduled-consolidations",
+        description: "We combine smaller shipments into one cost-effective flight, ensuring your goods move regularly and affordably.",
         icon: <Plane className="w-6 h-6" />,
+        image: "/images/cargo/service_consolidation.png"
     },
     {
-        title: "AOG Specialist",
-        slug: "aog-specialist",
-        description: "Dedicated 24/7 support for Aircraft on Ground logistics. We move critical components with zero-latency response times to keep fleets airborne.",
+        title: "Large & Special Equipment",
+        slug: "special-equipment",
+        description: "Moving heavy machinery or oversized parts? Our expert team and specialized propeller planes handle the most challenging loads with care.",
         icon: <Activity className="w-6 h-6" />,
+        image: "/images/cargo/service_special_equipment.png"
     },
     {
-        title: "Sensitive Cargo",
-        slug: "sensitive-cargo",
-        description: "Precision-controlled logistics for pharmaceuticals and high-value tech. Advanced thermal monitoring and vibration-dampened handling.",
+        title: "Global Air Charter",
+        slug: "global-charter",
+        description: "Private flight solutions for your cargo. When timing is everything, we dedicate an entire aircraft to your specific route and schedule.",
         icon: <Thermometer className="w-6 h-6" />,
+        image: "/images/cargo/service_global_charter.png"
     },
     {
-        title: "Secure Logistics",
-        slug: "secure-logistics",
-        description: "Military-grade security protocols for high-value assets. Full chain of custody with end-to-end encryption for all digital documentation.",
+        title: "Fixed-Route Charter Operations",
+        slug: "fixed-route-charter",
+        description: "Steady, reliable transport on a set schedule. Ideal for supply chains that need consistent deliveries between set locations.",
         icon: <ShieldCheck className="w-6 h-6" />,
+        image: "/images/cargo/service_fixed_pipe.png"
     },
 ];
 
 const expertiseTags = [
-    "Precision Logistics", "Customs Authority", "Express Aviation", "Fleet Monitoring",
-    "Digital Ledger POD", "Secure Hangarage", "Asset Insurance", "Global Logistics Hub",
-    "Route Optimization", "Priority Clearing", "Technical Logistics", "Freight Intelligence"
+    "Simple Logistics", "Reliable Delivery", "Express Air", "Cargo Monitoring",
+    "Easy Tracking", "Secure Handling", "Global Network", "Direct Flights",
+    "Fast Clearing", "Heavy Freight", "Scheduled Runs", "Supply Chain"
 ];
 
 const topTags = [
-    "Smart Logistics", "Live Portals", "Inventory Intelligence",
-    "West Africa Reach", "E-commerce Priority", "AOG Response", "Predictive Analytics"
+    "Air Cargo", "Live Tracking", "Easy Logistics",
+    "West Africa", "Priority Shipping", "Quick Response", "Smart Freight"
 ];
 
 export default function DetailedServices() {
     return (
         <section id="detailed-services" className="bg-white text-navy-900 py-32 px-6 overflow-hidden relative">
-
-
-
-
-
             <div className="max-w-7xl mx-auto relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -57,14 +56,11 @@ export default function DetailedServices() {
                     transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
                     className="mb-20 text-center md:text-left"
                 >
-
-
                     <h2 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-8 tracking-tighter leading-[0.9] text-navy-900">
-                        Operational <span className="text-blue-600 italic">Precision</span>
+                        Our <span className="text-blue-600 italic">Services</span>
                     </h2>
                     <p className="text-xl md:text-2xl text-navy-900/60 max-w-3xl mb-12 font-medium leading-relaxed">
-
-                        We use advanced technology and a global network to deliver your cargo reliably and on time.
+                        We simplify air cargo logistics with reliable propeller-driven transport and transparent, easy-to-use technology.
                     </p>
 
                     <div className="flex flex-wrap justify-center md:justify-start gap-6 mb-20">
@@ -89,18 +85,22 @@ export default function DetailedServices() {
                                     duration: 0.8,
                                     ease: [0.23, 1, 0.32, 1]
                                 }}
-                                className="group p-6 sm:p-14 rounded-[2.5rem] sm:rounded-[3rem] bg-gray-50 border border-gray-100 hover:border-blue-600/30 transition-all duration-700 hover:shadow-premium-xl relative overflow-hidden h-full"
+                                className="group rounded-[2.5rem] sm:rounded-[3rem] bg-gray-50 border border-gray-100 hover:border-blue-600/30 transition-all duration-700 hover:shadow-premium-xl relative overflow-hidden h-[400px] sm:h-[500px]"
                             >
-                                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                                    <category.icon.type {...category.icon.props} className="w-32 h-32" />
-                                </div>
+                                {/* Background Image */}
+                                <div
+                                    className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
+                                    style={{ backgroundImage: `url(${category.image})` }}
+                                />
+                                {/* Overlay */}
+                                <div className="absolute inset-0 z-10 bg-gradient-to-t from-navy-950 via-navy-950/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
 
-                                <div className="relative z-10">
-                                    <div className="w-16 h-16 rounded-3xl bg-blue-600 flex items-center justify-center text-white mb-10 shadow-premium group-hover:scale-110 transition-transform duration-500">
+                                <div className="relative z-20 h-full flex flex-col justify-end p-8 sm:p-12">
+                                    <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white mb-6 shadow-premium group-hover:scale-110 transition-transform duration-500">
                                         {category.icon}
                                     </div>
-                                    <h3 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight text-navy-900">{category.title}</h3>
-                                    <p className="text-xl text-navy-900/60 leading-relaxed font-medium mb-8">
+                                    <h3 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-white">{category.title}</h3>
+                                    <p className="text-lg text-white/70 leading-relaxed font-medium">
                                         {category.description}
                                     </p>
                                 </div>

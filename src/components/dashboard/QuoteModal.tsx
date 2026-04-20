@@ -46,7 +46,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* ... (rest of the form stays the same) */}
                     {/* Service Selection */}
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {[
                             { id: 'air', label: 'Air', icon: Plane },
                             { id: 'sea', label: 'Sea', icon: Ship },
@@ -56,13 +56,13 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                                 key={item.id}
                                 type="button"
                                 onClick={() => setService(item.id)}
-                                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${service === item.id
+                                className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl border-2 transition-all ${service === item.id
                                     ? 'border-primary bg-primary/5 text-primary'
                                     : 'border-slate-100 dark:border-slate-800 text-slate-500 hover:border-slate-200 dark:hover:border-slate-700'
                                     }`}
                             >
-                                <item.icon size={24} className="mb-2" />
-                                <span className="text-xs font-medium uppercase tracking-wider">{item.label}</span>
+                                <item.icon size={20} className="mb-2 sm:size-6" />
+                                <span className="text-[10px] sm:text-xs font-medium uppercase tracking-wider">{item.label}</span>
                             </button>
                         ))}
                     </div>
@@ -96,7 +96,7 @@ export default function QuoteModal({ isOpen, onClose }: QuoteModalProps) {
                     </div>
 
                     {/* Cargo Details */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-[10px] font-medium uppercase tracking-widest text-slate-500 block">Total Weight (KG)</label>
                             <div className="relative">

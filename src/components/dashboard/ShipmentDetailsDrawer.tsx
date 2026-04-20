@@ -142,32 +142,32 @@ export function ShipmentDetailsDrawer({
                         className="fixed top-0 right-0 h-full w-full md:max-w-[500px] bg-white dark:bg-navy-900 z-[101] flex flex-col shadow-2xl overflow-hidden"
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-navy/10 dark:border-white/10 flex items-center justify-between bg-white dark:bg-navy-900 sticky top-0 z-10">
+                        <div className="p-4 sm:p-6 border-b border-navy/10 dark:border-white/10 flex items-center justify-between bg-white dark:bg-navy-900 sticky top-0 z-10">
                             <div>
-                                <h2 className="text-xl font-display font-medium text-navy dark:text-white mb-1">Shipment Details</h2>
-                                <p className="text-xs text-navy/50 dark:text-white/50 uppercase tracking-widest font-medium">
+                                <h2 className="text-lg sm:text-xl font-display font-medium text-navy dark:text-white mb-1">Shipment Details</h2>
+                                <p className="text-[10px] sm:text-xs text-navy/50 dark:text-white/50 uppercase tracking-widest font-medium">
                                     {shipment.trackingNumber}
                                 </p>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="w-10 h-10 rounded-full bg-navy/5 dark:bg-white/5 flex items-center justify-center text-navy/40 dark:text-white/70 hover:bg-navy/10 dark:hover:bg-white/10 hover:text-navy dark:hover:text-white transition-all underline-none cursor-pointer"
+                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-navy/5 dark:bg-white/5 flex items-center justify-center text-navy/40 dark:text-white/70 hover:bg-navy/10 dark:hover:bg-white/10 hover:text-navy dark:hover:text-white transition-all underline-none cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide">
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 scrollbar-hide">
                             {/* Quick Info Cards */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 rounded-2xl bg-navy/5 dark:bg-white/5 border border-navy/10 dark:border-white/5">
-                                    <div className="text-[10px] text-navy/40 dark:text-white/40 uppercase font-medium mb-1">Status</div>
+                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                                <div className="p-3 sm:p-4 rounded-2xl bg-navy/5 dark:bg-white/5 border border-navy/10 dark:border-white/5">
+                                    <div className="text-[9px] sm:text-[10px] text-navy/40 dark:text-white/40 uppercase font-medium mb-1">Status</div>
                                     <StatusPill status={shipment.status} />
                                 </div>
-                                <div className="p-4 rounded-2xl bg-navy/5 dark:bg-white/5 border border-navy/10 dark:border-white/5">
-                                    <div className="text-[10px] text-navy/40 dark:text-white/40 uppercase font-medium mb-1">ETA</div>
-                                    <div className="text-sm font-medium text-navy dark:text-white">{shipment.eta}</div>
+                                <div className="p-3 sm:p-4 rounded-2xl bg-navy/5 dark:bg-white/5 border border-navy/10 dark:border-white/5">
+                                    <div className="text-[9px] sm:text-[10px] text-navy/40 dark:text-white/40 uppercase font-medium mb-1">ETA</div>
+                                    <div className="text-xs sm:text-sm font-medium text-navy dark:text-white">{shipment.eta}</div>
                                 </div>
                             </div>
 

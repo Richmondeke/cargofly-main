@@ -53,7 +53,7 @@ export function AnnouncementBanner({ fallback }: AnnouncementBannerProps) {
 
     if (announcements.length === 0) {
         return fallback || (
-            <section className="relative overflow-hidden rounded-2xl bg-[#003399] p-10 sm:p-14 flex items-center justify-between group min-h-[340px]">
+            <section className="relative overflow-hidden rounded-2xl bg-[#003399] p-6 sm:p-14 flex items-center justify-between group min-h-[340px]">
                 <div
                     className="absolute inset-0 z-0 pointer-events-none bg-repeat opacity-100"
                     style={{
@@ -111,7 +111,7 @@ export function AnnouncementBanner({ fallback }: AnnouncementBannerProps) {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-                    className="absolute inset-0 p-10 sm:p-14 flex items-center justify-between"
+                    className="absolute inset-0 p-6 sm:p-14 flex items-center justify-between"
                 >
                     {/* Motif Background Overlay */}
                     <div

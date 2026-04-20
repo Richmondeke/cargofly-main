@@ -105,12 +105,12 @@ export default function Hero() {
                                 transition={smoothTransition}
                                 className="px-2"
                             >
-                                <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-5 p-2 bg-white/5 rounded-[28px] border border-white/10">
+                                <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-3 md:gap-5 p-2 bg-white/5 rounded-[28px] border border-white/10">
                                     <div className="flex-grow relative flex items-center group/input">
-                                        <Search className="absolute left-6 text-white/20 group-focus-within/input:text-blue-500 transition-colors w-6 h-6" strokeWidth={2.5} />
+                                        <Search className="absolute left-4 md:left-6 text-white/20 group-focus-within/input:text-blue-500 transition-colors w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
                                         <input
-                                            className="w-full pl-16 pr-6 py-5 rounded-[22px] bg-transparent border-0 focus:ring-0 text-white text-xl placeholder:text-white/20 outline-none font-medium"
-                                            placeholder="Enter AWB or Tracking Number"
+                                            className="w-full pl-12 md:pl-16 pr-4 md:pr-6 py-4 md:py-5 rounded-[22px] bg-transparent border-0 focus:ring-0 text-lg md:text-xl placeholder:text-white/20 outline-none font-medium"
+                                            placeholder="Enter AWB / Tracking #"
                                             type="text"
                                             value={trackingNumber}
                                             onChange={(e) => setTrackingNumber(e.target.value)}
@@ -118,9 +118,10 @@ export default function Hero() {
                                     </div>
                                     <button
                                         type="submit"
-                                        className="bg-blue-600 text-white px-12 py-5 rounded-[22px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_50px_rgba(37,99,235,0.5)] active:scale-95 duration-300"
+                                        className="bg-blue-600 text-white px-8 md:px-12 py-4 md:py-5 rounded-[22px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center justify-center gap-2 md:gap-3 shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_50px_rgba(37,99,235,0.5)] active:scale-95 duration-300 whitespace-nowrap"
                                     >
-                                        Track Shipment
+                                        Track
+                                        <span className="hidden sm:inline">Shipment</span>
                                         <ArrowRight className="w-5 h-5" strokeWidth={3} />
                                     </button>
                                 </form>
